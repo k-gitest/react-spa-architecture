@@ -53,11 +53,6 @@ const MemoForm = ({ onSubmit }: { onSubmit: (data: MemoFormData) => void }) => {
 
   return (
     <div>
-      <div className="w-full text-center">
-        <h2 className="text-2xl mb-4">Memo</h2>
-        <p className="mb-4">メモを残しましょう</p>
-      </div>
-
       <div className="flex justify-center">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="w-2/3 space-y-6">

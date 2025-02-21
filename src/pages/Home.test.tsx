@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 import Home from './Home';
 
 // ResizeObserver をモックする
@@ -8,18 +9,42 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
+// window.matchMedia をモックする
+vi.stubGlobal('matchMedia', vi.fn().mockImplementation(query => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addListener: vi.fn(), // 無くてもいい
+  removeListener: vi.fn(), // 無くてもいい
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  dispatchEvent: vi.fn(),
+})));
+
 describe('Home コンポーネント', () => {
-  it('メモの追加とリストへの表示', async() => {
+
+  it('メモの追加とリストへの表示', () => {
     render(<Home />);
 
-    // メモフォームの入力フィールドとボタンを取得
+    // メモ追加ボタンを取得
+    const memoAddButton = screen.getByRole('button', {name: 'メモ追加'});
+
+    // メモ追加ボタンをクリック
+    fireEvent.click(memoAddButton);
+
+    waitFor( () => {
+      expect(screen.getByText('Memo')).toBeInTheDocument();
+      expect(screen.getByText('メモを残そう'));
+    },{ timeout: 1000 })
+
+    // メモフォームの入力フィールドを取得
     const titleInput = screen.getByLabelText('タイトル');
     const contentInput = screen.getByLabelText('メモの内容');
     const categoryButton = screen.getByRole('combobox', { name: 'カテゴリー' });
     const radioHigh = screen.getByRole('radio', { name: '大' });
     const checkboxRecents = screen.getByRole('checkbox', { name: 'Recents' });
     const addButton = screen.getByRole('button', { name: '送信' });
-
+    
     // 入力フィールドに値を入力
     fireEvent.change(titleInput, { target: { value: 'テストタイトル' } });
     fireEvent.change(contentInput, { target: { value: 'テスト内容' } });
