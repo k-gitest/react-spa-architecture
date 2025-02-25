@@ -1,3 +1,4 @@
+import React from 'react';
 import { MemoFormData } from '@/types/memo-form-data';
 import {
   Card,
@@ -15,7 +16,7 @@ interface MemoListProps {
   onDelete: (index: number) => void;
 }
 
-const MemoList = ({ memoData, onEdit, onDelete }: MemoListProps) => {
+const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProps) => {
   return (
     <div className="grid grid-cols-4 gap-4 p-4">
     {memoData.map((memo, index) => (
@@ -45,6 +46,8 @@ const MemoList = ({ memoData, onEdit, onDelete }: MemoListProps) => {
     ))}
     </div>
   )
-}
+})
+
+MemoList.displayName = 'MemoList'
 
 export default MemoList

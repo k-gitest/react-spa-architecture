@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { MemoFormData } from '@/types/memo-form-data'
 import MemoForm from "@/components/memo-form"
 import MemoList from "@/components/memo-list"
@@ -24,15 +24,15 @@ const Home = () => {
     setOpen(false);
   };
 
-  const handleEditClick = (index: number) => {
+  const handleEditClick = useCallback((index: number) => {
     setEditIndex(index);
     setOpen(true);
-  }
+  }, []);
 
-  const handleDeleteClick = (index: number) => {
+  const handleDeleteClick = useCallback((index: number) => {
     const updatedMemoList = memoList.filter((_, i) => i !== index);
     setMemoList(updatedMemoList);
-  };
+  }, [memoList]);
   
   return (
     <main className="w-full p-4">

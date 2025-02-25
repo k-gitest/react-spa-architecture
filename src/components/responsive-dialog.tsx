@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import React, { ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,7 +20,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 
-const ResponsiveDialog = ({
+const ResponsiveDialog = React.memo(({
                          open,
                          onOpenChange,
                          isDesktop,
@@ -86,6 +86,9 @@ const ResponsiveDialog = ({
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-    );
-}
-export default ResponsiveDialog;
+    )
+})
+
+ResponsiveDialog.displayName = 'ResponsiveDialog'
+
+export default ResponsiveDialog
