@@ -4,6 +4,7 @@ import Home from '@/pages/Home';
 import About from '@/pages/About';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
+import NotFound from '@/pages/Not-Found';
 import { ThemeProvider } from "@/hooks/use-theme-provider"
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
       </Router>

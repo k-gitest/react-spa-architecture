@@ -11,7 +11,7 @@ const Home = () => {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  const handleFormSubmit = (data: MemoFormData) => {
+  const handleFormSubmit = useCallback((data: MemoFormData) => {
     if(editIndex !== null){
       const updateMemoList = [...memoList]
       updateMemoList[editIndex] = data
@@ -22,7 +22,7 @@ const Home = () => {
       setMemoList([...memoList, data])
     }
     setOpen(false);
-  };
+  }, [memoList, editIndex]);
 
   const handleEditClick = useCallback((index: number) => {
     setEditIndex(index);
