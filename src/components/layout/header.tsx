@@ -16,6 +16,9 @@ const Header = () => {
         <Button variant="ghost" asChild>
           <Link to="/about">About</Link>
         </Button>
+        <Button variant="ghost" asChild>
+          <Link to="/fetch">Fetch</Link>
+        </Button>
         <ModeToggle />
       </nav> 
     </header>
