@@ -1,5 +1,5 @@
 import React from 'react';
-import { MemoFormData } from '@/types/memo-form-data';
+import { Memo } from '@/types/memo-form-data';
 import {
   Card,
   CardContent,
@@ -11,9 +11,9 @@ import {
 import { Button } from "@/components/ui/button"
 
 interface MemoListProps {
-  memoData: MemoFormData[];
-  onEdit: (index: number) => void;
-  onDelete: (index: number) => void;
+  memoData: Memo[];
+  onEdit: (index: string) => void;
+  onDelete: (index: string) => void;
 }
 
 const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProps) => {
@@ -27,7 +27,7 @@ const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProps) => {
           <CardDescription>{memo.importance}</CardDescription>
         </CardHeader>
         <CardContent>
-          <p>{memo.content}</p>
+          <p className='break-all'>{memo.content}</p>
         </CardContent>
         <CardFooter>
           <ul>
@@ -38,8 +38,8 @@ const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProps) => {
         </CardFooter>
         <CardFooter>
           <div className="w-full flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => onEdit(index)}>編集</Button>
-            <Button variant="outline" onClick={() => onDelete(index)}>削除</Button>
+            <Button variant="outline" onClick={() => onEdit(memo.id)}>編集</Button>
+            <Button variant="outline" onClick={() => onDelete(memo.id)}>削除</Button>
           </div>
         </CardFooter>
       </Card>

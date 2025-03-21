@@ -13,3 +13,10 @@ export const FormSchema = z.object({
   ),
   tag: z.array(z.string()).min(1, { message: "タグは必須です" }),
 });
+
+export const MemoSchema = FormSchema.extend({
+  id: z.string(),
+  user_id: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});

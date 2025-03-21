@@ -3,20 +3,28 @@
 tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 
 ## 目的
+- 拡張的で効率的な運用保守ができる単一責務のレイヤード設計を目指す
 - shadcn/uiのフォームUIをパーツ別にコンポーネントにして再利用可能にする
 - shadcn/uiのメディアクエリ別ドロワー/ダイアログを再利用可能にする
 - shadcn/uiのテーマをトグルで三段階切替にする（システム・ライト・ダーク）
 - Fetch APIをラップしたHTTPクライアントを作成し再利用可能にする
+- supabaseをバックエンドとして使用する（auth・database postgres）
+- prismaをデータベース管理として使用する（DBスキーマ・トランザクション）
 
 ## 開発環境  
 - react 18.2.0
-- vite 6.1.1
-- tailwindcss 3.4.13
-- typescript 4.7.4
 - react-router-dom 7.2.0
 - react-hook-form 7.54.2
-- zod 3.24.2
+- react-query 5.68.0
+- vite 6.1.1
 - vitest 3.0.6
+- typescript 5.7.0
+- zod 3.24.2
+- zustand 5.0.3
+- shadcn/ui
+- tailwindcss 3.4.13
+- prisma 6.5.0
+- supabase 2.19.7
 
 ```text
 /
@@ -26,19 +34,29 @@ tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 │    │    ├── form ...フォームパーツコンポーネント
 │    │    ├── layout
 │    │    ├── ui ...shadcn/uiコンポーネント
+│    │    ├── account-form.tsx ...アカウント入力フォーム
 │    │    ├── memo-form.tsx ...メモ入力フォーム
 │    │    ├── memo-list.tsx ...メモリスト表示
+│    │    ├── memo-manager.tsx ...メモ管理
+│    │    ├── mode-toggle.tsx ...テーマ切替
 │    │    └── responsive-dialog.tsx ...共有ドロワー/ダイアログ
 │    ├── lib
 │    │    ├── fetchClient.ts ...Fetch API クライアント
+│    │    ├── supabase.ts ...supabaseクライアント
+│    │    ├── util.ts ...ユーティリティ関数
 │    │    └── errors.ts ...カスタムエラー定義
 │    ├── hooks
-│    │    ├── theme-provider ...テーマ切替
+│    │    ├── use-theme-provider ...テーマ切替状態管理
+│    │    ├── use-auth-state ...ユーザー認証状態
+│    │    ├── use-auth-store ...ユーザー認証状態管理
 │    │    └── use-media-query ...メディアクエリ判別
+│    ├── services
+│    │    └── memoService ...メモCRUD
 │    ├── pages
-│    ├── schemas
+│    ├── schemas ...zodスキーマ
 │    ├── types
 │    └── App.tsx
+├── prisma ...prismaスキーマ・マイグレーション
 ├── index.html
 ├── tailwind.config.js
 ├── package.json
@@ -147,4 +165,7 @@ try {
 - データをAPIで呼び出す事を想定しzodのスキーマをschemasに、スキーマの型をtypesに分けておく
 - ダイアログ/ドロワーはよく使用するので再利用可能な共有コンポーネントにしておく
 - Fetchは多くの場面で使用するので再利用可能なクラスにしておく
+- supabaseとprismaは型を出力してくれるので効率的な開発ができるようにしておく
+- apiでのCRUDはservicesで再利用可能なフックにしておく
+
 

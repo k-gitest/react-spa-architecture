@@ -9,51 +9,10 @@
  * リトライは500系エラーとネットワークエラーで行う
  */
 
-import { backoff, delay, between } from './utils';
-import { FetchError, NetworkError, JsonParseError, TimeoutError } from './errors';
-import { z } from 'zod';
-
-interface InitOptions {
-  baseUrl?: string;
-  timeout?: number;
-  maxRetry?: number;
-  retryDelay?: number;
-  baseBackoff?: number;
-  retryStatus?: number[];
-  retryMethods?: string[];
-}
-
-interface RequestOptions extends RequestInit {
-  retryEnabled?: boolean;
-  type?: DataType;
-}
-type DataType = "json" | "text" | "blob" | "arrayBuffer"
-
-const clientConfigSchema = z.object({
-  baseUrl: z
-    .string().url({ message: 'baseUrlはURLの文字列を設定してください' }).optional(),
-  timeout: z
-    .number({ message: 'timeoutは数値を設定してください' })
-    .positive({ message: 'timeoutは1以上の値を設定してください' })
-    .optional(),
-  maxRetry: z
-    .number({ message: 'maxRetryは数値を設定してください' })
-    .positive({ message: 'maxRetryは1以上の値を設定してください' })
-    .optional(),
-  retryDelay: z
-    .number({ message: 'retryDelayは数値を設定してください' })
-    .positive({ message: 'retryDelayは1以上の値を設定してください' })
-    .optional(),
-  baseBackoff: z
-    .number({ message: 'baseBackoffは数値を設定してください' })
-    .positive({ message: 'baseBackoffは1以上の値を設定してください' })
-    .optional(),
-  retryStatus: z
-    .array(z.number(), { message: "retryStatusは数値の配列に設定してください" }).optional(),
-  retryMethods: z
-    .array(z.string(), { message: "retryMethodsは文字列の配列に設定してください" }).optional(),
-});
-type ClientConfig = z.infer<typeof clientConfigSchema>;
+import { backoff, delay, between } from '@/lib/utils';
+import { FetchError, NetworkError, JsonParseError, TimeoutError } from '@/lib/errors';
+import { clientConfigSchema } from '@/schemas/fetch-client-schema'
+import { ClientConfig, InitOptions, RequestOptions, DataType } from '@/types/fetch-client-types'
 
 /**
  * @class FetchClient

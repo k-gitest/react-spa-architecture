@@ -1,11 +1,11 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-// 指数バックオフ　Math.pow(base, exponent) でbaseのexponent乗となる
+// 指数バックオフMath.pow(base, exponent)でbaseのexponent乗となる
 export const backoff = (base: number, exponent: number, delayTime: number): number => {
   const baseDelay = delayTime * Math.pow(base, exponent);
   const jitter = (Math.random() * delayTime) / 2;
