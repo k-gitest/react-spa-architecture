@@ -1,4 +1,5 @@
-import MemoManager from '@/components/memo-manager'
+//import MemoManager from '@/components/memo-manager'
+import MemoManager from '@/components/memo-controller'
 
 const Home = () => {
   return (

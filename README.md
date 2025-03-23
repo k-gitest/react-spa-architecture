@@ -8,6 +8,7 @@ tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 - shadcn/uiのメディアクエリ別ドロワー/ダイアログを再利用可能にする
 - shadcn/uiのテーマをトグルで三段階切替にする（システム・ライト・ダーク）
 - Fetch APIをラップしたHTTPクライアントを作成し再利用可能にする
+- tanstack-queryでデータ通信状態管理を再利用可能にする
 - supabaseをバックエンドとして使用する（auth・database postgres）
 - prismaをデータベース管理として使用する（DBスキーマ・トランザクション）
 
@@ -46,6 +47,7 @@ tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 │    │    ├── util.ts ...ユーティリティ関数
 │    │    └── errors.ts ...カスタムエラー定義
 │    ├── hooks
+│    │    ├── use-memo-queries ...データ通信状態状態管理
 │    │    ├── use-theme-provider ...テーマ切替状態管理
 │    │    ├── use-auth-state ...ユーザー認証状態
 │    │    ├── use-auth-store ...ユーザー認証状態管理
@@ -167,5 +169,5 @@ try {
 - Fetchは多くの場面で使用するので再利用可能なクラスにしておく
 - supabaseとprismaは型を出力してくれるので効率的な開発ができるようにしておく
 - apiでのCRUDはservicesで再利用可能なフックにしておく
-
+- prismaのバグでuuid_generate_v4と@updateAtのスキーマが使えないので、gen_random_uuid()とdefault(now())とplpgトリガーで対応する必要がある
 

@@ -12,7 +12,8 @@
     "format": "prettier --write src",
     "migrate": "dotenv -e .env.local -- npx prisma migrate dev",
     "generate": "dotenv -e .env.local -- npx prisma generate",
-    "migrate:create": "dotenv -e .env.local -- npx prisma migrate dev --create-only --name hoge"
+    "migrate:create": "dotenv -e .env.local -- npx prisma migrate dev --create-only --name hoge",
+    "generate:type": "supabase gen types typescript --project-id $PROJECT_ID > src/types/database.types.ts"
   },
   "keywords": [],
   "author": "",

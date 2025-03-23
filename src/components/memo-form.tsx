@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormSchema } from '@/schemas/memo-form-schema';
@@ -51,17 +51,11 @@ const MemoForm = ({ onSubmit, initialValues }: Props) => {
     defaultValues: initialValues || defaultMemoFormData,
   });
 
-  const handleSubmit = (data: MemoFormData) => {
+  const handleSubmit = useCallback((data: MemoFormData) => {
     onSubmit(data);
     form.reset();
-  };
+  }, [onSubmit]);
 
-  /* この処理はなくても動作するが、RHFのdefaultValuesはコンポーネントの初期化時に一度だけ設定され、それ以降は変更されない
-     もし編集中に別のメモの編集ボタンがクリックされると、最初のデータが表示されたままになる
-     そのまま更新すると後のデータに最初のデータが入ることになりデータの整合性がとれなくなる
-     useEffectでデータを更新し初期値とする処理となる
-     formが依存配列に含まれているのは、メモフォームが再レンダリングされた場合にもuseEffectを実行するため
-  */
   useEffect(() => {
     if (initialValues) {
       form.reset(initialValues);

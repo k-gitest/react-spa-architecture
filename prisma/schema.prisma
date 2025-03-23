@@ -17,13 +17,13 @@ model User {
 model Memo {
   id         String   @id @default(dbgenerated("gen_random_uuid()"))
   user_id    String   @db.Uuid
-  title      String
-  content    String
+  title      String   @db.VarChar(100)
+  content    String   @db.Text
   importance String
   category   String
   tag        String[]
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now()) @updatedAt
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @updatedAt @db.Timestamptz(3) @default(now())
   user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("memos")

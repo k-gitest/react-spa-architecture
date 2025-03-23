@@ -12,7 +12,7 @@ const Login = () => {
       <div className="flex justify-center p-4">
         <p>
           登録がまだの方は
-          <Button>
+          <Button variant="ghost">
             <Link to="/register">新規登録ページ</Link>
           </Button>
           から登録してください
