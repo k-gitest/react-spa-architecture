@@ -1,56 +1,43 @@
-import { supabase } from '@/lib/supabase';
-import FormInput from '@/components/form/form-input';
+import { FormInput } from '@/components/form/form-parts';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { validatedAccount } from '@/schemas/account-schema';
+import { Account } from '@/types/account-types'
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useSignIn, useSignUp, useSignInWithOAuth } from '@/hooks/use-auth-queries';
+import { Loader } from 'lucide-react';
 
 const AccountForm = (props: { type: string }) => {
-  const validatedAccount = z.object({
-    email: z.string().email({ message: 'emailアドレスは有効なアドレスを入力してください' }),
-    password: z.string().min(6, { message: 'パスワードは6文字以上にしてください' }),
-  });
-
-  type Account = z.infer<typeof validatedAccount>;
 
   const form = useForm<Account>({
     resolver: zodResolver(validatedAccount),
     defaultValues: { email: '', password: '' },
   });
 
+  const signInMutation = useSignIn();
+  const signUpMutation = useSignUp();
+  const signInWithOAuthMutation = useSignInWithOAuth();
+
   const handleSubmit = async (formData: Account) => {
     if (props.type === 'login') {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      signInMutation.mutate({
         email: formData.email,
         password: formData.password,
       });
-      if (error) console.error('サインインエラー: ', error.message);
-      console.log('サインイン成功: ', data);
-      form.reset();
+    }
+    else {
+      signUpMutation.mutate({
+        email: formData.email,
+        password: formData.password,
+      });
     }
 
-    const { data, error } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-    });
-    if (error) console.error('サインアップエラー: ', error.message);
-    console.log('サインアップ成功：', data);
     form.reset();
   };
 
   const handleGithub = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: `/callback`,
-      },
-    });
-    if (error) {
-      console.error('サインアップエラー:', error);
-    } else {
-      console.log('サインアップ成功:', data);
-    }
+    signInWithOAuthMutation.mutate();
   };
 
   return (
@@ -61,8 +48,8 @@ const AccountForm = (props: { type: string }) => {
             <FormInput label="email" placeholder="emailを入力してください" name="email" />
             <FormInput label="password" placeholder="パスワードを入力してください" name="password" />
             <div className='text-center'>
-              <Button type="submit" className="w-32">
-                送信
+              <Button type="submit" className="w-32" disabled={signInMutation.isPending || signUpMutation.isPending}>
+                {(signInMutation.isPending || signUpMutation.isPending) && <Loader className="animate-spin" />} 送信
               </Button>
             </div>
           </form>

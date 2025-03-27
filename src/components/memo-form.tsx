@@ -5,11 +5,7 @@ import { FormSchema } from '@/schemas/memo-form-schema';
 import { MemoFormData } from '@/types/memo-form-data';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import FormInput from '@/components/form/form-input';
-import FormTextArea from '@/components/form/form-textarea';
-import FormRadioGroup from '@/components/form/form-radio';
-import FormSelect from '@/components/form/form-select';
-import FormCheckboxGroup from '@/components/form/form-checkbox';
+import { FormInput, FormTextArea, FormSelect, FormCheckboxGroup, FormRadioGroup } from '@/components/form/form-parts';
 
 const importances = [
   { value: 'high', label: '大' },
@@ -65,7 +61,7 @@ const MemoForm = ({ onSubmit, initialValues }: Props) => {
   return (
     <div className="flex justify-center">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="w-2/3 space-y-6">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="w-full space-y-6 p-1">
           <FormInput label="タイトル" placeholder="タイトルを入力してください" name="title" />
           <FormSelect label="カテゴリー" options={categories} placeholder="カテゴリ選択" name="category" />
           <FormTextArea label="メモの内容" placeholder="内容を記入してください" name="content" />

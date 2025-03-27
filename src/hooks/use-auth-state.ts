@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/hooks/use-auth-store';
 
-function useAuthState() {
+export const useAuthState = () => {
   const setGlobalSession = useAuthStore((state) => state.setSession);
 
   useEffect(() => {
@@ -18,4 +18,4 @@ function useAuthState() {
   }, []);
 }
 
-export { useAuthState };
+

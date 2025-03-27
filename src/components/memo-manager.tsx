@@ -3,7 +3,7 @@ import { Memo, MemoFormData } from '@/types/memo-form-data';
 import MemoForm from '@/components/memo-form';
 import MemoList from '@/components/memo-list';
 import ResponsiveDialog from '@/components/responsive-dialog';
-import useMediaQuery from '@/hooks/use-media-query';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import { useAuthStore } from '@/hooks/use-auth-store';
 import { fetchMemos, addMemo, showMemo, updateMemo, deleteMemo } from '@/services/memoService';
 

@@ -7,9 +7,10 @@ tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 - shadcn/uiのフォームUIをパーツ別にコンポーネントにして再利用可能にする
 - shadcn/uiのメディアクエリ別ドロワー/ダイアログを再利用可能にする
 - shadcn/uiのテーマをトグルで三段階切替にする（システム・ライト・ダーク）
+- shadcn/uiのtoastフックスで通信状態の表示を再利用可能にする
 - Fetch APIをラップしたHTTPクライアントを作成し再利用可能にする
 - tanstack-queryでデータ通信状態管理を再利用可能にする
-- supabaseをバックエンドとして使用する（auth・database postgres）
+- supabaseをバックエンドとして使用する（auth・database postgres・edge functions）
 - prismaをデータベース管理として使用する（DBスキーマ・トランザクション）
 
 ## 開発環境  
@@ -26,6 +27,8 @@ tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 - tailwindcss 3.4.13
 - prisma 6.5.0
 - supabase 2.19.7
+- deno 2.2.5
+- node 20.18.1
 
 ```text
 /
@@ -33,17 +36,19 @@ tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 ├── src
 │    ├── components
 │    │    ├── form ...フォームパーツコンポーネント
-│    │    ├── layout
+│    │    ├── layout ...ヘッダー･フッター
 │    │    ├── ui ...shadcn/uiコンポーネント
 │    │    ├── account-form.tsx ...アカウント入力フォーム
 │    │    ├── memo-form.tsx ...メモ入力フォーム
 │    │    ├── memo-list.tsx ...メモリスト表示
 │    │    ├── memo-manager.tsx ...メモ管理
 │    │    ├── mode-toggle.tsx ...テーマ切替
-│    │    └── responsive-dialog.tsx ...共有ドロワー/ダイアログ
+│    │    ├── responsive-dialog.tsx ...共有ドロワー/ダイアログ
+│    │    └── user-profile.tsx ...ユーザー情報管理
 │    ├── lib
 │    │    ├── fetchClient.ts ...Fetch API クライアント
 │    │    ├── supabase.ts ...supabaseクライアント
+│    │    ├── supabase.ts ...prismaクライアント
 │    │    ├── util.ts ...ユーティリティ関数
 │    │    └── errors.ts ...カスタムエラー定義
 │    ├── hooks
@@ -51,14 +56,17 @@ tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 │    │    ├── use-theme-provider ...テーマ切替状態管理
 │    │    ├── use-auth-state ...ユーザー認証状態
 │    │    ├── use-auth-store ...ユーザー認証状態管理
+│    │    ├── use-auth-queries ...ユーザー認証通信状態管理
 │    │    └── use-media-query ...メディアクエリ判別
 │    ├── services
+│    │    ├── authService ...ユーザー認証
 │    │    └── memoService ...メモCRUD
 │    ├── pages
 │    ├── schemas ...zodスキーマ
 │    ├── types
 │    └── App.tsx
 ├── prisma ...prismaスキーマ・マイグレーション
+├── supabase ...エッジファンクション
 ├── index.html
 ├── tailwind.config.js
 ├── package.json

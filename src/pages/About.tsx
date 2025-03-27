@@ -5,7 +5,7 @@ const About = () => {
         <h2 className="text-2xl mb-4">About</h2>
         <p>このアプリはreactとviteとshadcn/uiで開発されています</p>
         <p>react-hook-formとzodとshadcn/uiのフォームコンポーネントを使用したメモアプリです。</p>
-        </div>
+      </div>
     </main>
   )
 }

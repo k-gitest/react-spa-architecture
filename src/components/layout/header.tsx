@@ -1,20 +1,16 @@
-import { Link, redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
-import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/hooks/use-auth-store';
+import { useSignOut } from '@/hooks/use-auth-queries';
+import { Loader } from 'lucide-react';
 
 const Header = () => {
   const session = useAuthStore((state) => state.session);
+  const signOutMutation = useSignOut();
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('ログアウトエラー:', error);
-    } else {
-      console.log('ログアウトしました');
-      redirect('/');
-    }
+    signOutMutation.mutate();
   };
 
   return (
@@ -31,9 +27,12 @@ const Header = () => {
         <Button variant="ghost" asChild>
           <Link to="/fetch">Fetch</Link>
         </Button>
+        <Button variant="ghost" asChild>
+          <Link to="/profile">Profile</Link>
+        </Button>
         {session && (
-          <Button variant="ghost" asChild onClick={handleLogout}>
-            <Link to="/register">ログアウト</Link>
+          <Button variant="ghost" asChild onClick={handleLogout} disabled={signOutMutation.isPending}>
+            <Link to="/register">{signOutMutation.isPending && <Loader className="animate-spin" />}ログアウト</Link>
           </Button>
         )}
         {!session && (
