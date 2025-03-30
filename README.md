@@ -1,6 +1,6 @@
 ## 概要
 
-tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
+ReactでSPAのメモアプリを開発
 
 ## 目的
 - 拡張的で効率的な運用保守ができる単一責務のレイヤード設計を目指す
@@ -10,6 +10,7 @@ tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 - shadcn/uiのtoastフックスで通信状態の表示を再利用可能にする
 - Fetch APIをラップしたHTTPクライアントを作成し再利用可能にする
 - tanstack-queryでデータ通信状態管理を再利用可能にする
+- tRPCでデータ通信状態管理を再利用可能にする
 - supabaseをバックエンドとして使用する（auth・database postgres・edge functions）
 - prismaをデータベース管理として使用する（DBスキーマ・トランザクション）
 
@@ -20,6 +21,7 @@ tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 - react-query 5.68.0
 - vite 6.1.1
 - vitest 3.0.6
+- trpc 11.0.0
 - typescript 5.7.0
 - zod 3.24.2
 - zustand 5.0.3
@@ -28,6 +30,7 @@ tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 - prisma 6.5.0
 - supabase 2.19.7
 - deno 2.2.5
+- hono 4.0.0
 - node 20.18.1
 
 ```text
@@ -66,7 +69,9 @@ tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 │    ├── types
 │    └── App.tsx
 ├── prisma ...prismaスキーマ・マイグレーション
-├── supabase ...エッジファンクション
+├── supabase/functions ...エッジファンクション
+│    ├── delete-user-account ...アカウント削除
+│    └── trpc ...tRPCルーター
 ├── index.html
 ├── tailwind.config.js
 ├── package.json
@@ -74,6 +79,11 @@ tailwindとshadcn/uiを使用してReactでSPAの簡易メモアプリを開発
 └── vite.config.js
 
 ```
+## メモ機能
+- メモにはタイトル、カテゴリー、コンテンツ、重要度、タグを入力できます
+- メモを追加するとメモの一覧が表示されます
+- 一覧表示からメモごとの編集と削除ができます
+
 ## フォームパーツコンポーネントの使い方
 shadcn/uiのFormコンポーネント内で使用できる  
 パーツコンポーネントを読み込みlabel, placeholder, name, optionsを渡す
@@ -117,11 +127,6 @@ import { ModeToggle } from "@/components/mode-toggle";
 ...
 
 ```
-
-## メモ機能
-- メモにはタイトル、カテゴリー、コンテンツ、重要度、タグを入力できます
-- メモを追加するとメモの一覧が表示されます
-- 一覧表示からメモごとの編集と削除ができます
 
 ## Fetch API クライアント
 APIとの通信を行うためのカスタムクライアントです。
@@ -178,4 +183,6 @@ try {
 - supabaseとprismaは型を出力してくれるので効率的な開発ができるようにしておく
 - apiでのCRUDはservicesで再利用可能なフックにしておく
 - prismaのバグでuuid_generate_v4と@updateAtのスキーマが使えないので、gen_random_uuid()とdefault(now())とplpgトリガーで対応する必要がある
-
+- サーバーエラーはhook内でtoastで表示処理とするとUI側で行わなくて良い
+- 今回tanstack QueryとtRPCを別々に使用しているが、使い方としてはあまり変わらない
+- denoとhonoの良さはedgeの様なリソースが限られたところで使えるということを感じる

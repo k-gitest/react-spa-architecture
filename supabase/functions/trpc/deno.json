@@ -1,0 +1,14 @@
+{
+  "imports": {
+    "@trpc/server": "npm:@trpc/server@^11.0.0",
+    "@trpc/server/adapters/fetch": "npm:@trpc/server@^11.0.0/adapters/fetch",
+    "hono": "npm:hono@^4.0.0",
+    "hono/cors": "npm:hono@^4.0.0/cors",
+    "@hono/trpc-server": "npm:@hono/trpc-server",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@^2.0.0",
+    "zod": "npm:zod@^3.23.8"
+  },
+  "tasks": {
+    "dev": "deno run --watch index.ts"
+  }
+}
