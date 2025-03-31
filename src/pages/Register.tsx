@@ -1,10 +1,11 @@
 import { AccountForm } from '@/components/account-form';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import MainWrapper from '@/components/layout/main-wrapper';
 
 const Register = () => {
   return (
-    <div>
+    <MainWrapper>
       <div className="flex justify-center">
         <AccountForm type="register" />
       </div>
@@ -18,7 +19,7 @@ const Register = () => {
           からログインしてください
         </p>
       </div>
-    </div>
+    </MainWrapper>
   );
 };
 

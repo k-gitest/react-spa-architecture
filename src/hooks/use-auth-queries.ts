@@ -37,7 +37,7 @@ export const useSignOut = () => {
 	const navigate = useNavigate();
 	return useMutation({
 		mutationFn: authSignOut,
-		onSuccess: () => navigate("/login"),
+		onSuccess: () => navigate("/auth/login"),
 		onError: (err) => toast({ title: err.message }),
 	})
 }

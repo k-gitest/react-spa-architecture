@@ -1,4 +1,4 @@
-import { FormInput } from '@/components/form/form-parts';
+import { FormWrapper, FormInput } from '@/components/form/form-parts';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
@@ -54,6 +54,15 @@ const AccountForm = (props: { type: string }) => {
             </div>
           </form>
         </Form>
+        <FormWrapper onSubmit={handleSubmit} form={form}>
+          <FormInput label="email" placeholder="emailを入力してください" name="email" />
+          <FormInput label="password" placeholder="パスワードを入力してください" name="password" />
+          <div className='text-center'>
+            <Button type="submit" className="w-32" disabled={signInMutation.isPending || signUpMutation.isPending}>
+              {(signInMutation.isPending || signUpMutation.isPending) && <Loader className="animate-spin" />} 送信
+            </Button>
+          </div>
+        </FormWrapper>
       </div>
       <div className="text-center">
         <Button onClick={handleGithub}>Githubで登録</Button>

@@ -15,7 +15,7 @@ const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProps) => {
       {memoData.map((memo, index) => (
         <Card key={index}>
           <CardHeader>
-            <CardTitle>{memo.title}</CardTitle>
+            <CardTitle className="break-words">{memo.title}</CardTitle>
             <CardDescription>{memo.category}</CardDescription>
             <CardDescription>{memo.importance}</CardDescription>
           </CardHeader>

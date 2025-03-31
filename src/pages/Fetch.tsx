@@ -3,8 +3,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FetchClient } from '@/lib/fetchClient';
 import { trpc as trpcClient } from '@/lib/trpc';
 import { useTRPC } from '@/lib/trpc';
-import { useMemos } from '@/hooks/use-memos'
+import { useMemos } from '@/hooks/use-memo-queries-trpc'
 import { getQueryKey } from '@trpc/react-query';
+import MainWrapper from '@/components/layout/main-wrapper'
 import MemoList from '@/components/memo-list';
 
 const http = new FetchClient();
@@ -66,16 +67,16 @@ const Fetch = () => {
     return queryClient.invalidateQueries({ queryKey: memosKey });
   }
 
-  const {memos, isMemosLoading, memosError} = useMemos();
+  const { memos, isMemosLoading, memosError } = useMemos();
 
   if (isLoading) return <p>Loading users...</p>;
   if (isError) return <p>Error fetching users: {error?.message}</p>;
 
   return (
-    <div>
+    <MainWrapper>
       {isMemosLoading && <p>memosのLoading...</p>}
       {memosError && <p>{memosError.message}</p>}
-      {memos && <div>{memos[0]}</div>}
+      {memos && <div>{memos[0].id}</div>}
       {memos?.length === 0 && <p>データがなかったですよ</p>}
       <hr className="my-3" />
       <p>{helloRectQuery.data?.message}</p>
@@ -83,7 +84,7 @@ const Fetch = () => {
       <div>
         {getMemosReactQuery.isLoading && <p>Loading...</p>}
         {getMemosReactQuery.isError && <p className='color-red-600'>{getMemosReactQuery.error.message}</p>}
-        {getMemosReactQuery.data?.map((chunk, index) => <div key={index}>{chunk}</div>)}
+        {getMemosReactQuery.data?.map((chunk, index) => <div key={index}>{chunk.titile}</div>)}
         {getMemosReactQuery.data?.length === 0 && <p>データがありません</p>}
         <button type="button" onClick={() => getMemosReactQuery.refetch()}>更新</button>
         <button type="button" onClick={invalidateReactMemoKey}>キー更新</button>
@@ -94,7 +95,7 @@ const Fetch = () => {
       <div>
         {getMemosQuery.isLoading && <p>Loading...</p>}
         {getMemosQuery.isError && <p className='color-red-600'>{getMemosQuery.error.message}</p>}
-        {getMemosQuery.data?.map((chunk, index) => <div key={index}>{chunk}</div>)}
+        {getMemosQuery.data?.map((chunk, index) => <div key={index}>{chunk.title}</div>)}
         {getMemosQuery.data?.length === 0 && <p>データがありません</p>}
         <button type="button" onClick={() => getMemosQuery.refetch()}>更新</button>
         <button type="button" onClick={invalidateMemoKey}>キー更新</button>
@@ -116,7 +117,7 @@ const Fetch = () => {
             <p>{todo.completed}</p>
           </div>
         ))}
-    </div>
+    </MainWrapper>
   );
 };
 

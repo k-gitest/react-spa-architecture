@@ -27,22 +27,23 @@ const Header = () => {
         <Button variant="ghost" asChild>
           <Link to="/fetch">Fetch</Link>
         </Button>
-        <Button variant="ghost" asChild>
-          <Link to="/profile">Profile</Link>
-        </Button>
         {session && (
-          <Button variant="ghost" asChild onClick={handleLogout} disabled={signOutMutation.isPending}>
-            <Link to="/register">{signOutMutation.isPending && <Loader className="animate-spin" />}ログアウト</Link>
-          </Button>
+          <>
+            <Button variant="ghost" asChild>
+              <Link to="/auth/profile">Profile</Link>
+            </Button>
+            <Button variant="ghost" asChild onClick={handleLogout} disabled={signOutMutation.isPending}>
+              <Link to="/auth/register">{signOutMutation.isPending && <Loader className="animate-spin" />}ログアウト</Link>
+            </Button>
+          </>
         )}
         {!session && (
           <>
             <Button variant="ghost" asChild>
-              <Link to="/login">ログイン</Link>
+              <Link to="/auth/login">ログイン</Link>
             </Button>
-
             <Button variant="ghost" asChild>
-              <Link to="/register">新規登録</Link>
+              <Link to="/auth/register">新規登録</Link>
             </Button>
           </>
         )}

@@ -1,9 +1,31 @@
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import React, { ReactNode } from 'react';
+import { UseFormReturn, SubmitHandler } from 'react-hook-form';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
+
+type FormWrapperProps<T extends Record<string, any>> = {
+	children?: ReactNode;
+	onSubmit: SubmitHandler<T>;
+	form: UseFormReturn<T>;
+};
+
+export const FormWrapper = <T extends Record<string, any>>({
+	children,
+	onSubmit,
+	form,
+}: FormWrapperProps<T>) => {
+	return (
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
+				{children}
+			</form>
+		</Form>
+	)
+}
 
 export const FormInput = ({ label, placeholder, name }: { label: string; placeholder: string; name: string; }) => (
 	<FormField

@@ -1,13 +1,14 @@
 //import MemoManager from '@/components/memo-manager'
 import MemoManagerTrpc from '@/components/memo-manager-trpc';
-import MemoManager from '@/components/memo-controller'
+import MemoManager from '@/components/memo-manager-tanstack';
+import MainWrapper from '@/components/layout/main-wrapper';
 
 const Home = () => {
   return (
-    <main className="w-full p-4">
+    <MainWrapper>
       <MemoManagerTrpc />
       <MemoManager />
-    </main>
+    </MainWrapper>
   );
 };
 

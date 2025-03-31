@@ -1,8 +1,11 @@
 import UserProfile from '@/components/user-profile'
+import MainWrapper from '@/components/layout/main-wrapper'
 
 const Profile = () => {
 	return (
-		<UserProfile />
+		<MainWrapper>
+			<UserProfile />
+		</MainWrapper>
 	)
 }
 export default Profile

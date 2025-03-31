@@ -3,7 +3,7 @@
 ReactでSPAのメモアプリを開発
 
 ## 目的
-- 拡張的で効率的な運用保守ができる単一責務のレイヤード設計を目指す
+- 拡張的で効率的な運用保守ができるアーキテクチャと単一責務のレイヤード設計を目指す
 - shadcn/uiのフォームUIをパーツ別にコンポーネントにして再利用可能にする
 - shadcn/uiのメディアクエリ別ドロワー/ダイアログを再利用可能にする
 - shadcn/uiのテーマをトグルで三段階切替にする（システム・ライト・ダーク）
@@ -39,7 +39,7 @@ ReactでSPAのメモアプリを開発
 ├── src
 │    ├── components
 │    │    ├── form ...フォームパーツコンポーネント
-│    │    ├── layout ...ヘッダー･フッター
+│    │    ├── layout ...レイアウトコンポーネント
 │    │    ├── ui ...shadcn/uiコンポーネント
 │    │    ├── account-form.tsx ...アカウント入力フォーム
 │    │    ├── memo-form.tsx ...メモ入力フォーム
@@ -64,9 +64,10 @@ ReactでSPAのメモアプリを開発
 │    ├── services
 │    │    ├── authService ...ユーザー認証
 │    │    └── memoService ...メモCRUD
-│    ├── pages
+│    ├── pages ...ページコンポーネント
+│    ├── routes ...ページルーター
 │    ├── schemas ...zodスキーマ
-│    ├── types
+│    ├── types ...型
 │    └── App.tsx
 ├── prisma ...prismaスキーマ・マイグレーション
 ├── supabase/functions ...エッジファンクション

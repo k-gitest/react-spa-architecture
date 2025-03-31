@@ -5,7 +5,7 @@ import MemoList from '@/components/memo-list';
 import ResponsiveDialog from '@/components/responsive-dialog';
 import {useMediaQuery} from '@/hooks/use-media-query';
 import { useAuthStore } from '@/hooks/use-auth-store';
-import { useGetMemos, useGetMemo, useAddMemo, useUpdateMemo, useDeleteMemo, } from '@/hooks/use-memo-queries';
+import { useGetMemos, useGetMemo, useAddMemo, useUpdateMemo, useDeleteMemo, } from '@/hooks/use-memo-queries-tanstack';
 
 const MemoManager = () => {
   const session = useAuthStore((state) => state.session);

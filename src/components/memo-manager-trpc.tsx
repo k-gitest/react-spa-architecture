@@ -5,9 +5,7 @@ import MemoList from '@/components/memo-list';
 import ResponsiveDialog from '@/components/responsive-dialog';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useAuthStore } from '@/hooks/use-auth-store';
-import { useMemos } from '@/hooks/use-memos';
-import { deleteMemo, updateMemo } from '@/services/memoService';
-import { queryClient } from '@/lib/queryClient';
+import { useMemos } from '@/hooks/use-memo-queries-trpc';
 
 const MemoManagerTrpc = () => {
 	const session = useAuthStore((state) => state.session);
@@ -34,7 +32,6 @@ const MemoManagerTrpc = () => {
 		},
 		[editIndex, updateMemo],
 	);
-
 
 	const handleFormSubmit = useCallback(
 		async (data: MemoFormData) => {
