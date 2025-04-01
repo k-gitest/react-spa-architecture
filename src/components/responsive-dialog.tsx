@@ -1,10 +1,10 @@
-import React, { ReactNode } from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger, } from "@/components/ui/drawer"
+import React, { ReactNode } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger, } from "@/components/ui/drawer";
 
-const ResponsiveDialog = React.memo(({
+export const ResponsiveDialog = React.memo(({
   open,
   onOpenChange,
   isDesktop,
@@ -74,9 +74,5 @@ const ResponsiveDialog = React.memo(({
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
-  )
-})
-
-ResponsiveDialog.displayName = 'ResponsiveDialog'
-
-export default ResponsiveDialog
+  );
+});

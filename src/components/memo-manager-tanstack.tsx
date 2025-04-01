@@ -1,13 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import { MemoFormData } from '@/types/memo-form-data';
-import MemoForm from '@/components/memo-form';
-import MemoList from '@/components/memo-list';
-import ResponsiveDialog from '@/components/responsive-dialog';
-import {useMediaQuery} from '@/hooks/use-media-query';
+import { MemoForm } from '@/components/memo-form';
+import { MemoList } from '@/components/memo-list';
+import { ResponsiveDialog } from '@/components/responsive-dialog';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import { useAuthStore } from '@/hooks/use-auth-store';
 import { useGetMemos, useGetMemo, useAddMemo, useUpdateMemo, useDeleteMemo, } from '@/hooks/use-memo-queries-tanstack';
 
-const MemoManager = () => {
+export const MemoManagerTanstack = () => {
   const session = useAuthStore((state) => state.session);
   const [editIndex, setEditIndex] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
@@ -72,8 +72,8 @@ const MemoManager = () => {
   );
 
   useEffect(() => {
-    if (!open) setEditIndex(null)
-  }, [open])
+    if (!open) setEditIndex(null);
+  }, [open]);
 
   if (!session) return <p className='text-center'>メモ機能は会員限定です</p>;
 
@@ -100,5 +100,3 @@ const MemoManager = () => {
     </div>
   );
 };
-
-export default MemoManager;

@@ -3,10 +3,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FetchClient } from '@/lib/fetchClient';
 import { trpc as trpcClient } from '@/lib/trpc';
 import { useTRPC } from '@/lib/trpc';
-import { useMemos } from '@/hooks/use-memo-queries-trpc'
+import { useMemos } from '@/hooks/use-memo-queries-trpc';
 import { getQueryKey } from '@trpc/react-query';
-import MainWrapper from '@/components/layout/main-wrapper'
-import MemoList from '@/components/memo-list';
+import { MainWrapper } from '@/components/layout/main-wrapper';
+import { Helmet } from 'react-helmet-async';
 
 const http = new FetchClient();
 
@@ -55,7 +55,7 @@ const Fetch = () => {
   const getMemosKey = getQueryKey(trpcClient.getMemos, undefined, 'query');
   const invalidateReactMemoKey = () => {
     return queryClient.invalidateQueries({ queryKey: getMemosKey });
-  }
+  };
 
   // createTRPCContextの場合
   const helloQuery = useQuery(trpc.hello.queryOptions());
@@ -65,7 +65,7 @@ const Fetch = () => {
 
   const invalidateMemoKey = () => {
     return queryClient.invalidateQueries({ queryKey: memosKey });
-  }
+  };
 
   const { memos, isMemosLoading, memosError } = useMemos();
 
@@ -74,6 +74,12 @@ const Fetch = () => {
 
   return (
     <MainWrapper>
+      <Helmet>
+        <title>Fetchページ: React ⚛️ + Vite ⚡ + shadcn/ui</title>
+        <meta name="description" content="メモアプリで使用するFetchの種類を見る事ができます" />
+      </Helmet>
+      <h2>tRPCによるフェッチ</h2>
+      <h3>createTRPCRectの場合</h3>
       {isMemosLoading && <p>memosのLoading...</p>}
       {memosError && <p>{memosError.message}</p>}
       {memos && <div>{memos[0].id}</div>}
@@ -90,6 +96,7 @@ const Fetch = () => {
         <button type="button" onClick={invalidateReactMemoKey}>キー更新</button>
       </div>
       <hr className="my-3" />
+      <h3>createTRPCContextの場合</h3>
       <p>{helloQuery.data?.message}</p>
       <p>{greetQuery.data?.greeting}</p>
       <div>

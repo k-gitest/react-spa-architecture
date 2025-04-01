@@ -15,8 +15,8 @@ import Profile from '@/pages/Profile';
 import Confirm from '@/pages/Confirm';
 import NewPass from '@/pages/NewPass';
 import NotFound from '@/pages/Not-Found';
-import { ProtectedRoute } from '@/routes/protected-route';
 import { AuthGuard } from '@/routes/auth-guard';
+import { GuestGuard } from '@/routes/guest-guard';
 
 const LayoutWrapper = () => {
   return (
@@ -34,14 +34,14 @@ const router = createBrowserRouter(
       <Route path="/about" element={<About />} />
       <Route path="/fetch" element={<Fetch />} />
       
-      {/* Auth routes with AuthGuard */}
-      <Route element={<AuthGuard />}>
+      {/* Guest routes with GuestGuard */}
+      <Route element={<GuestGuard />}>
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/register" element={<Register />} />
       </Route>
       
       {/* Protected routes */}
-      <Route element={<ProtectedRoute />}>
+      <Route element={<AuthGuard />}>
         <Route path="/auth/profile" element={<Profile />} />
         <Route path="/auth/confirm" element={<Confirm />} />
         <Route path="/auth/pass" element={<NewPass />} />

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Memo } from '@/types/memo-form-data';
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
 
 interface MemoListProps {
   memoData: Memo[];
@@ -9,7 +9,7 @@ interface MemoListProps {
   onDelete: (index: string) => void;
 }
 
-const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProps) => {
+export const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProps) => {
   return (
     <div className="grid grid-cols-4 gap-4 p-4">
       {memoData.map((memo, index) => (
@@ -38,9 +38,5 @@ const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProps) => {
         </Card>
       ))}
     </div>
-  )
-})
-
-MemoList.displayName = 'MemoList'
-
-export default MemoList
+  );
+});

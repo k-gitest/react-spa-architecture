@@ -41,7 +41,7 @@ interface Props {
   initialValues?: MemoFormData;
 }
 
-const MemoForm = ({ onSubmit, initialValues }: Props) => {
+export const MemoForm = ({ onSubmit, initialValues }: Props) => {
   const form = useForm<MemoFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: initialValues || defaultMemoFormData,
@@ -79,4 +79,3 @@ const MemoForm = ({ onSubmit, initialValues }: Props) => {
   );
 };
 
-export default MemoForm;

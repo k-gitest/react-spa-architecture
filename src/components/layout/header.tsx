@@ -5,7 +5,7 @@ import { useAuthStore } from '@/hooks/use-auth-store';
 import { useSignOut } from '@/hooks/use-auth-queries';
 import { Loader } from 'lucide-react';
 
-const Header = () => {
+export const Header = () => {
   const session = useAuthStore((state) => state.session);
   const signOutMutation = useSignOut();
 
@@ -53,5 +53,3 @@ const Header = () => {
     </header>
   );
 };
-
-export default Header;

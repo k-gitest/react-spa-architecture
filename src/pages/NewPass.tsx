@@ -3,7 +3,8 @@ import { redirect } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authUpdateUser } from '@/services/authService';
-import MainWrapper from '@/components/layout/main-wrapper'
+import { MainWrapper } from '@/components/layout/main-wrapper';
+import { Helmet } from 'react-helmet-async';
 
 const NewPass = () => {
 	const [newPassword, setNewPassword] = useState<string>("");
@@ -21,6 +22,10 @@ const NewPass = () => {
 
 	return (
 		<MainWrapper>
+			<Helmet>
+				<title>パスワード変更ページ: React ⚛️ + Vite ⚡ + shadcn/ui</title>
+				<meta name="description" content="パスワード変更ページです" />
+			</Helmet>
 			<div className="flex justify-center">
 				<div className="w-96 flex flex-col gap-2">
 					<p>新しいパスワード</p>
@@ -29,6 +34,6 @@ const NewPass = () => {
 				</div>
 			</div>
 		</MainWrapper>
-	)
-}
+	);
+};
 export default NewPass;

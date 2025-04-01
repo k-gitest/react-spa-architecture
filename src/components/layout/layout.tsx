@@ -1,10 +1,10 @@
-import { ReactNode } from 'react'
-import MainWrapper from "@/components/layout/main-wrapper"
-import Header from '@/components/layout/header'
-import Footer from '@/components/layout/footer'
+import { ReactNode } from 'react';
+import { MainWrapper } from "@/components/layout/main-wrapper";
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
 
-export const Layout = ({ children }: { children: ReactNode }) => {
+export const Layout = ({ children }: { children: ReactNode; }) => {
 	return (
 		<>
 			<Header />
@@ -12,7 +12,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
 				{children}
 			</MainWrapper>
 			<Footer />
-      <Toaster />
+			<Toaster />
 		</>
-	)
-}
+	);
+};

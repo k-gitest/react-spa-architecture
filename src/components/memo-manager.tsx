@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Memo, MemoFormData } from '@/types/memo-form-data';
-import MemoForm from '@/components/memo-form';
-import MemoList from '@/components/memo-list';
-import ResponsiveDialog from '@/components/responsive-dialog';
+import { MemoForm } from '@/components/memo-form';
+import { MemoList } from '@/components/memo-list';
+import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useAuthStore } from '@/hooks/use-auth-store';
 import { fetchMemos, addMemo, showMemo, updateMemo, deleteMemo } from '@/services/memoService';
 
-const MemoManager = () => {
+export const MemoManager = () => {
   const session = useAuthStore((state) => state.session);
 
   const [memoList, setMemoList] = useState<Memo[]>([]);
@@ -126,5 +126,3 @@ const MemoManager = () => {
     </div>
   );
 };
-
-export default MemoManager;

@@ -2,13 +2,13 @@ import { useCallback, useState } from 'react';
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useUpdateUser, useResetPasswordForEmail, useDeleteUserAccount } from '@/hooks/use-auth-queries';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog"
+import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import ResponsiveDialog from '@/components/responsive-dialog';
+import { ResponsiveDialog } from '@/components/responsive-dialog';
 
-const UserProfile = () => {
+export const UserProfile = () => {
 	const session = useAuthStore((state) => state.session);
 	const userProfile = session?.user;
 	const isDesktop = useMediaQuery('(min-width: 768px)');
@@ -86,6 +86,5 @@ const UserProfile = () => {
 				</div>
 			</div>
 		</div>
-	)
-}
-export default UserProfile
+	);
+};

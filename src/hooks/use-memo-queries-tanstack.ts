@@ -29,7 +29,7 @@ export const useGetMemo = (id: string | null) => {
 export const useAddMemo = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: MemoFormData & { user_id: string }) => addMemo(data),
+    mutationFn: (data: MemoFormData & { user_id: string; }) => addMemo(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['memos'] });
     },
@@ -40,7 +40,7 @@ export const useAddMemo = () => {
 export const useUpdateMemo = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: MemoFormData }) =>
+    mutationFn: ({ id, updates }: { id: string; updates: MemoFormData; }) =>
       updateMemo(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['memos'] });
