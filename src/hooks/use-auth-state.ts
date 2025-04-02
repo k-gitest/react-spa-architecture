@@ -15,7 +15,5 @@ export const useAuthState = () => {
     });
 
     return () => data.subscription.unsubscribe();
-  }, []);
-}
-
-
+  }, [setGlobalSession]);
+};

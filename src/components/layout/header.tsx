@@ -33,7 +33,9 @@ export const Header = () => {
               <Link to="/auth/profile">Profile</Link>
             </Button>
             <Button variant="ghost" asChild onClick={handleLogout} disabled={signOutMutation.isPending}>
-              <Link to="/auth/register">{signOutMutation.isPending && <Loader className="animate-spin" />}ログアウト</Link>
+              <Link to="/auth/register">
+                {signOutMutation.isPending && <Loader className="animate-spin" />}ログアウト
+              </Link>
             </Button>
           </>
         )}

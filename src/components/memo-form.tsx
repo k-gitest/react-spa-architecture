@@ -47,10 +47,13 @@ export const MemoForm = ({ onSubmit, initialValues }: Props) => {
     defaultValues: initialValues || defaultMemoFormData,
   });
 
-  const handleSubmit = useCallback((data: MemoFormData) => {
-    onSubmit(data);
-    form.reset();
-  }, [onSubmit]);
+  const handleSubmit = useCallback(
+    (data: MemoFormData) => {
+      onSubmit(data);
+      form.reset();
+    },
+    [onSubmit, form],
+  );
 
   useEffect(() => {
     if (initialValues) {
@@ -78,4 +81,3 @@ export const MemoForm = ({ onSubmit, initialValues }: Props) => {
     </div>
   );
 };
-

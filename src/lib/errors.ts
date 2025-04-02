@@ -21,7 +21,7 @@ export class JsonParseError extends FetchError {
   constructor(message: string, originalError?: Error) {
     super(message);
     this.name = 'JsonParseError';
-    this.originalError = originalError
+    this.originalError = originalError;
   }
 }
 

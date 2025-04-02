@@ -1,19 +1,20 @@
-import { createTRPCReact } from '@trpc/react-query';
-import { createTRPCContext } from '@trpc/tanstack-react-query';
+import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query';
+import { createTRPCClient, httpBatchLink } from '@trpc/client';
+import { queryClient } from '@/lib/queryClient';
 import type { AppRouter } from '../../supabase/functions/trpc/router';
-import { httpBatchLink } from '@trpc/client';
 
-export const trpc = createTRPCReact<AppRouter>();
-export const trpcClient = trpc.createClient({
+const trpcClient = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
       url: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trpc`,
-      fetch: (...arg) => fetch(...arg),
       headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
     }),
   ],
 });
 
-export const { TRPCProvider, useTRPC, useTRPCClient } = createTRPCContext<AppRouter>();
+export const trpc = createTRPCOptionsProxy<AppRouter>({
+  client: trpcClient,
+  queryClient,
+});

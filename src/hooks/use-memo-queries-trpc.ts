@@ -1,50 +1,65 @@
-// src/hooks/useMemos.ts
 import { trpc } from '@/lib/trpc';
 import { MemoFormData } from '@/types/memo-form-data';
+import { queryClient } from '@/lib/queryClient';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { toast } from '@/hooks/use-toast';
 
 export function useMemos() {
   // メモ一覧の取得
-  const memosQuery = trpc.getMemos.useQuery();
+  const memosOptions = trpc.getMemos.queryOptions();
+  const memosQuery = useQuery(memosOptions);
+
+  // キャッシュからキーを取得
+  const memosKey = trpc.getMemos.queryKey();
 
   // メモの追加
-  const addMemoMutation = trpc.addMemo.useMutation({
-    onSuccess: () => {
-      // キャッシュの更新
-      memosQuery.refetch();
-    }
-  });
+  const addMemoMutation = useMutation(
+    trpc.addMemo.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: memosKey });
+      },
+      onError: (err) => toast({ title: err.message }),
+    }),
+  );
 
   // メモの詳細取得
-  const getMemo = (id: string | null) => {
-    return trpc.getMemo.useQuery(id as string, { enabled: !!id });
+  const useGetMemo = (id: string | null) => {
+    const queryOptions = trpc.getMemo.queryOptions(id as string, { enabled: !!id })
+    return useQuery(queryOptions);
   };
 
   // メモの更新
-  const updateMemoMutation = trpc.updateMemo.useMutation({
-    onSuccess: () => {
-      memosQuery.refetch();
-    }
-  });
+  const updateMemoMutation = useMutation(
+    trpc.updateMemo.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: memosKey });
+      },
+      onError: (err) => toast({ title: err.message }),
+    }),
+  );
 
   // メモの削除
-  const deleteMemoMutation = trpc.deleteMemo.useMutation({
-    onSuccess: () => {
-      memosQuery.refetch();
-    }
-  });
+  const deleteMemoMutation = useMutation(
+    trpc.deleteMemo.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: memosKey });
+      },
+      onError: (err) => toast({ title: err.message }),
+    }),
+  );
 
   // 各メソッドの実装
   const addMemo = async (data: MemoFormData, userId: string) => {
     await addMemoMutation.mutateAsync({
       ...data,
-      user_id: userId
+      user_id: userId,
     });
   };
 
   const updateMemo = async (id: string, data: MemoFormData) => {
     await updateMemoMutation.mutateAsync({
       id,
-      data
+      data,
     });
   };
 
@@ -57,8 +72,8 @@ export function useMemos() {
     isMemosLoading: memosQuery.isLoading,
     memosError: memosQuery.error,
     addMemo,
-    getMemo,
+    useGetMemo,
     updateMemo,
-    deleteMemo
+    deleteMemo,
   };
 }

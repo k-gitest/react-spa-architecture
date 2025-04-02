@@ -23,7 +23,7 @@ export const MemoManager = () => {
     } catch (err) {
       console.error(err);
     }
-  }, [fetchMemos, setMemoList]);
+  }, [setMemoList]);
 
   const memoFetcher = useCallback(
     async (index: string) => {
@@ -34,7 +34,7 @@ export const MemoManager = () => {
         console.error(err);
       }
     },
-    [showMemo, setEditMemo],
+    [setEditMemo],
   );
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export const MemoManager = () => {
         console.error(err);
       }
     },
-    [addMemo, memoListFetcher],
+    [memoListFetcher],
   );
 
   const handleUpdateSubmit = useCallback(
@@ -63,7 +63,7 @@ export const MemoManager = () => {
         console.error(err);
       }
     },
-    [updateMemo, memoListFetcher, setEditIndex],
+    [memoListFetcher, setEditIndex],
   );
 
   const handleFormSubmit = useCallback(
@@ -97,7 +97,7 @@ export const MemoManager = () => {
         console.error(err);
       }
     },
-    [memoListFetcher, deleteMemo],
+    [memoListFetcher],
   );
 
   /* メモ取得別手法 memoListからeditIndexでメモを取得する
@@ -107,7 +107,7 @@ export const MemoManager = () => {
   };
   */
 
-  if (!session) return <p className='text-center'>メモ機能は会員限定です</p>;
+  if (!session) return <p className="text-center">メモ機能は会員限定です</p>;
 
   return (
     <div>

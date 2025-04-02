@@ -7,8 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useSignIn, useSignUp, useSignInWithOAuth } from '@/hooks/use-auth-queries';
 import { Loader } from 'lucide-react';
 
-export const AccountForm = (props: { type: string; }) => {
-
+export const AccountForm = (props: { type: string }) => {
   const form = useForm<Account>({
     resolver: zodResolver(validatedAccount),
     defaultValues: { email: '', password: '' },
@@ -24,8 +23,7 @@ export const AccountForm = (props: { type: string; }) => {
         email: formData.email,
         password: formData.password,
       });
-    }
-    else {
+    } else {
       signUpMutation.mutate({
         email: formData.email,
         password: formData.password,
@@ -40,12 +38,12 @@ export const AccountForm = (props: { type: string; }) => {
   };
 
   return (
-    <div className='flex flex-col gap-4'>
+    <div className="flex flex-col gap-4">
       <div className="w-full flex flex-col gap-2 items-center">
         <FormWrapper onSubmit={handleSubmit} form={form}>
           <FormInput label="email" placeholder="emailを入力してください" name="email" />
           <FormInput label="password" placeholder="パスワードを入力してください" name="password" />
-          <div className='text-center'>
+          <div className="text-center">
             <Button type="submit" className="w-32" disabled={signInMutation.isPending || signUpMutation.isPending}>
               {(signInMutation.isPending || signUpMutation.isPending) && <Loader className="animate-spin" />} 送信
             </Button>
@@ -58,4 +56,3 @@ export const AccountForm = (props: { type: string; }) => {
     </div>
   );
 };
-

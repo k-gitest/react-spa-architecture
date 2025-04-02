@@ -11,8 +11,8 @@
 
 import { backoff, delay, between } from '@/lib/utils';
 import { FetchError, NetworkError, JsonParseError, TimeoutError } from '@/lib/errors';
-import { clientConfigSchema } from '@/schemas/fetch-client-schema'
-import { ClientConfig, InitOptions, RequestOptions, DataType } from '@/types/fetch-client-types'
+import { clientConfigSchema } from '@/schemas/fetch-client-schema';
+import { ClientConfig, InitOptions, RequestOptions, DataType } from '@/types/fetch-client-types';
 
 /**
  * @class FetchClient
@@ -41,8 +41,7 @@ export class FetchClient {
    * @param {string} [initOptions.retryMethods=["GET", "PUT", "DELETE"]] - リトライ対象とするHTTPメソッドの配列。
    */
   constructor(initOptions: InitOptions = {}) {
-
-    const validatedConfig = this.validateConfig(initOptions)
+    const validatedConfig = this.validateConfig(initOptions);
 
     const defaultBaseUrl = (import.meta.env.VITE_BASE_API_URL as string) || 'localhost';
 
@@ -52,8 +51,8 @@ export class FetchClient {
     this.retryDelay = validatedConfig.retryDelay ?? 1000;
     this.baseBackoff = validatedConfig.baseBackoff ?? 2;
     this.defaultHeaders = { 'Content-Type': 'application/json' };
-    this.retryStatus = validatedConfig.retryStatus ?? [500, 502, 503, 504]
-    this.retryMethods = validatedConfig.retryMethods ?? ["GET", "PUT", "DELETE"]
+    this.retryStatus = validatedConfig.retryStatus ?? [500, 502, 503, 504];
+    this.retryMethods = validatedConfig.retryMethods ?? ['GET', 'PUT', 'DELETE'];
   }
 
   /**
@@ -72,7 +71,7 @@ export class FetchClient {
       retryDelay: initOptions.retryDelay,
       baseBackoff: initOptions.baseBackoff,
       retryStatus: initOptions.retryStatus,
-      retryMethods: initOptions.retryMethods
+      retryMethods: initOptions.retryMethods,
     };
 
     const result = clientConfigSchema.safeParse(validateTarget);
@@ -138,7 +137,7 @@ export class FetchClient {
       else return await response.json();
     } catch (err) {
       if (err instanceof SyntaxError) throw new JsonParseError('JSONパースエラー', err);
-      if (err instanceof TypeError) throw new Error(`パースエラー: ${err}`)
+      if (err instanceof TypeError) throw new Error(`パースエラー: ${err}`);
       throw err;
     }
   }
@@ -176,7 +175,7 @@ export class FetchClient {
     if (err instanceof JsonParseError) {
       throw err;
     }
-    throw (`不明なエラー: ${err}`);
+    throw `不明なエラー: ${err}`;
   }
 
   /**

@@ -1,8 +1,7 @@
-import { MainWrapper } from "@/components/layout/main-wrapper";
+import { MainWrapper } from '@/components/layout/main-wrapper';
 import { Helmet } from 'react-helmet-async';
 
 const NotFound = () => {
-
   return (
     <MainWrapper>
       <Helmet>

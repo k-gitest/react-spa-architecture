@@ -1,6 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
-import Home from './Home';
+import Home from '@/pages/Home';
+import { HelmetProvider } from 'react-helmet-async';
+import App from '@/App'
 
 // ResizeObserver をモックする
 global.ResizeObserver = class ResizeObserver {
@@ -24,7 +26,7 @@ vi.stubGlobal('matchMedia', vi.fn().mockImplementation(query => ({
 describe('Home コンポーネント', () => {
 
   it('メモの追加とリストへの表示', () => {
-    render(<Home />);
+    render(<App><Home /></App>);
 
     // メモ追加ボタンを取得
     const memoAddButton = screen.getByRole('button', {name: 'メモ追加'});

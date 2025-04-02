@@ -5,7 +5,17 @@ import { MemoList } from '@/components/memo-list';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useAuthStore } from '@/hooks/use-auth-store';
-import { useGetMemos, useGetMemo, useAddMemo, useUpdateMemo, useDeleteMemo, } from '@/hooks/use-memo-queries-tanstack';
+import {
+  useGetMemosApi,
+  useAddMemoApi,
+  useUpdateMemoApi,
+  useDeleteMemoApi,
+  useGetMemos,
+  useGetMemo,
+  useAddMemo,
+  useUpdateMemo,
+  useDeleteMemo,
+} from '@/hooks/use-memo-queries-tanstack';
 
 export const MemoManagerTanstack = () => {
   const session = useAuthStore((state) => state.session);
@@ -18,7 +28,7 @@ export const MemoManagerTanstack = () => {
     isLoading: isMemoListLoading,
     isError: isMemoListError,
     error: memoListError,
-  } = useGetMemos();
+  } = useGetMemosApi();
 
   const { data: editMemoData } = useGetMemo(editIndex);
 
@@ -26,20 +36,34 @@ export const MemoManagerTanstack = () => {
   const updateMemoMutation = useUpdateMemo();
   const deleteMemoMutation = useDeleteMemo();
 
+  const addMemoMutationApi = useAddMemoApi();
+  const updateMemoMutationApi = useUpdateMemoApi();
+  const deleteMemoMutationApi = useDeleteMemoApi();
+
   const handleAddSubmit = useCallback(
+    (data: MemoFormData) => {
+      if (session?.user.id) {
+        addMemoMutationApi.mutate({ ...data, user_id: session.user.id });
+      }
+    },
+    /*
     async (data: MemoFormData) => {
       if (session?.user.id) {
         addMemoMutation.mutate({ ...data, user_id: session.user.id });
       }
     },
-    [session?.user.id, addMemoMutation],
+    */
+    [session?.user.id, addMemoMutationApi],
   );
 
   const handleUpdateSubmit = useCallback(
+    (editIndex: string, data: MemoFormData) => updateMemoMutationApi.mutate({ id: editIndex, updates: data }),
+    /*
     async (data: MemoFormData, editIndex: string) => {
       updateMemoMutation.mutate({ id: editIndex, updates: data });
-    },
-    [updateMemoMutation],
+    }
+    */
+    [updateMemoMutationApi],
   );
 
   const handleFormSubmit = useCallback(
@@ -48,7 +72,7 @@ export const MemoManagerTanstack = () => {
         handleAddSubmit(data);
       }
       if (editIndex) {
-        handleUpdateSubmit(data, editIndex);
+        handleUpdateSubmit(editIndex, data);
       }
       setOpen(false);
       setEditIndex(null);
@@ -66,19 +90,20 @@ export const MemoManagerTanstack = () => {
 
   const handleDeleteClick = useCallback(
     async (index: string) => {
-      deleteMemoMutation.mutate(index);
+      deleteMemoMutationApi.mutate(index);
+      //deleteMemoMutation.mutate(index);
     },
-    [deleteMemoMutation],
+    [deleteMemoMutationApi],
   );
 
   useEffect(() => {
     if (!open) setEditIndex(null);
   }, [open]);
 
-  if (!session) return <p className='text-center'>メモ機能は会員限定です</p>;
+  if (!session) return <p className="text-center">メモ機能は会員限定です</p>;
 
-  if (isMemoListLoading) return <p className='text-center'>Loading memos...</p>;
-  if (isMemoListError) return <p className='text-center'>Error loading memos: {memoListError?.message}</p>;
+  if (isMemoListLoading) return <p className="text-center">Loading memos...</p>;
+  if (isMemoListError) return <p className="text-center">Error loading memos: {memoListError?.message}</p>;
 
   return (
     <div>
@@ -94,9 +119,7 @@ export const MemoManagerTanstack = () => {
       >
         <MemoForm onSubmit={handleFormSubmit} initialValues={editMemoData} />
       </ResponsiveDialog>
-      {memoList && (
-        <MemoList memoData={memoList} onEdit={handleEditClick} onDelete={handleDeleteClick} />
-      )}
+      {memoList && <MemoList memoData={memoList} onEdit={handleEditClick} onDelete={handleDeleteClick} />}
     </div>
   );
 };

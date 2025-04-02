@@ -13,7 +13,7 @@ export const addMemo = async (props: MemoFormData & { user_id: string }) => {
 };
 
 export const showMemo = async (id: string) => {
-  const { data, error } = await supabase.from('memos').select("*").eq("id", id).single();
+  const { data, error } = await supabase.from('memos').select('*').eq('id', id).single();
   if (error) throw error;
   return data;
 };

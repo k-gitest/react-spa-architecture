@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { authEmailVerifyOpt } from '@/services/authService';
 import { EmailOtpType } from '@supabase/supabase-js';
 
-const emalOtpType = ["signup", "invite", "magiclink", "recovery", "email_change", "email"];
+const emalOtpType = ['signup', 'invite', 'magiclink', 'recovery', 'email_change', 'email'];
 
 const EmailVerificationPage = () => {
   const [verificationStatus, setVerificationStatus] = useState('検証中...');
