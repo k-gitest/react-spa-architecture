@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useAuthStore } from '@/hooks/use-auth-store';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { useUpdateUser, useResetPasswordForEmail, useDeleteUserAccount } from '@/hooks/use-auth-queries';
+import { useAuth } from '@/hooks/use-auth-queries';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -12,11 +12,10 @@ export const UserProfile = () => {
   const session = useAuthStore((state) => state.session);
   const userProfile = session?.user;
   const isDesktop = useMediaQuery('(min-width: 768px)');
-  const updateUserMutation = useUpdateUser();
-  const resetPasswordForEmailMutation = useResetPasswordForEmail();
-  const deleteUserAccountMutation = useDeleteUserAccount();
-  const [open, setOpen] = useState(false);
 
+  const {updateUser, resetPassword, deleteAccount} = useAuth();
+
+  const [open, setOpen] = useState(false);
   const [email, setEmail] = useState<string>('');
 
   const handleEmail = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,20 +24,20 @@ export const UserProfile = () => {
   }, []);
 
   const handleEmailChangeSubmit = useCallback(() => {
-    updateUserMutation.mutate({ email: email });
+    updateUser({ email: email });
     setOpen(false);
-  }, [email, updateUserMutation]);
+  }, [email, updateUser]);
 
   const handlePasswordChangeMailSubmit = useCallback(() => {
-    resetPasswordForEmailMutation.mutate(email);
+    resetPassword(email);
     setOpen(false);
-  }, [email, resetPasswordForEmailMutation]);
+  }, [email, resetPassword]);
 
   const handleDeleteUserAccountSubmit = useCallback(() => {
     if (session?.user?.id) {
-      deleteUserAccountMutation.mutate(session.user.id);
+      deleteAccount(session.user.id);
     }
-  }, [session?.user?.id, deleteUserAccountMutation]);
+  }, [session?.user?.id, deleteAccount]);
 
   if (!session) return <p className="text-center">プロフィールは登録すると閲覧できます</p>;
 

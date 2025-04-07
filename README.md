@@ -27,6 +27,7 @@ ReactでSPAのメモアプリを開発
 - zustand 5.0.3
 - shadcn/ui
 - tailwindcss 3.4.13
+- react-helmet-async 2.0.5
 - prisma 6.5.0
 - supabase 2.19.7
 - deno 2.2.5
@@ -51,9 +52,12 @@ ReactでSPAのメモアプリを開発
 │    ├── lib
 │    │    ├── fetchClient.ts ...Fetch API クライアント
 │    │    ├── supabase.ts ...supabaseクライアント
-│    │    ├── supabase.ts ...prismaクライアント
+│    │    ├── prisma.ts ...prismaクライアント
+│    │    ├── queryClient.ts ...tanstackクライアント
+│    │    ├── trpc.ts ...trpcクライアント
 │    │    ├── util.ts ...ユーティリティ関数
 │    │    └── errors.ts ...カスタムエラー定義
+│    ├── errors ...エラーハンドリング設定
 │    ├── hooks
 │    │    ├── use-memo-queries ...データ通信状態状態管理
 │    │    ├── use-theme-provider ...テーマ切替状態管理
@@ -94,8 +98,7 @@ import FormInput from "@/components/form/form-input";
 
 ...
 
-<Form {...form}>
-  <form onSubmit={form.handleSubmit(handleSubmit)} className="w-2/3 space-y-6">
+<FormWrapper onSubmit={handleSubmit} form={form}>
     <FormInput label="タイトル" placeholder="タイトルを入力してください" name="title" />
     
     ...
@@ -187,3 +190,7 @@ try {
 - サーバーエラーはhook内でtoastで表示処理とするとUI側で行わなくて良い
 - 今回tanstack QueryとtRPCを別々に使用しているが、使い方としてはあまり変わらない
 - denoとhonoの良さはedgeの様なリソースが限られたところで使えるということを感じる
+- tRPCはv9, v10, v11で書き方から使えるメソッドやプロパティも異なる
+- tRPCでのtanstack Queryも同様に統合前後で異なる、共通化処理の型が複雑
+- tRPCをsupabaseで使用するとエラーの型がことなるので合わせる必要がある
+- tanstack queryのuseQueryはv5でoptionsのコールバックが幾つか削除されており、自分で実装する必要がある

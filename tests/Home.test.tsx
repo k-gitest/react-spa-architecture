@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import Home from '@/pages/Home';
-import { HelmetProvider } from 'react-helmet-async';
 import App from '@/App'
 
 // ResizeObserver をモックする

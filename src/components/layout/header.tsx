@@ -2,12 +2,12 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
 import { useAuthStore } from '@/hooks/use-auth-store';
-import { useSignOut } from '@/hooks/use-auth-queries';
+import { useAuth } from '@/hooks/use-auth-queries';
 import { Loader } from 'lucide-react';
 
 export const Header = () => {
   const session = useAuthStore((state) => state.session);
-  const signOutMutation = useSignOut();
+  const { signOutMutation } = useAuth();
 
   const handleLogout = async () => {
     signOutMutation.mutate();

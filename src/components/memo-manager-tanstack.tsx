@@ -5,17 +5,7 @@ import { MemoList } from '@/components/memo-list';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useAuthStore } from '@/hooks/use-auth-store';
-import {
-  useGetMemosApi,
-  useAddMemoApi,
-  useUpdateMemoApi,
-  useDeleteMemoApi,
-  useGetMemos,
-  useGetMemo,
-  useAddMemo,
-  useUpdateMemo,
-  useDeleteMemo,
-} from '@/hooks/use-memo-queries-tanstack';
+import { useMemos } from '@/hooks/use-memo-queries-tanstack';
 
 export const MemoManagerTanstack = () => {
   const session = useAuthStore((state) => state.session);
@@ -24,46 +14,32 @@ export const MemoManagerTanstack = () => {
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const {
-    data: memoList,
-    isLoading: isMemoListLoading,
-    isError: isMemoListError,
-    error: memoListError,
-  } = useGetMemosApi();
-
+    memos: memoList,
+    isMemosLoading: isMemoListLoading,
+    isMemosError: isMemoListError,
+    memosError: memoListError,
+    useGetMemo,
+    addMemo,
+    updateMemo,
+    deleteMemo
+  } = useMemos();
+  
   const { data: editMemoData } = useGetMemo(editIndex);
 
-  const addMemoMutation = useAddMemo();
-  const updateMemoMutation = useUpdateMemo();
-  const deleteMemoMutation = useDeleteMemo();
-
-  const addMemoMutationApi = useAddMemoApi();
-  const updateMemoMutationApi = useUpdateMemoApi();
-  const deleteMemoMutationApi = useDeleteMemoApi();
-
   const handleAddSubmit = useCallback(
-    (data: MemoFormData) => {
-      if (session?.user.id) {
-        addMemoMutationApi.mutate({ ...data, user_id: session.user.id });
-      }
-    },
-    /*
     async (data: MemoFormData) => {
       if (session?.user.id) {
-        addMemoMutation.mutate({ ...data, user_id: session.user.id });
+        addMemo({ ...data, user_id: session.user.id });
       }
     },
-    */
-    [session?.user.id, addMemoMutationApi],
+    [session?.user.id, addMemo],
   );
 
   const handleUpdateSubmit = useCallback(
-    (editIndex: string, data: MemoFormData) => updateMemoMutationApi.mutate({ id: editIndex, updates: data }),
-    /*
-    async (data: MemoFormData, editIndex: string) => {
-      updateMemoMutation.mutate({ id: editIndex, updates: data });
-    }
-    */
-    [updateMemoMutationApi],
+    async (editIndex: string, data: MemoFormData) => {
+      updateMemo( editIndex, data );
+    },
+    [updateMemo],
   );
 
   const handleFormSubmit = useCallback(
@@ -90,10 +66,9 @@ export const MemoManagerTanstack = () => {
 
   const handleDeleteClick = useCallback(
     async (index: string) => {
-      deleteMemoMutationApi.mutate(index);
-      //deleteMemoMutation.mutate(index);
+      deleteMemo(index);
     },
-    [deleteMemoMutationApi],
+    [deleteMemo],
   );
 
   useEffect(() => {

@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { validatedAccount } from '@/schemas/account-schema';
 import { Account } from '@/types/account-types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useSignIn, useSignUp, useSignInWithOAuth } from '@/hooks/use-auth-queries';
+import { useAuth } from '@/hooks/use-auth-queries';
 import { Loader } from 'lucide-react';
 
 export const AccountForm = (props: { type: string }) => {
@@ -13,28 +13,20 @@ export const AccountForm = (props: { type: string }) => {
     defaultValues: { email: '', password: '' },
   });
 
-  const signInMutation = useSignIn();
-  const signUpMutation = useSignUp();
-  const signInWithOAuthMutation = useSignInWithOAuth();
+  const { signUp, signIn, signInWithOAuth, signUpMutation, signInMutation } = useAuth();
 
   const handleSubmit = async (formData: Account) => {
     if (props.type === 'login') {
-      signInMutation.mutate({
-        email: formData.email,
-        password: formData.password,
-      });
+      signIn(formData);
     } else {
-      signUpMutation.mutate({
-        email: formData.email,
-        password: formData.password,
-      });
+      signUp(formData);
     }
 
     form.reset();
   };
 
   const handleGithub = async () => {
-    signInWithOAuthMutation.mutate();
+    signInWithOAuth("github");
   };
 
   return (

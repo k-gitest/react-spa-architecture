@@ -4,6 +4,9 @@ import { FetchClient } from '@/lib/fetchClient';
 import { trpc as trpcClient } from '@/lib/trpc';
 import { MainWrapper } from '@/components/layout/main-wrapper';
 import { Helmet } from 'react-helmet-async';
+import { ZodError } from 'zod';
+import { TRPCClientError } from '@trpc/client';
+import { TRPCError } from '@trpc/server';
 
 const http = new FetchClient();
 
@@ -46,9 +49,18 @@ const Fetch = () => {
 
   // createTRPCOptionsProxyの場合
   const helloQuery = useQuery(trpcClient.hello.queryOptions());
-  const greetQuery = useQuery(trpcClient.greet.queryOptions('hoge'));
+  const greetQuery = useQuery(trpcClient.greet.queryOptions("hoge"));
   const getMemosQuery = useQuery(trpcClient.getMemos.queryOptions());
   const memosKey = trpcClient.getMemos.queryKey();
+
+  useEffect(()=>{
+    if(getMemosQuery.error instanceof TRPCClientError){
+      console.log(getMemosQuery.error?.data)
+    }
+    if(greetQuery.error?.data?.zodError){
+      console.log(greetQuery.error?.data.zodError)
+    }
+  },[greetQuery])
 
   const invalidateMemoKey = () => {
     return queryClient.invalidateQueries({ queryKey: memosKey });
@@ -66,6 +78,8 @@ const Fetch = () => {
       <h2>tRPCによるフェッチ</h2>
       <p>{helloQuery.data?.message}</p>
       <p>{greetQuery.data?.greeting}</p>
+      <p>{greetQuery.error?.data?.zodError && <div>{greetQuery.error.data?.zodError?.formErrors}</div>}</p>
+      <p>{greetQuery.error?.data?.zodError && <div>{greetQuery.error.data?.zodError?.fieldErrors.title}</div>}</p>
       <div>
         {getMemosQuery.isLoading && <p>Loading...</p>}
         {getMemosQuery.isError && <p className="color-red-600">{getMemosQuery.error.message}</p>}
