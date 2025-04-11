@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { validatedAccount } from '@/schemas/account-schema';
 import { Account } from '@/types/account-types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuth } from '@/hooks/use-auth-queries';
+import { useAuth } from '@/hooks/use-auth-queries-trpc';
 import { Loader } from 'lucide-react';
 
 export const AccountForm = (props: { type: string }) => {
@@ -26,7 +26,10 @@ export const AccountForm = (props: { type: string }) => {
   };
 
   const handleGithub = async () => {
-    signInWithOAuth("github");
+    signInWithOAuth({
+      provider: 'github',
+      redirectTo: `${window.location.origin}`,
+    });
   };
 
   return (

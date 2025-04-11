@@ -69,10 +69,10 @@ export const useAuth = () => {
 
   // OAuth用
   const signInWithOAuthMutation = useApiMutation<
-    { provider: Provider | null; url: string | null },
+    { provider: Provider, url: string | null},
     AuthError,
-    Provider
-  >(authSignInWithOAuth);
+    { provider: Provider, redirectTo: string }
+  >((data) => authSignInWithOAuth(data));
 
   // サインアウト用
   const signOutMutation = useApiMutation<void, AuthError>(authSignOut, {
@@ -109,8 +109,8 @@ export const useAuth = () => {
     await signInMutation.mutateAsync({ data });
   };
 
-  const signInWithOAuth = async (provider: Provider) => {
-    await signInWithOAuthMutation.mutateAsync(provider);
+  const signInWithOAuth = async (data: { provider: Provider, redirectTo: string }) => {
+    await signInWithOAuthMutation.mutateAsync(data);
   };
 
   const signOut = async () => {

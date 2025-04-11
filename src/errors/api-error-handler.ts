@@ -94,9 +94,13 @@ const setPostgrestError = (error: TRPCError, mappingName: string) => {
   const setError = {
     message: error.message,
     code: mappingName,
-    details: "",
-    hint: "",
+    details: '',
+    hint: '',
     name: 'TRPCError',
   };
   return setError;
+};
+
+export const createPostgrestErrorFromData = (error: PostgrestError) => {
+  return new PostgrestError({ message: error.message, details: error.details, hint: error.hint, code: error.code });
 };

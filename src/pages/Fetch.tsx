@@ -11,6 +11,7 @@ import { TRPCError } from '@trpc/server';
 const http = new FetchClient();
 
 const fetchTodo = async (): Promise<Todo[]> => {
+  console.log("fetch!!")
   return http.get<Todo[]>('/todos');
 };
 
@@ -29,6 +30,7 @@ const Fetch = () => {
   const { isLoading, isError, data, error } = useQuery({
     queryKey: ['todo'],
     queryFn: fetchTodo,
+    enabled: false,
   });
 
   useEffect(() => {
@@ -48,10 +50,10 @@ const Fetch = () => {
   };
 
   // createTRPCOptionsProxyの場合
-  const helloQuery = useQuery(trpcClient.hello.queryOptions());
-  const greetQuery = useQuery(trpcClient.greet.queryOptions("hoge"));
-  const getMemosQuery = useQuery(trpcClient.getMemos.queryOptions());
-  const memosKey = trpcClient.getMemos.queryKey();
+  const helloQuery = useQuery(trpcClient.util.hello.queryOptions());
+  const greetQuery = useQuery(trpcClient.util.greet.queryOptions("hoge"));
+  const getMemosQuery = useQuery(trpcClient.memo.getMemos.queryOptions());
+  const memosKey = trpcClient.memo.getMemos.queryKey();
 
   useEffect(()=>{
     if(getMemosQuery.error instanceof TRPCClientError){

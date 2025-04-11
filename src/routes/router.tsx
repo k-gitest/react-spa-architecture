@@ -5,6 +5,7 @@ import About from '@/pages/About';
 import Fetch from '@/pages/Fetch';
 import Register from '@/pages/Register';
 import Login from '@/pages/Login';
+import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
 import Confirm from '@/pages/Confirm';
 import NewPass from '@/pages/NewPass';
@@ -28,10 +29,14 @@ const router = createBrowserRouter(
       <Route path="/about" element={<About />} />
       <Route path="/fetch" element={<Fetch />} />
 
+      {/* new password redirect routes */}
+      <Route path="/pass" element={<Auth />} />
+
       {/* Guest routes with GuestGuard */}
       <Route element={<GuestGuard />}>
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/register" element={<Register />} />
+        <Route path="/auth" element={<Auth />} />
       </Route>
 
       {/* Protected routes */}

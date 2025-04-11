@@ -38,8 +38,10 @@ export const MemoManager = () => {
   );
 
   useEffect(() => {
-    memoListFetcher();
-  }, [memoListFetcher]);
+    if(session?.user.id){
+      memoListFetcher();
+    }
+  }, [memoListFetcher, session]);
 
   const handleAddSubmit = useCallback(
     async (data: MemoFormData, userId: string) => {

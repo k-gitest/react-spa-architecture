@@ -113,9 +113,9 @@ export const useMemos = () => {
   // セッション取得
   const session = useAuthStore((state) => state.session);
   // メモ一覧の取得
-  const memosKey = trpc.getMemos.queryKey();
+  const memosKey = trpc.memo.getMemos.queryKey();
 
-  const memosQueryOptions = trpc.getMemos.queryOptions(void 0 , {enabled: !!session?.user.id});
+  const memosQueryOptions = trpc.memo.getMemos.queryOptions(void 0 , {enabled: !!session?.user.id});
   const memosQueryResult = useQuery(memosQueryOptions);
   const memosQuery = handleTRPCApiError(memosQueryResult, {
     /* カスタム設定の場合
@@ -127,13 +127,13 @@ export const useMemos = () => {
 
   // メモの詳細取得
   const useGetMemo = (id: string | null) => {
-    const queryOptions = trpc.getMemo.queryOptions(id as string, { enabled: !!id });
+    const queryOptions = trpc.memo.getMemo.queryOptions(id as string, { enabled: !!id });
     const queryResult = useQuery(queryOptions);
     return handleTRPCApiError(queryResult);
   };
 
   // メモの追加
-  const addMemoMutationOptions = trpc.addMemo.mutationOptions({
+  const addMemoMutationOptions = trpc.memo.addMemo.mutationOptions({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memosKey });
     },
@@ -141,7 +141,7 @@ export const useMemos = () => {
   const addMemoMutation = useApiMutation(addMemoMutationOptions);
 
   // メモの更新
-  const updateMemoMutationOptions = trpc.updateMemo.mutationOptions({
+  const updateMemoMutationOptions = trpc.memo.updateMemo.mutationOptions({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memosKey });
     },
@@ -149,7 +149,7 @@ export const useMemos = () => {
   const updateMemoMutation = useApiMutation(updateMemoMutationOptions);
 
   // メモの削除
-  const deleteMemoMutationOptions = trpc.deleteMemo.mutationOptions({
+  const deleteMemoMutationOptions = trpc.memo.deleteMemo.mutationOptions({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memosKey });
     },

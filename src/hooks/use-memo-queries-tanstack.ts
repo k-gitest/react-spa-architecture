@@ -19,6 +19,21 @@ import { Memo, MemoFormData } from '@/types/memo-form-data';
 import { toast } from '@/hooks/use-toast';
 import { handleApiError } from '@/errors/api-error-handler';
 import { PostgrestError } from '@supabase/supabase-js';
+import { useAuthStore } from '@/hooks/use-auth-store';
+import { data } from 'react-router-dom';
+import { FetchClient } from '@/lib/fetchClient';
+
+const http = new FetchClient();
+interface Todo {
+  userId: number;
+  id: number;
+  title: string;
+  completed: boolean;
+}
+const fetchTodo = async (): Promise<Todo[]> => {
+  console.log('fetch!!');
+  return http.get<Todo[]>('/todos');
+};
 
 /**
  * 汎用的なuseQueryカスタムフック
@@ -46,6 +61,7 @@ export const useApiQuery = <TData = unknown, TError = unknown, TQueryKey extends
 
   // onSuccess, onError, onSettledがv5で使えない為、useEffectで代用している
   const { isError, error, isSuccess, data } = queryResult;
+
   // onSucces代替
   useEffect(() => {
     // カスタム
@@ -116,10 +132,13 @@ export const useApiMutation = <TData = unknown, TError = unknown, TVariables = v
 };
 
 export const useMemos = () => {
+  const session = useAuthStore((state) => state.session);
   const queryClient = useQueryClient();
 
   // メモ一覧取得用
-  const memosQuery = useApiQuery<Memo[], Error>(['memos'], fetchMemos);
+  const memosQuery = useApiQuery<Memo[], Error>(['memos'], fetchMemos, undefined, undefined, undefined, {
+    enabled: !!session?.user.id,
+  });
 
   // 個別メモ取得用
   const useGetMemo = useCallback((id: string | null) => {

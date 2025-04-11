@@ -1,4 +1,5 @@
-import { AccountForm } from '@/components/account-form';
+import { AccountForm } from '@/components/account-form-tanstack';
+import { AccountForm as AccountFormTRPC } from '@/components/account-form-trpc';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { MainWrapper } from '@/components/layout/main-wrapper';
@@ -13,6 +14,7 @@ const Login = () => {
       </Helmet>
       <div className="flex justify-center">
         <AccountForm type="login" />
+        <AccountFormTRPC type="login" />
       </div>
 
       <div className="flex justify-center p-4">

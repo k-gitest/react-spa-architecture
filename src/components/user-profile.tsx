@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useAuthStore } from '@/hooks/use-auth-store';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { useAuth } from '@/hooks/use-auth-queries';
+import { useAuth } from '@/hooks/use-auth-queries-tanstack';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';

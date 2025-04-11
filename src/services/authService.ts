@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { Account } from '@/types/account-types';
-import { EmailOtpType } from '@supabase/supabase-js';
+import { EmailOtpType, Provider } from '@supabase/supabase-js';
 
 interface UpdateData {
   email?: string;
@@ -25,11 +25,11 @@ export const authSignUp = async (signUpData: Account) => {
   return data;
 };
 
-export const authSignInWithOAuth = async () => {
+export const authSignInWithOAuth = async (items: { provider: Provider, redirectTo: string}) => {
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'github',
+    provider: items.provider,
     options: {
-      redirectTo: `${window.location.origin}`,
+      redirectTo: items.redirectTo,
     },
   });
   if (error) throw error;

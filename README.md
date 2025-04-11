@@ -1,6 +1,6 @@
 ## 概要
 
-ReactでSPAのメモアプリを開発
+Reactベースの拡張性と保守性を重視して設計されたSPAメモアプリケーション 
 
 ## 目的
 - 拡張的で効率的な運用保守ができるアーキテクチャと単一責務のレイヤード設計を目指す
@@ -45,7 +45,9 @@ ReactでSPAのメモアプリを開発
 │    │    ├── account-form.tsx ...アカウント入力フォーム
 │    │    ├── memo-form.tsx ...メモ入力フォーム
 │    │    ├── memo-list.tsx ...メモリスト表示
-│    │    ├── memo-manager.tsx ...メモ管理
+│    │    ├── memo-manager.tsx ...supabaseメモ管理
+│    │    ├── memo-manager-tanstack.tsx ...tanstackQueryメモ管理
+│    │    ├── memo-manager-trpc.tsx ...trpcメモ管理
 │    │    ├── mode-toggle.tsx ...テーマ切替
 │    │    ├── responsive-dialog.tsx ...共有ドロワー/ダイアログ
 │    │    └── user-profile.tsx ...ユーザー情報管理
@@ -59,11 +61,13 @@ ReactでSPAのメモアプリを開発
 │    │    └── errors.ts ...カスタムエラー定義
 │    ├── errors ...エラーハンドリング設定
 │    ├── hooks
-│    │    ├── use-memo-queries ...データ通信状態状態管理
+│    │    ├── use-memo-queries-tanstack ...tanstackQueryデータ通信状態状態管理
+│    │    ├── use-memo-queries-trpc ...trpcデータ通信状態状態管理
 │    │    ├── use-theme-provider ...テーマ切替状態管理
 │    │    ├── use-auth-state ...ユーザー認証状態
 │    │    ├── use-auth-store ...ユーザー認証状態管理
 │    │    ├── use-auth-queries ...ユーザー認証通信状態管理
+│    │    ├── use-toast ...toastUI状態管理
 │    │    └── use-media-query ...メディアクエリ判別
 │    ├── services
 │    │    ├── authService ...ユーザー認証
@@ -188,7 +192,7 @@ try {
 - apiでのCRUDはservicesで再利用可能なフックにしておく
 - prismaのバグでuuid_generate_v4と@updateAtのスキーマが使えないので、gen_random_uuid()とdefault(now())とplpgトリガーで対応する必要がある
 - サーバーエラーはhook内でtoastで表示処理とするとUI側で行わなくて良い
-- 今回tanstack QueryとtRPCを別々に使用しているが、使い方としてはあまり変わらない
+- supabaseClient/tanstack QueryとtRPC/tanstack Queryを個別に使用しているが、コード量としてはそこまで変わらない
 - denoとhonoの良さはedgeの様なリソースが限られたところで使えるということを感じる
 - tRPCはv9, v10, v11で書き方から使えるメソッドやプロパティも異なる
 - tRPCでのtanstack Queryも同様に統合前後で異なる、共通化処理の型が複雑
