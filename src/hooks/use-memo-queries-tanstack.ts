@@ -20,20 +20,6 @@ import { toast } from '@/hooks/use-toast';
 import { handleApiError } from '@/errors/api-error-handler';
 import { PostgrestError } from '@supabase/supabase-js';
 import { useAuthStore } from '@/hooks/use-auth-store';
-import { data } from 'react-router-dom';
-import { FetchClient } from '@/lib/fetchClient';
-
-const http = new FetchClient();
-interface Todo {
-  userId: number;
-  id: number;
-  title: string;
-  completed: boolean;
-}
-const fetchTodo = async (): Promise<Todo[]> => {
-  console.log('fetch!!');
-  return http.get<Todo[]>('/todos');
-};
 
 /**
  * 汎用的なuseQueryカスタムフック

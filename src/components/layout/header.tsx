@@ -35,7 +35,7 @@ export const Header = () => {
         {session && (
           <>
             <Button variant="ghost" asChild>
-              <Link to="/auth/profile">Profile</Link>
+              <Link to="/auth/setting">Setting</Link>
             </Button>
             <Button variant="ghost" asChild onClick={handleLogout} disabled={signOutMutation.isPending}>
               <Link to="/auth/register">

@@ -9,7 +9,7 @@ export const FormSchema = z.object({
   category: z
     .string()
     .refine((value) => ['memo', 'task', 'diary'].includes(value), { message: '有効なカテゴリを選択してください' }),
-  tag: z.array(z.string()).min(1, { message: 'タグは必須です' }),
+  tags: z.array(z.string()).min(1, { message: 'タグは必須です' }),
 });
 
 export const MemoSchema = FormSchema.extend({

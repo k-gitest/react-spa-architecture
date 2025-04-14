@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { authUpdateUser } from '@/services/authService';
 import { MainWrapper } from '@/components/layout/main-wrapper';
 import { Helmet } from 'react-helmet-async';
+import { InputWithButton } from '@/components/input-with-button';
 
 const NewPass = () => {
   const [newPassword, setNewPassword] = useState<string>('');
@@ -29,6 +30,15 @@ const NewPass = () => {
       <div className="flex justify-center">
         <div className="w-96 flex flex-col gap-2">
           <p>新しいパスワード</p>
+          <InputWithButton
+            label="新しいパスワード"
+            inputType="password"
+            initialValue={newPassword}
+            placeholder="新しいパスワードを入力して下さい"
+            onChange={()=>handleNewPassword}
+            onSubmit={authUpdateNewPasswordSubmit}
+            className="w-96"
+          />
           <Input
             type="password"
             value={newPassword}

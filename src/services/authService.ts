@@ -25,7 +25,7 @@ export const authSignUp = async (signUpData: Account) => {
   return data;
 };
 
-export const authSignInWithOAuth = async (items: { provider: Provider, redirectTo: string}) => {
+export const authSignInWithOAuth = async (items: { provider: Provider; redirectTo: string }) => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: items.provider,
     options: {
@@ -43,7 +43,9 @@ export const authSignOut = async () => {
 };
 
 export const authUpdateUser = async (updateData: UpdateData) => {
-  const { data, error } = await supabase.auth.updateUser(updateData);
+  const { data, error } = await supabase.auth.updateUser(updateData, {
+    emailRedirectTo: `${window.location.origin}/pass`,
+  });
   if (error) throw error;
   return data;
 };
