@@ -1,40 +1,35 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { FormWrapper, FormInput } from './form/form-parts';
+import { cn } from '@/lib/utils';
+import { useForm } from 'react-hook-form';
+import { InputHTMLAttributes } from 'react';
 
-interface InputWithButtonProps {
-  id?: string;
-  initialValue?: string;
-  placeholder?: string;
-  inputType?: string;
-  buttonText?: string;
-  label?: string;
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: () => void;
+type InputWithButtonProps = {
+  name: string;
+  label: string;
   className?: string;
-  value?: string;
-}
+  buttonText?: string;
+  onSubmit: () => void;
+} & InputHTMLAttributes<HTMLInputElement>;
 
 export const InputWithButton = ({
-  id,
-  initialValue = '',
-  placeholder = '',
-  inputType = 'text',
-  buttonText = '送信',
+  name,
   label,
-  onChange,
-  onSubmit,
   className = '',
-  value = ''
+  buttonText = '送信',
+  onSubmit,
+  ...props
 }: InputWithButtonProps) => {
+  const form = useForm({
+    defaultValues: {},
+  });
+
   return (
-    <div className={`flex flex-col gap-4 ${className}`}>
-      {label && <p>{label}</p>}
-      <Input id={id} type={inputType} value={value} onChange={onChange} placeholder={placeholder} />
-      <Button type="button" onClick={onSubmit}>
-        {buttonText}
-      </Button>
-    </div>
+    <FormWrapper onSubmit={onSubmit} form={form}>
+      <div className={cn('flex flex-col gap-4', className)}>
+        <FormInput label={label} name={name} {...props} />
+        <Button type="submit">{buttonText}</Button>
+      </div>
+    </FormWrapper>
   );
 };
-

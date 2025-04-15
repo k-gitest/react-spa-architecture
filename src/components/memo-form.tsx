@@ -70,11 +70,11 @@ export const MemoForm = ({ onSubmit, initialValues }: Props) => {
   return (
     <div className="flex justify-center">
       <FormWrapper onSubmit={handleSubmit} form={form}>
-        <FormInput label="タイトル" placeholder="タイトルを入力してください" name="title" />
-        <FormSelect label="カテゴリー" options={categories} placeholder="カテゴリ選択" name="category" />
-        <FormTextArea label="メモの内容" placeholder="内容を記入してください" name="content" />
-        <FormRadioGroup label="重要度" options={importances} name="importance" />
-        <FormCheckboxGroup label="タグ" options={tagItems} name="tag" />
+        <FormInput label="タイトル" name="title" placeholder="タイトルを入力してください" />
+        <FormSelect label="カテゴリー" name="category" options={categories} placeholder="カテゴリ選択" />
+        <FormTextArea label="メモの内容" name="content" placeholder="内容を記入してください" />
+        <FormRadioGroup label="重要度" name="importance" options={importances} />
+        <FormCheckboxGroup label="タグ" name="tag" options={tagItems} />
 
         <div className="flex justify-center">
           <Button type="submit" className="w-32">

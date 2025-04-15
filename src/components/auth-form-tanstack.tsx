@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { validatedAccount } from '@/schemas/account-schema';
 import { Account } from '@/types/account-types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuth } from '@/hooks/use-auth-queries-trpc';
+import { useAuth } from '@/hooks/use-auth-queries-tanstack';
 import { Loader } from 'lucide-react';
 
 export const AccountForm = (props: { type: string }) => {
@@ -36,8 +36,8 @@ export const AccountForm = (props: { type: string }) => {
     <div className="flex flex-col gap-4">
       <div className="w-full flex flex-col gap-2 items-center">
         <FormWrapper onSubmit={handleSubmit} form={form}>
-          <FormInput label="email" placeholder="emailを入力してください" name="email" />
-          <FormInput label="password" placeholder="パスワードを入力してください" name="password" />
+          <FormInput label="email" name="email" placeholder="emailを入力してください" />
+          <FormInput label="password" name="password" placeholder="パスワードを入力してください" />
           <div className="text-center">
             <Button type="submit" className="w-32" disabled={signInMutation.isPending || signUpMutation.isPending}>
               {(signInMutation.isPending || signUpMutation.isPending) && <Loader className="animate-spin" />} 送信

@@ -1,5 +1,5 @@
-import { AccountForm } from '@/components/account-form-tanstack';
-import { AccountForm as AccountFormTRPC } from '@/components/account-form-trpc';
+import { AccountForm } from '@/components/auth-form-tanstack';
+import { AccountForm as AccountFormTRPC } from '@/components/auth-form-trpc';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { MainWrapper } from '@/components/layout/main-wrapper';
@@ -21,7 +21,7 @@ const Login = () => {
         <p>
           登録がまだの方は
           <Button variant="ghost">
-            <Link to="/auth/register">新規登録ページ</Link>
+            <Link to="/register">新規登録ページ</Link>
           </Button>
           から登録してください
         </p>

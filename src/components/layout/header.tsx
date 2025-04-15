@@ -52,10 +52,10 @@ export const Header = () => {
         {!session && (
           <>
             <Button variant="ghost" asChild>
-              <Link to="/auth/login">ログイン</Link>
+              <Link to="/login">ログイン</Link>
             </Button>
             <Button variant="ghost" asChild>
-              <Link to="/auth/register">新規登録</Link>
+              <Link to="/register">新規登録</Link>
             </Button>
           </>
         )}

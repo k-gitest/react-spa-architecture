@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode, InputHTMLAttributes, TextareaHTMLAttributes, SelectHTMLAttributes } from 'react';
 import { UseFormReturn, SubmitHandler } from 'react-hook-form';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -23,14 +23,18 @@ export const FormWrapper = <T extends Record<string, unknown>>({ children, onSub
   );
 };
 
-export const FormInput = ({ label, placeholder, name }: { label: string; placeholder: string; name: string }) => (
+export const FormInput = ({
+  label,
+  name,
+  ...props
+}: { label: string; name: string } & InputHTMLAttributes<HTMLInputElement>) => (
   <FormField
     name={name}
     render={({ field }) => (
       <FormItem>
         <FormLabel>{label}</FormLabel>
         <FormControl>
-          <Input placeholder={placeholder} {...field} />
+          <Input {...field} {...props} />
         </FormControl>
         <FormMessage />
       </FormItem>
@@ -38,14 +42,18 @@ export const FormInput = ({ label, placeholder, name }: { label: string; placeho
   />
 );
 
-export const FormTextArea = ({ label, placeholder, name }: { label: string; placeholder: string; name: string }) => (
+export const FormTextArea = ({
+  label,
+  name,
+  ...props
+}: { label: string; name: string } & TextareaHTMLAttributes<HTMLTextAreaElement>) => (
   <FormField
     name={name}
     render={({ field }) => (
       <FormItem>
         <FormLabel>{label}</FormLabel>
         <FormControl>
-          <Textarea placeholder={placeholder} {...field} />
+          <Textarea {...field} {...props} />
         </FormControl>
         <FormMessage />
       </FormItem>
@@ -57,11 +65,12 @@ export const FormRadioGroup = ({
   label,
   options,
   name,
+  ...props
 }: {
   label: string;
   options: readonly { value: string; label: string }[];
   name: string;
-}) => (
+} & InputHTMLAttributes<HTMLInputElement>) => (
   <FormField
     name={name}
     render={({ field }) => (
@@ -93,7 +102,7 @@ export const FormCheckboxGroup = ({
   label: string;
   options: readonly { id: string; label: string }[];
   name: string;
-}) => (
+} & InputHTMLAttributes<HTMLInputElement>) => (
   <FormField
     name={name}
     render={() => (
@@ -137,8 +146,8 @@ export const FormSelect = ({
   label: string;
   options: readonly { value: string; label: string }[];
   name: string;
-  placeholder: string;
-}) => (
+  placeholder?: string;
+}& SelectHTMLAttributes<HTMLSelectElement>) => (
   <FormField
     name={name}
     render={({ field }) => (

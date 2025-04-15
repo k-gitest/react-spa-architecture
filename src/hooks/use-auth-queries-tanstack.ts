@@ -1,14 +1,11 @@
 import { useMutation, UseMutationResult, UseMutationOptions } from '@tanstack/react-query';
 import {
-  authSignInWithPassword,
-  authSignUp,
-  authSignInWithOAuth,
-  authSignOut,
-  authUpdateUser,
-  authResetPasswordForEmail,
-  deleteUserAccount,
+  signInWithPasswordAuthService,
+  signUpAuthService,
+  signInWithOAuthService,
+  signOutAuthService,
 } from '@/services/authService';
-import { Account, AccountUpdate } from '@/types/account-types';
+import { Account } from '@/types/account-types';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { User, Session, AuthError, Provider } from '@supabase/supabase-js';
@@ -53,7 +50,7 @@ export const useAuth = () => {
 
   // サインアップ用
   const signUpMutation = useApiMutation<{ user: User | null; session: Session | null }, AuthError, { data: Account }>(
-    ({ data }) => authSignUp(data),
+    ({ data }) => signUpAuthService(data),
     {
       onSuccess: () => navigate('/'),
     },
@@ -61,7 +58,7 @@ export const useAuth = () => {
 
   // サインイン用
   const signInMutation = useApiMutation<{ user: User | null; session: Session | null }, AuthError, { data: Account }>(
-    ({ data }) => authSignInWithPassword(data),
+    ({ data }) => signInWithPasswordAuthService(data),
     {
       onSuccess: () => navigate('/'),
     },
@@ -72,33 +69,12 @@ export const useAuth = () => {
     { provider: Provider; url: string | null },
     AuthError,
     { provider: Provider; redirectTo: string }
-  >((data) => authSignInWithOAuth(data));
+  >((data) => signInWithOAuthService(data));
 
   // サインアウト用
-  const signOutMutation = useApiMutation<void, AuthError>(authSignOut, {
+  const signOutMutation = useApiMutation<void, AuthError>(signOutAuthService, {
     onSuccess: () => navigate('/auth/login'),
   });
-
-  // ユーザー情報アップデート用
-  const updateUserMutation = useApiMutation<{ user: User }, AuthError, AccountUpdate>((data) => authUpdateUser(data), {
-    onSuccess: () => toast({ title: '変更確認メールを送信しました' }),
-  });
-
-  // パスワードリセット用
-  const resetPasswordForEmailMutation = useApiMutation<{} | null, AuthError, string>(
-    (email) => authResetPasswordForEmail(email),
-    {
-      onSuccess: () => toast({ title: 'パスワードリセットの確認メールを送信しました' }),
-    },
-  );
-
-  // アカウント削除用
-  const deleteUserAccountMutation = useApiMutation<{ message: string }, AuthError, string>(
-    (token) => deleteUserAccount(token),
-    {
-      onSuccess: () => toast({ title: 'アカウントを削除しました' }),
-    },
-  );
 
   // 各メソッド実装
   const signUp = async (data: Account) => {
@@ -117,18 +93,6 @@ export const useAuth = () => {
     await signOutMutation.mutateAsync();
   };
 
-  const updateUser = async (data: AccountUpdate) => {
-    await updateUserMutation.mutateAsync(data);
-  };
-
-  const resetPassword = async (data: AccountUpdate) => {
-    if (data.email) await resetPasswordForEmailMutation.mutateAsync(data.email);
-  };
-
-  const deleteAccount = async (token: string) => {
-    await deleteUserAccountMutation.mutateAsync(token);
-  };
-
   return {
     signUp,
     signUpMutation,
@@ -137,8 +101,5 @@ export const useAuth = () => {
     signInWithOAuth,
     signOut,
     signOutMutation,
-    updateUser,
-    resetPassword,
-    deleteAccount,
   };
 };

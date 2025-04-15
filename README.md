@@ -42,9 +42,9 @@ Reactベースの拡張性と保守性を重視して設計されたSPAメモア
 │    │    ├── form ...フォームパーツコンポーネント
 │    │    ├── layout ...レイアウトコンポーネント
 │    │    ├── ui ...shadcn/uiコンポーネント
-│    │    ├── account-form-tanstack.tsx ...tanstackQueryアカウント入力フォーム
-│    │    ├── account-form-trpc.tsx ...trpcアカウント入力フォーム
-│    │    ├── account-form-manager.tsx...アカウント設定管理
+│    │    ├── auth-form-tanstack.tsx ...tanstackQuery認証フォーム
+│    │    ├── auth-form-trpc.tsx ...trpc認証フォーム
+│    │    ├── account-manager.tsx...アカウント設定管理
 │    │    ├── memo-form.tsx ...メモ入力フォーム
 │    │    ├── memo-list.tsx ...メモリスト表示
 │    │    ├── memo-manager.tsx ...supabaseメモ管理
@@ -72,11 +72,14 @@ Reactベースの拡張性と保守性を重視して設計されたSPAメモア
 │    │    ├── use-auth-store ...ユーザー認証状態管理
 │    │    ├── use-auth-queries-tanstack ...tanstackQueryユーザー認証通信状態管理
 │    │    ├── use-auth-queries-trpc ...trpcユーザー認証通信状態管理
+│    │    ├── use-account-queries-tanstack ...tanstackアカウント通信状態管理
 │    │    ├── use-toast ...toastUI状態管理
 │    │    └── use-media-query ...メディアクエリ判別
 │    ├── services
 │    │    ├── authService ...ユーザー認証
-│    │    └── memoService ...メモCRUD
+│    │    ├── accountService ...アカウント設定
+│    │    ├── memoService ...メモCRUD
+│    │    └── profileService ...プロフィールCRUD
 │    ├── pages ...ページコンポーネント
 │    ├── routes ...ページルーター
 │    ├── schemas ...zodスキーマ
@@ -205,5 +208,6 @@ try {
 - tRPCのエラーはTRPCErrorよりTRPCClientErrorにフォーマットで出力した方が扱いやすい
 - tanstack queryのuseQueryはv5でoptionsのコールバックが幾つか削除されており、自分で実装する必要がある
 - edge functionsの認証はtokenヘッダーをfunctions内でも使用する必要がある
-- supabaseからのコールバックはPKCEで自動処理されるのでパスクエリ判別はできない
+- supabaseからのコールバックはPKCEで自動処理されるのでパスクエリ判別はできないのでidentitiesなどから判別する必要がある
 - webhookからのコールバックでAppが再マウントするのでcallback用ページで受けてから遷移する必要がある
+- supabase storageは初期値でCDNでキャッシュされるため適宜ハッシュを付けておく

@@ -9,11 +9,11 @@ import {
 } from '@tanstack/react-query';
 import { useEffect, useCallback } from 'react';
 import {
-  fetchMemos,
-  addMemo as addMemoService,
-  showMemo,
-  updateMemo as updateMemoService,
-  deleteMemo as deleteMemoService,
+  fetchMemosService,
+  addMemoService,
+  getMemoService,
+  updateMemoService,
+  deleteMemoService,
 } from '@/services/memoService';
 import { Memo, MemoFormData } from '@/types/memo-form-data';
 import { toast } from '@/hooks/use-toast';
@@ -122,7 +122,7 @@ export const useMemos = () => {
   const queryClient = useQueryClient();
 
   // メモ一覧取得用
-  const memosQuery = useApiQuery<Memo[], Error>(['memos'], fetchMemos, undefined, undefined, undefined, {
+  const memosQuery = useApiQuery<Memo[], Error>(['memos'], fetchMemosService, undefined, undefined, undefined, {
     enabled: !!session?.user.id,
   });
 
@@ -130,7 +130,7 @@ export const useMemos = () => {
   const useGetMemo = useCallback((id: string | null) => {
     return useApiQuery<Memo | undefined, Error>(
       ['memo', id],
-      () => (id ? showMemo(id) : Promise.resolve(undefined)),
+      () => (id ? getMemoService(id) : Promise.resolve(undefined)),
       undefined,
       undefined,
       undefined,

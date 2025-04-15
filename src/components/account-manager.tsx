@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuthStore } from '@/hooks/use-auth-store';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { useAuth } from '@/hooks/use-auth-queries-tanstack';
+import { useAccount } from '@/hooks/use-account-queries-tanstack';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { InputWithButton } from '@/components/input-with-button';
-import { authUpdateUser } from '@/services/authService';
 import { useForm } from 'react-hook-form';
 import { FormWrapper, FormInput } from './form/form-parts';
 import { AccountUpdate } from '@/types/account-types';
@@ -14,7 +13,7 @@ export const AccountManager = () => {
   const session = useAuthStore((state) => state.session);
   const userData = session?.user;
   const isDesktop = useMediaQuery('(min-width: 768px)');
-  const { updateUser, resetPassword, deleteAccount } = useAuth();
+  const { updateUser, resetPassword, deleteAccount } = useAccount();
   const [provider, setProvider] = useState<boolean>(false);
   const [newPassword, setNewPassword] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
@@ -39,12 +38,12 @@ export const AccountManager = () => {
     [resetPassword],
   );
 
-  const authUpdateNewPasswordSubmit = useCallback(
+  const handleNewPasswordSubmit = useCallback(
     (data: AccountUpdate) => {
-      authUpdateUser(data);
+      updateUser(data);
       setOpen(false);
     },
-    [authUpdateUser],
+    [updateUser],
   );
 
   const handleDeleteUserAccountSubmit = useCallback(() => {
@@ -79,13 +78,11 @@ export const AccountManager = () => {
               className="flex justify-center"
             >
               <FormWrapper onSubmit={handleEmailChangeSubmit} form={form}>
-                <FormInput label="email" placeholder="新しいアドレスを入力してください" name="email" />
+                <FormInput label="email" name="email" placeholder="新しいアドレスを入力してください" />
                 <Button type="submit">送信</Button>
               </FormWrapper>
             </ResponsiveDialog>
           )}
-
-          <p>最終ログイン：{userData?.updated_at}</p>
 
           {provider && !newPassword && (
             <ResponsiveDialog
@@ -96,7 +93,7 @@ export const AccountManager = () => {
               className="flex justify-center"
             >
               <FormWrapper onSubmit={handlePasswordChangeMailSubmit} form={form}>
-                <FormInput label="email" placeholder="登録しているアドレスを入力してください" name="email" />
+                <FormInput label="email" name="email" placeholder="登録しているアドレスを入力してください" />
                 <Button type="submit">送信</Button>
               </FormWrapper>
             </ResponsiveDialog>
@@ -110,12 +107,14 @@ export const AccountManager = () => {
               dialogDescription="新しいパスワードを入力して下さい"
               className="flex justify-center"
             >
-              <FormWrapper onSubmit={authUpdateNewPasswordSubmit} form={form}>
-                <FormInput label="password" placeholder="新しいパスワードを入力して下さい" name="password" />
+              <FormWrapper onSubmit={handleNewPasswordSubmit} form={form}>
+                <FormInput label="password" name="password" placeholder="新しいパスワードを入力して下さい" />
                 <Button type="submit">送信</Button>
               </FormWrapper>
             </ResponsiveDialog>
           )}
+
+          <p>最終ログイン：{userData?.updated_at}</p>
 
           <div className="text-center">
             <Button className="bg-red-700 hover:bg-red-800" type="button" onClick={handleDeleteUserAccountSubmit}>

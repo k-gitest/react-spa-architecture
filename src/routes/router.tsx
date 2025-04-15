@@ -34,8 +34,8 @@ const router = createBrowserRouter(
 
       {/* Guest routes with GuestGuard */}
       <Route element={<GuestGuard />}>
-        <Route path="/auth/login" element={<Login />} />
-        <Route path="/auth/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Route>
 
       {/* Protected routes */}
