@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { authEmailVerifyOpt } from '@/services/authService';
+import { emailVerifyOptAuthService } from '@/services/authService';
 import { EmailOtpType } from '@supabase/supabase-js';
 
 const emalOtpType = ['signup', 'invite', 'magiclink', 'recovery', 'email_change', 'email'];
@@ -25,7 +25,7 @@ const EmailVerificationPage = () => {
   }, [searchParams]);
 
   const verifyEmail = async (token: string, type: EmailOtpType) => {
-    authEmailVerifyOpt(token, type);
+    emailVerifyOptAuthService(token, type);
   };
 
   return (

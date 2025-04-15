@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import { Router } from '@/routes/router';
 import { ThemeProvider } from '@/hooks/use-theme-provider';
 import { queryClient, QueryClientProvider } from '@/lib/queryClient';
-import { useAuthState } from '@/hooks/use-auth-state';
+import { useSessionObserver } from '@/hooks/use-session-observer';
 import { HelmetProvider } from 'react-helmet-async';
 
 interface AppProps {
@@ -11,7 +11,7 @@ interface AppProps {
 }
 
 export default function App({ children }: AppProps) {
-  useAuthState();
+  useSessionObserver();
 
   return (
     <QueryClientProvider client={queryClient}>

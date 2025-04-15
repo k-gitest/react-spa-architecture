@@ -4,11 +4,11 @@ import { MemoForm } from '@/components/memo-form';
 import { MemoList } from '@/components/memo-list';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { useAuthStore } from '@/hooks/use-auth-store';
+import { useSessionStore } from '@/hooks/use-session-store';
 import { useMemos } from '@/hooks/use-memo-queries-trpc';
 
 export const MemoManagerTrpc = () => {
-  const session = useAuthStore((state) => state.session);
+  const session = useSessionStore((state) => state.session);
   const [editIndex, setEditIndex] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');

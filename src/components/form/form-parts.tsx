@@ -65,7 +65,6 @@ export const FormRadioGroup = ({
   label,
   options,
   name,
-  ...props
 }: {
   label: string;
   options: readonly { value: string; label: string }[];

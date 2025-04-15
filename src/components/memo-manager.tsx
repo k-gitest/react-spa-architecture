@@ -4,11 +4,11 @@ import { MemoForm } from '@/components/memo-form';
 import { MemoList } from '@/components/memo-list';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { useAuthStore } from '@/hooks/use-auth-store';
-import { fetchMemos, addMemo, showMemo, updateMemo, deleteMemo } from '@/services/memoService';
+import { useSessionStore } from '@/hooks/use-session-store';
+import { fetchMemosService, addMemoService, getMemoService, updateMemoService, deleteMemoService } from '@/services/memoService';
 
 export const MemoManager = () => {
-  const session = useAuthStore((state) => state.session);
+  const session = useSessionStore((state) => state.session);
 
   const [memoList, setMemoList] = useState<Memo[]>([]);
   const [editIndex, setEditIndex] = useState<string | null>(null);
@@ -18,7 +18,7 @@ export const MemoManager = () => {
 
   const memoListFetcher = useCallback(async () => {
     try {
-      const data = await fetchMemos();
+      const data = await fetchMemosService();
       setMemoList(data);
     } catch (err) {
       console.error(err);
@@ -28,7 +28,7 @@ export const MemoManager = () => {
   const memoFetcher = useCallback(
     async (index: string) => {
       try {
-        const data = await showMemo(index);
+        const data = await getMemoService(index);
         setEditMemo(data);
       } catch (err) {
         console.error(err);
@@ -46,7 +46,7 @@ export const MemoManager = () => {
   const handleAddSubmit = useCallback(
     async (data: MemoFormData, userId: string) => {
       try {
-        await addMemo({ ...data, user_id: userId });
+        await addMemoService({ ...data, user_id: userId });
         memoListFetcher();
       } catch (err) {
         console.error(err);
@@ -58,7 +58,7 @@ export const MemoManager = () => {
   const handleUpdateSubmit = useCallback(
     async (data: MemoFormData, editIndex: string) => {
       try {
-        await updateMemo(editIndex, { ...data });
+        await updateMemoService(editIndex, { ...data });
         memoListFetcher();
         setEditIndex(null);
       } catch (err) {
@@ -93,7 +93,7 @@ export const MemoManager = () => {
   const handleDeleteClick = useCallback(
     async (index: string) => {
       try {
-        await deleteMemo(index);
+        await deleteMemoService(index);
         memoListFetcher();
       } catch (err) {
         console.error(err);

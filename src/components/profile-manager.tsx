@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useAuthStore } from '@/hooks/use-auth-store';
+import { useSessionStore } from '@/hooks/use-session-store';
 import { useProfile } from '@/hooks/use-profile-queries-tanstack';
 import { Profile } from '@/types/profile-types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,7 +14,7 @@ import { detectMimeTypeFromUint8Array, isAllowedMimeType } from '@/lib/utils';
 import { getImageUrl } from '@/lib/supabase';
 
 export const ProfileManager = () => {
-  const session = useAuthStore((state) => state.session);
+  const session = useSessionStore((state) => state.session);
 
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -35,7 +35,7 @@ export const ProfileManager = () => {
     async (data: Profile) => {
       if (userId) await updateProfile(userId, data);
     },
-    [updateProfile],
+    [updateProfile, userId],
   );
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

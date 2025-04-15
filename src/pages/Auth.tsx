@@ -1,17 +1,17 @@
-import { useAuthState } from '@/hooks/use-auth-state';
+import { useSessionObserver } from '@/hooks/use-session-observer';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
 const Auth = () => {
   //email_change_sent_at , recovery_sent_at
-  const { session, loading } = useAuthState();
+  const { session, loading } = useSessionObserver();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (loading) return;
 
     if (session) {
-      navigate('/auth/profile');
+      navigate('/auth/setting');
     } else {
       navigate('/');
     }

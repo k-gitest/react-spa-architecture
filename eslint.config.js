@@ -26,5 +26,10 @@ export default [
       'react/jsx-pascal-case': 'error',
       'react/jsx-curly-brace-presence': ['warn', { props: 'never', children: 'never' }],
     },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
   },
 ];

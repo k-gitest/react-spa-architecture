@@ -4,9 +4,7 @@ import { FetchClient } from '@/lib/fetchClient';
 import { trpc as trpcClient } from '@/lib/trpc';
 import { MainWrapper } from '@/components/layout/main-wrapper';
 import { Helmet } from 'react-helmet-async';
-import { ZodError } from 'zod';
 import { TRPCClientError } from '@trpc/client';
-import { TRPCError } from '@trpc/server';
 
 const http = new FetchClient();
 

@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useAuthStore } from '@/hooks/use-auth-store';
+import { useSessionStore } from '@/hooks/use-session-store';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useAccount } from '@/hooks/use-account-queries-tanstack';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
-import { InputWithButton } from '@/components/input-with-button';
 import { useForm } from 'react-hook-form';
 import { FormWrapper, FormInput } from './form/form-parts';
 import { AccountUpdate } from '@/types/account-types';
 
 export const AccountManager = () => {
-  const session = useAuthStore((state) => state.session);
+  const session = useSessionStore((state) => state.session);
   const userData = session?.user;
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const { updateUser, resetPassword, deleteAccount } = useAccount();

@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
-import { useAuthStore } from '@/hooks/use-auth-store';
+import { useSessionStore } from '@/hooks/use-session-store';
 import { useAuth } from '@/hooks/use-auth-queries-tanstack';
 import { useAuth as useAuthTRPC } from '@/hooks/use-auth-queries-trpc';
 import { Loader } from 'lucide-react';
 
 export const Header = () => {
-  const session = useAuthStore((state) => state.session);
+  const session = useSessionStore((state) => state.session);
   const { signOutMutation } = useAuth();
   const { signOutMutation: signOutMutationTRPC } = useAuthTRPC();
 

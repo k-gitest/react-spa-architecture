@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAuthStore } from '@/hooks/use-auth-store';
+import { useSessionStore } from '@/hooks/use-session-store';
 import { Session } from '@supabase/supabase-js';
 
-export const useAuthState = () => {
+export const useSessionObserver = () => {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
-  const setGlobalSession = useAuthStore((state) => state.setSession);
+  const setGlobalSession = useSessionStore((state) => state.setSession);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {

@@ -19,7 +19,7 @@ import { Memo, MemoFormData } from '@/types/memo-form-data';
 import { toast } from '@/hooks/use-toast';
 import { handleApiError } from '@/errors/api-error-handler';
 import { PostgrestError } from '@supabase/supabase-js';
-import { useAuthStore } from '@/hooks/use-auth-store';
+import { useSessionStore } from '@/hooks/use-session-store';
 
 /**
  * 汎用的なuseQueryカスタムフック
@@ -54,7 +54,7 @@ export const useApiQuery = <TData = unknown, TError = unknown, TQueryKey extends
     if (isSuccess && onSuccess && data !== undefined) {
       onSuccess(data);
     }
-  }, [isSuccess, data, options]);
+  }, [isSuccess, data, options, onSuccess]);
 
   // onError代替
   useEffect(() => {
@@ -70,7 +70,7 @@ export const useApiQuery = <TData = unknown, TError = unknown, TQueryKey extends
       toast({ title: `エラーが発生しました: 不明なエラー` });
       console.error('エラー詳細:', error);
     }
-  }, [isError, error]);
+  }, [isError, error, onError]);
 
   //onSettled代替
   useEffect(() => {
@@ -78,7 +78,7 @@ export const useApiQuery = <TData = unknown, TError = unknown, TQueryKey extends
     if (onSettled && data) {
       onSettled(data);
     }
-  }, [data]);
+  }, [data, onSettled]);
 
   return queryResult;
 };
@@ -118,7 +118,7 @@ export const useApiMutation = <TData = unknown, TError = unknown, TVariables = v
 };
 
 export const useMemos = () => {
-  const session = useAuthStore((state) => state.session);
+  const session = useSessionStore((state) => state.session);
   const queryClient = useQueryClient();
 
   // メモ一覧取得用

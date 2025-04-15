@@ -7,7 +7,7 @@ import { queryClient } from '@/lib/queryClient';
 import { toast } from '@/hooks/use-toast';
 import { handleApiError, mapTRPCErrorCodeToPostgrestErrorCode } from '@/errors/api-error-handler';
 import { MemoFormData } from '@/types/memo-form-data';
-import { useAuthStore } from '@/hooks/use-auth-store';
+import { useSessionStore } from '@/hooks/use-session-store';
 
 /**
  * tRPCの汎用的なuseQueryカスタムフック
@@ -61,7 +61,7 @@ export const handleTRPCApiError = <TData, TError = unknown>(
       toast({ title: `エラーが発生しました: 不明なエラー` });
       console.error('エラー詳細:', error);
     }
-  }, [isError, error]);
+  }, [isError, error, options]);
 
   //onSettled代替
   useEffect(() => {
@@ -111,7 +111,7 @@ export const useApiMutation = <TData = unknown, TError = unknown, TVariables = v
 
 export const useMemos = () => {
   // セッション取得
-  const session = useAuthStore((state) => state.session);
+  const session = useSessionStore((state) => state.session);
   // メモ一覧の取得
   const memosKey = trpc.memo.getMemos.queryKey();
 

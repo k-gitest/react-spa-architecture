@@ -13,12 +13,16 @@ export const SettingManager = () => {
   return (
     <div className="w-full flex gap-4">
       <div className="flex flex-col gap-2">
-        <Button variant="ghost" onClick={() => handleDisplay('profile')}>プロフィール</Button>
-        <Button variant="ghost" onClick={() => handleDisplay('account')}>アカウント</Button>
+        <Button variant="ghost" onClick={() => handleDisplay('profile')}>
+          プロフィール
+        </Button>
+        <Button variant="ghost" onClick={() => handleDisplay('account')}>
+          アカウント
+        </Button>
       </div>
-      <div className='w-full'>
-      {display === 'profile' && <ProfileManager />}
-      {display === 'account' && <AccountManager />}
+      <div className="w-full">
+        {display === 'profile' && <ProfileManager />}
+        {display === 'account' && <AccountManager />}
       </div>
     </div>
   );

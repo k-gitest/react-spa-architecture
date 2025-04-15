@@ -8,7 +8,6 @@ import Login from '@/pages/Login';
 import Auth from '@/pages/Auth';
 import Setting from '@/pages/Setting';
 import Confirm from '@/pages/Confirm';
-import NewPass from '@/pages/NewPass';
 import NotFound from '@/pages/Not-Found';
 import { AuthGuard } from '@/routes/auth-guard';
 import { GuestGuard } from '@/routes/guest-guard';
@@ -42,7 +41,6 @@ const router = createBrowserRouter(
       <Route element={<AuthGuard />}>
         <Route path="/auth/setting" element={<Setting />} />
         <Route path="/auth/confirm" element={<Confirm />} />
-        <Route path="/auth/pass" element={<NewPass />} />
       </Route>
 
       {/* Not found route */}

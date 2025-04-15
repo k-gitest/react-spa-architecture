@@ -13,7 +13,7 @@ import {
 } from '@/errors/api-error-handler';
 import { createAuthApiErrorFromData } from '@/errors/auth-error-handler';
 import { handleAuthSuccess, removeLocalStorageAccessToken, setSupabaseSession } from '@/lib/auth';
-import { useAuthStore } from '@/hooks/use-auth-store';
+import { useSessionStore } from '@/hooks/use-session-store';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -61,7 +61,7 @@ export const useApiMutation = <TData = unknown, TError = unknown, TVariables = v
 };
 
 export const useAuth = () => {
-  const setGlobalSession = useAuthStore((state) => state.setSession);
+  const setGlobalSession = useSessionStore((state) => state.setSession);
   const navigate = useNavigate();
 
   // サインアップ用

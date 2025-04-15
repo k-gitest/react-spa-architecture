@@ -46,7 +46,7 @@ export const useAccount = () => {
   });
 
   // パスワードリセット用
-  const resetPasswordForEmailMutation = useApiMutation<{} | null, AuthError, string>(
+  const resetPasswordForEmailMutation = useApiMutation<object | null, AuthError, string>(
     (email) => resetPasswordForEmailAccountService(email),
     {
       onSuccess: () => toast({ title: 'パスワードリセットの確認メールを送信しました' }),

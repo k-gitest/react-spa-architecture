@@ -24,7 +24,7 @@ export const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProp
           </CardContent>
           <CardFooter>
             <ul>
-              {memo.tag.map((tag, index) => (
+              {memo.tags.map((tag, index) => (
                 <li key={index}>{tag}</li>
               ))}
             </ul>

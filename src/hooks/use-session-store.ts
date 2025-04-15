@@ -6,7 +6,7 @@ interface AuthState {
   setSession: (newSession: Session | null) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useSessionStore = create<AuthState>((set) => ({
   session: null,
   setSession: (newSession) => set({ session: newSession }),
 }));
