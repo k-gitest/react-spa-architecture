@@ -13,11 +13,8 @@ export const updateProfileService = async (id: string, update: Profile) => {
   return;
 };
 
-export const upLoadAvatarService = async (file: File, folderName: string, extention: string, currentUrl: string | null) => {
+export const upLoadAvatarService = async (file: File, folderName: string, extention: string) => {
   const newUrl = `avatars/${folderName}/avatar.${extention}?v=${Date.now()}`;
-  if (currentUrl) {
-    deleteAvatarService(currentUrl);
-  }
   const { data, error } = await supabase.storage.from('images').upload(newUrl, file, {
     upsert: true,
     cacheControl: '3600',

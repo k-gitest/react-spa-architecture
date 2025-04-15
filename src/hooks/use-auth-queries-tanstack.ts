@@ -69,9 +69,9 @@ export const useAuth = () => {
 
   // OAuth用
   const signInWithOAuthMutation = useApiMutation<
-    { provider: Provider, url: string | null},
+    { provider: Provider; url: string | null },
     AuthError,
-    { provider: Provider, redirectTo: string }
+    { provider: Provider; redirectTo: string }
   >((data) => authSignInWithOAuth(data));
 
   // サインアウト用
@@ -109,7 +109,7 @@ export const useAuth = () => {
     await signInMutation.mutateAsync({ data });
   };
 
-  const signInWithOAuth = async (data: { provider: Provider, redirectTo: string }) => {
+  const signInWithOAuth = async (data: { provider: Provider; redirectTo: string }) => {
     await signInWithOAuthMutation.mutateAsync(data);
   };
 
@@ -121,8 +121,8 @@ export const useAuth = () => {
     await updateUserMutation.mutateAsync(data);
   };
 
-  const resetPassword = async (email: string) => {
-    await resetPasswordForEmailMutation.mutateAsync(email);
+  const resetPassword = async (data: AccountUpdate) => {
+    if (data.email) await resetPasswordForEmailMutation.mutateAsync(data.email);
   };
 
   const deleteAccount = async (token: string) => {

@@ -24,28 +24,26 @@ export const useProfile = () => {
   });
 
   const updateProfile = async (id: string, data: Profile) => {
-    await profileMutation.mutateAsync({ id, data });
+    return profileMutation.mutateAsync({ id, data });
   };
 
   const uploadAvatarMutation = useMutation({
-    mutationFn: ({
-      file,
-      folderName,
-      extention,
-      currentUrl,
-    }: {
-      file: File;
-      folderName: string;
-      extention: string;
-      currentUrl: string | null;
-    }) => upLoadAvatarService(file, folderName, extention, currentUrl),
+    mutationFn: ({ file, folderName, extention }: { file: File; folderName: string; extention: string }) =>
+      upLoadAvatarService(file, folderName, extention),
     onSuccess: (data, variables) => {
       updateProfile(variables.folderName, { avatar: data.path, user_name: null });
     },
   });
 
   const uploadAvatar = async (file: File, folderName: string, extention: string, currentUrl: string | null) => {
-    await uploadAvatarMutation.mutateAsync({ file, folderName, extention, currentUrl });
+    try {
+      if (currentUrl) {
+        await deleteAvatar(currentUrl);
+      }
+      return await uploadAvatarMutation.mutateAsync({ file, folderName, extention });
+    } catch (error) {
+      throw error;
+    }
   };
 
   const deleteAvatarMutation = useMutation({
@@ -53,7 +51,7 @@ export const useProfile = () => {
   });
 
   const deleteAvatar = (path: string) => {
-    deleteAvatarMutation.mutateAsync({ path });
+    return deleteAvatarMutation.mutateAsync({ path });
   };
 
   return {

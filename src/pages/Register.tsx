@@ -21,7 +21,7 @@ const Register = () => {
         <p>
           既に登録している方は
           <Button variant="ghost">
-            <Link to="/login">ログインページ</Link>
+            <Link to="/auth/login">ログインページ</Link>
           </Button>
           からログインしてください
         </p>

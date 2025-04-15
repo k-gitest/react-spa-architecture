@@ -18,30 +18,33 @@ export const ProfileManager = () => {
 
   const [userId, setUserId] = useState<string | null>(null);
 
-  const { useGetProfile, updateProfile, uploadAvatar } =
-    useProfile();
+  const { useGetProfile, updateProfile, uploadAvatar } = useProfile();
   const { data, isError, isLoading } = useGetProfile(userId || '');
+
+  const defaultValues = {
+    avatar: '',
+    user_name: '',
+  };
 
   const form = useForm({
     resolver: zodResolver(validatedProfile),
-    defaultValues: { avatar: '', user_name: '' },
+    defaultValues: defaultValues,
   });
 
   const handleProfileChangeSubmit = useCallback(
-    (data: Profile) => {
-      console.log(data);
-      //updateProfile(profile, data);
+    async (data: Profile) => {
+      if (userId) await updateProfile(userId, data);
     },
     [updateProfile],
   );
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (session?.user.id && e.target.files && e.target.files.length > 0) {
-      const folderName = session.user.id;
+    if (userId && e.target.files && e.target.files.length > 0) {
+      const folderName = userId;
       const mimeType = await detectMimeTypeFromUint8Array(e.target.files[0]);
       const extention = isAllowedMimeType(mimeType);
       if (extention && data) {
-        uploadAvatar(e.target.files[0], folderName, extention, data.avatar);
+        await uploadAvatar(e.target.files[0], folderName, extention, data.avatar);
       } else {
         throw new Error('許可された画像形式ではありません。');
       }
@@ -52,13 +55,15 @@ export const ProfileManager = () => {
     if (session?.user.id) setUserId(session.user.id);
     if (data) {
       form.reset({
-        avatar: data.avatar || '',
+        avatar: data.avatar || session?.user.user_metadata.avatar_url || '',
         user_name: data.user_name || session?.user.user_metadata?.user_name || '',
       });
     }
   }, [data, session, form]);
 
   if (!session) return <p className="text-center">プロフィールは登録すると閲覧できます</p>;
+  if (isError) return <p>データが取得できませんでした</p>;
+  if (isLoading) return <p>Loading...</p>;
 
   return (
     <div>

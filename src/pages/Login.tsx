@@ -21,7 +21,7 @@ const Login = () => {
         <p>
           登録がまだの方は
           <Button variant="ghost">
-            <Link to="/register">新規登録ページ</Link>
+            <Link to="/auth/register">新規登録ページ</Link>
           </Button>
           から登録してください
         </p>
