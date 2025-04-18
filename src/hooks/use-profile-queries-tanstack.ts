@@ -6,19 +6,20 @@ import {
   deleteAvatarService,
 } from '@/services/profileService';
 import { Profile } from '@/types/profile-types';
+import { useApiQuery, useApiMutation } from '@/hooks/use-tanstack-query';
 
 export const useProfile = () => {
   const queryClient = useQueryClient();
 
   const useGetProfile = (id: string) => {
-    return useQuery({
+    return useApiQuery({
       queryKey: ['profile', id],
       queryFn: () => getProfileService(id),
       enabled: !!id,
     });
   };
 
-  const profileMutation = useMutation({
+  const profileMutation = useApiMutation({
     mutationFn: ({ id, data }: { id: string; data: Profile }) => updateProfileService(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['profile'] }),
   });
@@ -27,7 +28,7 @@ export const useProfile = () => {
     return profileMutation.mutateAsync({ id, data });
   };
 
-  const uploadAvatarMutation = useMutation({
+  const uploadAvatarMutation = useApiMutation({
     mutationFn: ({ file, folderName, extention }: { file: File; folderName: string; extention: string }) =>
       upLoadAvatarService(file, folderName, extention),
     onSuccess: (data, variables) => {
@@ -36,17 +37,13 @@ export const useProfile = () => {
   });
 
   const uploadAvatar = async (file: File, folderName: string, extention: string, currentUrl: string | null) => {
-    try {
-      if (currentUrl) {
-        await deleteAvatar(currentUrl);
-      }
-      return await uploadAvatarMutation.mutateAsync({ file, folderName, extention });
-    } catch (error) {
-      throw error;
+    if (currentUrl) {
+      await deleteAvatar(currentUrl);
     }
+    return await uploadAvatarMutation.mutateAsync({ file, folderName, extention });
   };
 
-  const deleteAvatarMutation = useMutation({
+  const deleteAvatarMutation = useApiMutation({
     mutationFn: ({ path }: { path: string }) => deleteAvatarService(path),
   });
 

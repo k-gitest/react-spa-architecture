@@ -1,9 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient({
-  /* グローバルエラー設定
+  //グローバルオプション設定
+  /*
   defaultOptions: {
-    queries: {},
+    queries: {
+      
+    },
     mutations: {
       onSuccess: () => {},
       onError: (error) => {
@@ -12,6 +15,7 @@ const queryClient = new QueryClient({
     },
   },
   */
+  
 });
 
 export { queryClient, QueryClientProvider };

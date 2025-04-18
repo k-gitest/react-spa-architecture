@@ -1,16 +1,7 @@
 import { PostgrestError } from '@supabase/supabase-js';
 import { TRPCError } from '@trpc/server';
-/*
-PostgrestError
-message: エラーメッセージ
-code: エラーコード
-details: エラーの詳細情報
-hint: エラーに関するヒント
 
-エラー監視サービス：Sentry
-ロギングライブラリ：Winston
-*/
-
+/* response statusで取得する場合 */
 export const handleApiResponseError = (response: Response) => {
   if (response.status) {
     switch (response.status) {
@@ -67,6 +58,15 @@ export const handleApiError = (error: PostgrestError) => {
   return 'Error: 不明なエラー';
 };
 
+/* TRPCErrorをPostgrestErrorへマッピングする処理 */
+/* setPostgrestErrorと併せて使用しcreatePostgrestErrorFromDataで取得する */
+/*
+PostgrestError
+message: エラーメッセージ
+code: エラーコード
+details: エラーの詳細情報
+hint: エラーに関するヒント
+*/
 export const mapTRPCErrorCodeToPostgrestErrorCode = (error: TRPCError) => {
   switch (error.code) {
     case 'BAD_REQUEST':

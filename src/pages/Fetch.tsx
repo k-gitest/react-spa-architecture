@@ -9,7 +9,7 @@ import { TRPCClientError } from '@trpc/client';
 const http = new FetchClient();
 
 const fetchTodo = async (): Promise<Todo[]> => {
-  console.log("fetch!!")
+  console.log('fetch!!');
   return http.get<Todo[]>('/todos');
 };
 
@@ -49,18 +49,18 @@ const Fetch = () => {
 
   // createTRPCOptionsProxyの場合
   const helloQuery = useQuery(trpcClient.util.hello.queryOptions());
-  const greetQuery = useQuery(trpcClient.util.greet.queryOptions("hoge"));
+  const greetQuery = useQuery(trpcClient.util.greet.queryOptions('hoge'));
   const getMemosQuery = useQuery(trpcClient.memo.getMemos.queryOptions());
   const memosKey = trpcClient.memo.getMemos.queryKey();
 
-  useEffect(()=>{
-    if(getMemosQuery.error instanceof TRPCClientError){
-      console.log(getMemosQuery.error?.data)
+  useEffect(() => {
+    if (getMemosQuery.error instanceof TRPCClientError) {
+      console.log(getMemosQuery.error?.data);
     }
-    if(greetQuery.error?.data?.zodError){
-      console.log(greetQuery.error?.data.zodError)
+    if (greetQuery.error?.data?.zodError) {
+      console.log(greetQuery.error?.data.zodError);
     }
-  },[greetQuery])
+  }, [greetQuery, getMemosQuery]);
 
   const invalidateMemoKey = () => {
     return queryClient.invalidateQueries({ queryKey: memosKey });

@@ -2,19 +2,12 @@ import { useMutation, UseMutationResult, UseMutationOptions } from '@tanstack/re
 import { Account, AccountUpdate } from '@/types/account-types';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import { User, Session, AuthError, AuthApiError, Provider, PostgrestError } from '@supabase/supabase-js';
-import { handleAuthError } from '@/errors/auth-error-handler';
+import { Provider } from '@supabase/supabase-js';
 import { trpc } from '@/lib/trpc';
-import { TRPCClientError } from '@trpc/client';
-import {
-  handleApiError,
-  mapTRPCErrorCodeToPostgrestErrorCode,
-  createPostgrestErrorFromData,
-} from '@/errors/api-error-handler';
-import { createAuthApiErrorFromData } from '@/errors/auth-error-handler';
-import { handleAuthSuccess, removeLocalStorageAccessToken, setSupabaseSession } from '@/lib/auth';
+import { handleAuthSuccess, removeLocalStorageAccessToken } from '@/lib/auth';
 import { useSessionStore } from '@/hooks/use-session-store';
-import { supabase } from '@/lib/supabase';
+import { errorHandler } from '@/errors/error-handler';
+import { useApiMutation } from '@/hooks/use-tanstack-query';
 
 /**
  * 汎用的なuseMutationカスタムフック
@@ -22,7 +15,7 @@ import { supabase } from '@/lib/supabase';
  * @param options - useMutationのオプション
  * @returns UseMutationの結果
  */
-export const useApiMutation = <TData = unknown, TError = unknown, TVariables = void, TContext = unknown>(
+export const useApiMutationDefault = <TData = unknown, TError = unknown, TVariables = void, TContext = unknown>(
   options?: Omit<UseMutationOptions<TData, TError, TVariables, TContext>, 'mutationFn'>,
 ): UseMutationResult<TData, TError, TVariables, TContext> => {
   return useMutation<TData, TError, TVariables, TContext>({
@@ -36,25 +29,7 @@ export const useApiMutation = <TData = unknown, TError = unknown, TVariables = v
       options?.onError?.(error, variables, context);
 
       // 共通エラーハンドリング
-      if (error instanceof TRPCClientError && error.data.name === 'TRPCError') {
-        const setPostgrestError = mapTRPCErrorCodeToPostgrestErrorCode(error.data);
-        const errorMessage = handleApiError(setPostgrestError);
-        toast({ title: `${errorMessage}` });
-
-        if (error.data.authError) {
-          const authApiError = createAuthApiErrorFromData(error.data.authError);
-          const errorMessage = handleAuthError(authApiError);
-          toast({ title: `${errorMessage}` });
-        }
-        if (error.data.postgrestError) {
-          const postgrestError = createPostgrestErrorFromData(error.data.postgrestError);
-          const errorMessage = handleApiError(postgrestError);
-          toast({ title: `${errorMessage}` });
-        }
-      } else if (error) {
-        toast({ title: `エラーが発生しました: 不明なエラー` });
-        console.error('エラー詳細:', error);
-      }
+      errorHandler(error)
     },
     ...options,
   });

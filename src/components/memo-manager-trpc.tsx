@@ -36,10 +36,10 @@ export const MemoManagerTrpc = () => {
   const handleFormSubmit = useCallback(
     async (data: MemoFormData) => {
       if (!editIndex && session?.user.id) {
-        handleAddSubmit(data);
+        await handleAddSubmit(data);
       }
       if (editIndex) {
-        handleUpdateSubmit(data, editIndex);
+        await handleUpdateSubmit(data, editIndex);
       }
       setOpen(false);
       setEditIndex(null);

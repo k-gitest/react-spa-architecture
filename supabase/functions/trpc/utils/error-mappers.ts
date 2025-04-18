@@ -1,3 +1,4 @@
+/* PostgrestErrorをTRPCErrorとして返すマッピング処理 */
 export const mapPostgrestErrorCodeToTRPCErrorCode = (code: string) => {
     switch (code) {
       case 'invalid_request':

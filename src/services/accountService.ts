@@ -1,11 +1,7 @@
 import { supabase } from '@/lib/supabase';
+import { AccountUpdate } from '@/types/account-types';
 
-interface UpdateData {
-  email?: string;
-  password?: string;
-}
-
-export const updateAccountService = async (updateData: UpdateData) => {
+export const updateAccountService = async (updateData: AccountUpdate) => {
   const { data, error } = await supabase.auth.updateUser(updateData, {
     emailRedirectTo: `${window.location.origin}/pass`,
   });
@@ -13,8 +9,9 @@ export const updateAccountService = async (updateData: UpdateData) => {
   return data;
 };
 
-export const resetPasswordForEmailAccountService = async (email: string) => {
-  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+export const resetPasswordForEmailAccountService = async (updateData: AccountUpdate) => {
+  if (!updateData.email) throw new Error('emailが入力されていません');
+  const { data, error } = await supabase.auth.resetPasswordForEmail(updateData.email, {
     redirectTo: `${window.location.origin}/pass`,
   });
   if (error) throw error;
