@@ -9,4 +9,8 @@ const getImageUrl = (path: string) => {
     return `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${import.meta.env.VITE_BUCKET_NAME}/${path}`;
 }
 
-export { supabase, getImageUrl };
+const getAvatarUrl = (path: string) => {
+    return `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${import.meta.env.VITE_BUCKET_PROFILE}/${path}`;
+}
+
+export { supabase, getImageUrl, getAvatarUrl };

@@ -14,6 +14,7 @@
     "generate": "dotenv -e .env.local -- npx prisma generate",
     "migrate:create": "dotenv -e .env.local -- npx prisma migrate dev --create-only --name hoge",
     "generate:type": "/bin/bash -c '. .env.local && npx supabase gen types typescript --project-id $PROJECT_ID > src/types/database.types.ts'",
+    "db:pull": "dotenv -e .env.local -- npx prisma db pull",
     "functions:serve": "npx supabase functions serve",
     "functions:deploy": "/bin/bash -c '. .env.local && npx supabase functions deploy --project-id $PROJECT_ID --no-verify-jwt'"
   },

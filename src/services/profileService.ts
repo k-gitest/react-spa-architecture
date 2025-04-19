@@ -14,8 +14,9 @@ export const updateProfileService = async (id: string, update: Profile) => {
 };
 
 export const upLoadAvatarService = async (file: File, folderName: string, extention: string) => {
-  const newUrl = `avatars/${folderName}/avatar.${extention}?v=${Date.now()}`;
-  const { data, error } = await supabase.storage.from('images').upload(newUrl, file, {
+  const newUrl = `${folderName}/avatar.${extention}?v=${Date.now()}`;
+  const bucket = import.meta.env.VITE_BUCKET_PROFILE || 'avatars';
+  const { data, error } = await supabase.storage.from(bucket).upload(newUrl, file, {
     upsert: true,
     cacheControl: '3600',
   });
@@ -24,7 +25,8 @@ export const upLoadAvatarService = async (file: File, folderName: string, extent
 };
 
 export const deleteAvatarService = async (path: string) => {
-  const { data, error } = await supabase.storage.from('images').remove([path]);
+  const bucket = import.meta.env.VITE_BUCKET_PROFILE || 'avatars';
+  const { data, error } = await supabase.storage.from(bucket).remove([path]);
   if (error) throw error;
   return data;
 };

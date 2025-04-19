@@ -37,8 +37,10 @@ export const useProfile = () => {
   });
 
   const uploadAvatar = async (file: File, folderName: string, extention: string, currentUrl: string | null) => {
+    // avatar画像アップロード前に現在のavatarを削除する
     if (currentUrl) {
-      await deleteAvatar(currentUrl);
+      const cleanPath = currentUrl.replace(/\?.*$/, '');
+      await deleteAvatar(cleanPath);
     }
     return await uploadAvatarMutation.mutateAsync({ file, folderName, extention });
   };

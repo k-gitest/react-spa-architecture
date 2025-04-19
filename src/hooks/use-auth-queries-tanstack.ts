@@ -34,7 +34,7 @@ export const useAuth = () => {
   // サインアウト用
   const signOutMutation = useApiMutation<void, AuthError>({
     mutationFn: signOutAuthService,
-    onSuccess: () => navigate('/auth/login'),
+    onSuccess: () => navigate('/login'),
   });
 
   // 各メソッド実装

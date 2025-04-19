@@ -38,12 +38,12 @@ export const Header = () => {
               <Link to="/auth/setting">Setting</Link>
             </Button>
             <Button variant="ghost" asChild onClick={handleLogout} disabled={signOutMutation.isPending}>
-              <Link to="/auth/register">
+              <Link to="/register">
                 {signOutMutation.isPending && <Loader className="animate-spin" />}ログアウト
               </Link>
             </Button>
             <Button variant="ghost" asChild onClick={handleLogoutTRPC} disabled={signOutMutationTRPC.isPending}>
-              <Link to="/auth/register">
+              <Link to="/register">
                 {signOutMutationTRPC.isPending && <Loader className="animate-spin" />}ログアウト
               </Link>
             </Button>

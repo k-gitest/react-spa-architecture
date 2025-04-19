@@ -1,35 +1,8 @@
-import { useMutation, UseMutationResult, UseMutationOptions } from '@tanstack/react-query';
 import { trpc } from '@/lib/trpc';
 import { queryClient } from '@/lib/queryClient';
 import { MemoFormData } from '@/types/memo-form-data';
 import { useSessionStore } from '@/hooks/use-session-store';
-import { errorHandler } from '@/errors/error-handler';
 import { useApiQuery, useApiMutation } from '@/hooks/use-tanstack-query';
-
-/**
- * tRPCの汎用的なuseMutationカスタムフック
- * @param options - useMutationのオプション
- * @returns UseMutationの結果
- */
-export const useApiMutationDefault = <TData = unknown, TError = unknown, TVariables = void, TContext = unknown>(
-  options?: Omit<UseMutationOptions<TData, TError, TVariables, TContext>, 'mutationFn'>,
-): UseMutationResult<TData, TError, TVariables, TContext> => {
-  return useMutation<TData, TError, TVariables, TContext>({
-    // 共通オプション設定
-    onSuccess: (data, variables, context) => {
-      console.log('Mutation successful:', data);
-      options?.onSuccess?.(data, variables, context);
-    },
-    onError: (error, variables, context) => {
-      console.error('Mutation error:', error);
-      options?.onError?.(error, variables, context);
-
-      // 共通エラーハンドリング
-      errorHandler(error);
-    },
-    ...options,
-  });
-};
 
 export const useMemos = () => {
   // セッション取得

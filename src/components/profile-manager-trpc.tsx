@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSessionStore } from '@/hooks/use-session-store';
-import { useProfile } from '@/hooks/use-profile-queries-tanstack';
+import { useProfile } from '@/hooks/use-profile-queries-trpc';
 import { Profile } from '@/types/profile-types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -22,8 +22,8 @@ export const ProfileManager = () => {
   const { data, isError, isLoading } = useGetProfile(userId || '');
 
   const defaultValues = {
-    avatar: '',
-    user_name: '',
+    avatar: "",
+    user_name: "",
   };
 
   const form = useForm({
@@ -44,7 +44,18 @@ export const ProfileManager = () => {
       const mimeType = await detectMimeTypeFromUint8Array(e.target.files[0]);
       const extention = isAllowedMimeType(mimeType);
       if (extention && data) {
-        await uploadAvatar(e.target.files[0], folderName, extention, data.avatar);
+        // ファイルをBase64に変換
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(e.target.files[0]);
+      
+      fileReader.onload = async () => {
+        // Base64文字列を取得（data:image/jpeg;base64,xxxxx の形式）
+        const base64File = fileReader.result as string;
+        // プレフィックスを除去して純粋なBase64文字列を取得
+        const base64Data = base64File.split(',')[1];
+        
+        await uploadAvatar(base64Data, folderName, extention, data.avatar);
+      };
       } else {
         throw new Error('許可された画像形式ではありません。');
       }
@@ -55,8 +66,8 @@ export const ProfileManager = () => {
     if (session?.user.id) setUserId(session.user.id);
     if (data) {
       form.reset({
-        avatar: data.avatar || '',
-        user_name: data.user_name || '',
+        avatar: data.avatar || "",
+        user_name: data.user_name || "",
       });
     }
   }, [data, session, form]);

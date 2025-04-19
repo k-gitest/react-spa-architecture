@@ -1,4 +1,3 @@
-import { useMutation, UseMutationResult, UseMutationOptions } from '@tanstack/react-query';
 import { Account, AccountUpdate } from '@/types/account-types';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -6,34 +5,7 @@ import { Provider } from '@supabase/supabase-js';
 import { trpc } from '@/lib/trpc';
 import { handleAuthSuccess, removeLocalStorageAccessToken } from '@/lib/auth';
 import { useSessionStore } from '@/hooks/use-session-store';
-import { errorHandler } from '@/errors/error-handler';
 import { useApiMutation } from '@/hooks/use-tanstack-query';
-
-/**
- * 汎用的なuseMutationカスタムフック
- * @param mutationFn - 実行する非同期関数
- * @param options - useMutationのオプション
- * @returns UseMutationの結果
- */
-export const useApiMutationDefault = <TData = unknown, TError = unknown, TVariables = void, TContext = unknown>(
-  options?: Omit<UseMutationOptions<TData, TError, TVariables, TContext>, 'mutationFn'>,
-): UseMutationResult<TData, TError, TVariables, TContext> => {
-  return useMutation<TData, TError, TVariables, TContext>({
-    // 共通オプション設定
-    onSuccess: (data, variables, context) => {
-      console.log('Mutation successful:', data);
-      options?.onSuccess?.(data, variables, context);
-    },
-    onError: (error, variables, context) => {
-      console.error('Mutation error:', error);
-      options?.onError?.(error, variables, context);
-
-      // 共通エラーハンドリング
-      errorHandler(error)
-    },
-    ...options,
-  });
-};
 
 export const useAuth = () => {
   const setGlobalSession = useSessionStore((state) => state.setSession);
@@ -68,7 +40,7 @@ export const useAuth = () => {
     onSuccess: () => {
       removeLocalStorageAccessToken();
       setGlobalSession(null);
-      navigate('/auth/login');
+      navigate('/login');
     },
   });
   const signOutMutation = useApiMutation(signOutMutationOptions);
