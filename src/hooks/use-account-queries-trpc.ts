@@ -1,42 +1,34 @@
-import {
-  updateAccountService,
-  resetPasswordForEmailAccountService,
-  deleteAccountService,
-} from '@/services/accountService';
-import { AccountUpdate } from '@/types/account-types';
+import { trpc } from '@/lib/trpc';
+import { useApiMutation } from './use-tanstack-query';
 import { toast } from '@/hooks/use-toast';
-import { User, AuthError } from '@supabase/supabase-js';
-import { useApiMutation } from '@/hooks/use-tanstack-query';
+import { AccountUpdate } from '@/types/account-types';
 import { signOutAuthService } from '@/services/authService';
 import { useNavigate } from 'react-router-dom';
 
 export const useAccount = () => {
   const navigate = useNavigate();
-  // ユーザー情報アップデート用
-  const updateUserMutation = useApiMutation<{ user: User }, AuthError, AccountUpdate>({
-    mutationFn: (data) => updateAccountService(data),
+
+  const updateAccountMutationOptions = trpc.account.updateAccount.mutationOptions({
     onSuccess: () => toast({ title: '変更確認メールを送信しました' }),
   });
+  const updateAccountMutation = useApiMutation(updateAccountMutationOptions);
 
-  // パスワードリセット用
-  const resetPasswordForEmailMutation = useApiMutation<object | null, AuthError, AccountUpdate>({
-    mutationFn: (data) => resetPasswordForEmailAccountService(data),
+  const resetPasswordForEmailMutationOptions = trpc.account.resetPasswordForEmailAccount.mutationOptions({
     onSuccess: () => toast({ title: 'パスワードリセットの確認メールを送信しました' }),
   });
+  const resetPasswordForEmailMutation = useApiMutation(resetPasswordForEmailMutationOptions);
 
-  // アカウント削除用
-  const deleteUserAccountMutation = useApiMutation<{ message: string }, AuthError, string>({
-    mutationFn: (token) => deleteAccountService(token),
+  const deleteUserAccountMutationOptions = trpc.account.deleteAccount.mutationOptions({
     onSuccess: () => {
       toast({ title: 'アカウントを削除しました' });
       signOutAuthService();
       navigate('/register');
     },
   });
+  const deleteUserAccountMutation = useApiMutation(deleteUserAccountMutationOptions);
 
-  // 各メソッド実装
   const updateAccount = async (data: AccountUpdate) => {
-    await updateUserMutation.mutateAsync(data);
+    await updateAccountMutation.mutateAsync(data);
   };
 
   const resetPassword = async (data: AccountUpdate) => {

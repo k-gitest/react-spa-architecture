@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import { validatedAccount } from '@/schemas/account-schema';
+import { validatedAccount, validatedAccountUpdate } from '@/schemas/account-schema';
 
 export type Account = z.infer<typeof validatedAccount>;
-
-export type AccountUpdate = {
-  email?: string;
-  password?: string;
-};
+export type AccountUpdate = z.infer<typeof validatedAccountUpdate>

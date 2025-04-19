@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { useAccount } from '@/hooks/use-account-queries-tanstack';
+import { useAccount } from '@/hooks/use-account-queries-trpc';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useForm } from 'react-hook-form';

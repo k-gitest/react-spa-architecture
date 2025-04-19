@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AccountManager } from '@/components/account-manager';
 import { ProfileManager } from '@/components/profile-manager';
 import { ProfileManager as ProfileManagerTRPC } from '@/components/profile-manager-trpc';
+import { AccountManager as AccountManagerTRPC } from '@/components/account-manager-trpc';
 import { Button } from '@/components/ui/button';
 
 export const SettingManager = () => {
@@ -22,8 +23,18 @@ export const SettingManager = () => {
         </Button>
       </div>
       <div className="w-full">
-        {display === 'profile' && <><ProfileManager /><ProfileManagerTRPC /></>}
-        {display === 'account' && <AccountManager />}
+        {display === 'profile' && (
+          <>
+            <ProfileManager />
+            <ProfileManagerTRPC />
+          </>
+        )}
+        {display === 'account' && (
+          <>
+            <AccountManager />
+            <AccountManagerTRPC />
+          </>
+        )}
       </div>
     </div>
   );

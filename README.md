@@ -12,7 +12,7 @@ Reactベースの拡張性と保守性を重視して設計されたSPAメモア
 - tanstack-queryでデータ通信状態管理を再利用可能にする
 - tRPCでデータ通信状態管理を再利用可能にする
 - supabaseをバックエンドとして使用する（auth・database postgres・edge functions）
-- prismaをデータベース管理として使用する（DBスキーマ・トランザクション）
+- prismaをデータベース管理として使用する（DBスキーマ・マイグレーション）
 
 ## 開発環境  
 - react 18.2.0
@@ -211,3 +211,4 @@ try {
 - supabaseからのコールバックはPKCEで自動処理されるのでパスクエリ判別はできないのでidentitiesなどから判別する必要がある
 - webhookからのコールバックでAppが再マウントするのでcallback用ページで受けてから遷移する必要がある
 - supabase storageは初期値でCDNでキャッシュされるため適宜ハッシュを付けておく
+- Fileをedge側に送信するとFileではなくなるのでbase64に変換して送信しedge側で戻す
