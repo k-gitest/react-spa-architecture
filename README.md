@@ -45,6 +45,7 @@ Reactベースの拡張性と保守性を重視して設計されたSPAメモア
 │    │    ├── auth-form-tanstack.tsx ...tanstackQuery認証フォーム
 │    │    ├── auth-form-trpc.tsx ...trpc認証フォーム
 │    │    ├── account-manager.tsx...アカウント設定管理
+│    │    ├── account-manager-trpc.tsx...アカウントtrpc設定管理
 │    │    ├── memo-form.tsx ...メモ入力フォーム
 │    │    ├── memo-list.tsx ...メモリスト表示
 │    │    ├── memo-manager.tsx ...supabaseメモ管理
@@ -53,6 +54,7 @@ Reactベースの拡張性と保守性を重視して設計されたSPAメモア
 │    │    ├── mode-toggle.tsx ...テーマ切替
 │    │    ├── responsive-dialog.tsx ...共有ドロワー/ダイアログ
 │    │    ├── profile-manager.tsx ...プロフィール設定管理
+│    │    ├── profile-manager-trpc.tsx ...プロフィールtrpc設定管理
 │    │    └── setting-manager.tsx ...ユーザー設定管理
 │    ├── lib
 │    │    ├── auth.ts ...認証カスタム関数
@@ -62,17 +64,22 @@ Reactベースの拡張性と保守性を重視して設計されたSPAメモア
 │    │    ├── queryClient.ts ...tanstackクライアント
 │    │    ├── trpc.ts ...trpcクライアント
 │    │    ├── util.ts ...ユーティリティ関数
+│    │    ├── constants.ts ...定数設定
 │    │    └── errors.ts ...カスタムエラー定義
 │    ├── errors ...エラーハンドリング設定
 │    ├── hooks
 │    │    ├── use-memo-queries-tanstack ...tanstackQueryデータ通信状態状態管理
 │    │    ├── use-memo-queries-trpc ...trpcデータ通信状態状態管理
 │    │    ├── use-theme-provider ...テーマ切替状態管理
-│    │    ├── use-auth-state ...ユーザー認証状態
-│    │    ├── use-auth-store ...ユーザー認証状態管理
+│    │    ├── use-session-observer ...ユーザー認証状態
+│    │    ├── use-session-store ...ユーザー認証状態管理
 │    │    ├── use-auth-queries-tanstack ...tanstackQueryユーザー認証通信状態管理
 │    │    ├── use-auth-queries-trpc ...trpcユーザー認証通信状態管理
 │    │    ├── use-account-queries-tanstack ...tanstackアカウント通信状態管理
+│    │    ├── use-account-queries-trpc ...trpcアカウント通信状態管理
+│    │    ├── use-profile-queries-tanstack ...tanstackデータ通信状態管理
+│    │    ├── use-profile-queries-trpc ...trpcデータ通信状態管理
+│    │    ├── use-tanstack-query ...tanstack query共通フック
 │    │    ├── use-toast ...toastUI状態管理
 │    │    └── use-media-query ...メディアクエリ判別
 │    ├── services
@@ -187,6 +194,29 @@ try {
 - デフォルトヘッダー: Content-Type: application/json がデフォルトで設定されています。
 - エラーハンドリング: タイムアウト、ネットワークエラー、HTTPエラー、JSONパースエラーなどのカスタムエラークラス (lib/errors.ts に定義) を使用して、より具体的なエラー情報を取得できます。
 
+## tanstack queryカスタムフック
+### 基本的な使い方
+hooks/use-tanstack-query.ts に実装されています。
+
+```typescript
+const { isLoading, data } = useApiQuery({
+      queryKey: ['key'],
+      queryFn:  () => getApiData(),
+      enabled: false,
+   },{
+      onSuccess: () => console.log("success!"),
+      onError: () => console.log("error!"),
+      onSettled: () => console.log("finish!"),
+   })
+
+const { isPending, data } = useApiMutation({
+      mutationFn:  () => getApiData(),
+      enabled: false,
+      onSuccess: () => console.log("success!"),
+      onError: () => console.log("error!"),
+      onSettled: () => console.log("finish!"),
+   })
+```
 
 ## まとめ
 - shadcn/uiのFormコンポーネントはzodとreact-hook-formと連携しているのでインストールする必要がある

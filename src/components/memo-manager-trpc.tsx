@@ -6,8 +6,15 @@ import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useMemos } from '@/hooks/use-memo-queries-trpc';
+import { ZodError } from 'zod';
+import { Memo } from '@/types/memo-form-data';
+import { TRPCClientError } from '@trpc/client';
+
+type FlattenedError = ReturnType<ZodError<Memo>['flatten']>;
 
 export const MemoManagerTrpc = () => {
+  const [zodError, setZodError] = useState<FlattenedError | null>(null);
+
   const session = useSessionStore((state) => state.session);
   const [editIndex, setEditIndex] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
@@ -20,7 +27,16 @@ export const MemoManagerTrpc = () => {
   const handleAddSubmit = useCallback(
     async (data: MemoFormData) => {
       if (session?.user.id) {
-        addMemo(data, session.user.id);
+        try {
+          await addMemo(data, session.user.id);
+          setZodError(null);
+          setOpen(false);
+          setEditIndex(null);
+        } catch (err) {
+          if (err instanceof TRPCClientError && err.data.zodError) {
+            setZodError(err.data.zodError);
+          }
+        }
       }
     },
     [session?.user.id, addMemo],
@@ -28,7 +44,16 @@ export const MemoManagerTrpc = () => {
 
   const handleUpdateSubmit = useCallback(
     async (data: MemoFormData, editIndex: string) => {
-      updateMemo(editIndex, data);
+      try {
+        await updateMemo(editIndex, data);
+        setZodError(null);
+        setOpen(false);
+        setEditIndex(null);
+      } catch (err) {
+        if (err instanceof TRPCClientError && err.data.zodError) {
+          setZodError(err.data.zodError);
+        }
+      }
     },
     [updateMemo],
   );
@@ -41,8 +66,6 @@ export const MemoManagerTrpc = () => {
       if (editIndex) {
         await handleUpdateSubmit(data, editIndex);
       }
-      setOpen(false);
-      setEditIndex(null);
     },
     [editIndex, session?.user.id, handleAddSubmit, handleUpdateSubmit],
   );
@@ -83,7 +106,7 @@ export const MemoManagerTrpc = () => {
         className="flex justify-center"
         hasOverflow={true}
       >
-        <MemoForm onSubmit={handleFormSubmit} initialValues={editMemoData} />
+        <MemoForm onSubmit={handleFormSubmit} initialValues={editMemoData} externalZodError={zodError} />
       </ResponsiveDialog>
       {memos && <MemoList memoData={memos} onEdit={handleEditClick} onDelete={handleDeleteClick} />}
     </div>

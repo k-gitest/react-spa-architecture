@@ -13,6 +13,7 @@ import { backoff, delay, between } from '@/lib/utils';
 import { FetchError, NetworkError, JsonParseError, TimeoutError } from '@/lib/errors';
 import { clientConfigSchema } from '@/schemas/fetch-client-schema';
 import { ClientConfig, InitOptions, RequestOptions, DataType } from '@/types/fetch-client-types';
+import { BASE_API_URL } from '@/lib/constants';
 
 /**
  * @class FetchClient
@@ -43,9 +44,7 @@ export class FetchClient {
   constructor(initOptions: InitOptions = {}) {
     const validatedConfig = this.validateConfig(initOptions);
 
-    const defaultBaseUrl = (import.meta.env.VITE_BASE_API_URL as string) || 'localhost';
-
-    this.baseUrl = validatedConfig.baseUrl ?? defaultBaseUrl;
+    this.baseUrl = validatedConfig.baseUrl ?? BASE_API_URL;
     this.timeout = validatedConfig.timeout ?? 5000;
     this.maxRetry = validatedConfig.maxRetry ?? 3;
     this.retryDelay = validatedConfig.retryDelay ?? 1000;

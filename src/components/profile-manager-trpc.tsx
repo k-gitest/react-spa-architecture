@@ -91,7 +91,7 @@ export const ProfileManager = () => {
           <Label htmlFor="picture">Picture</Label>
           <Input id="avatar" type="file" onChange={handleFileUpload} />
           <FormWrapper onSubmit={handleProfileChangeSubmit} form={form}>
-            <FormInput label="ユーザー名" placeholder="ユーザー名を入力してください" name="user_name" />
+            <FormInput label="ユーザー名" name="user_name" placeholder="ユーザー名を入力してください" />
             <Button type="submit">更新</Button>
           </FormWrapper>
         </div>
