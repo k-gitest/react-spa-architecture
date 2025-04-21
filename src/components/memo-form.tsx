@@ -12,8 +12,8 @@ import {
   FormCheckboxGroup,
   FormRadioGroup,
 } from '@/components/form/form-parts';
-import { ZodError } from 'zod';
-import { Memo } from '@/types/memo-form-data';
+import { z } from 'zod';
+import { syncZodErrors } from '@/lib/trpc';
 
 const importances = [
   { value: 'high', label: '大' },
@@ -44,12 +44,12 @@ const defaultMemoFormData = {
   tags: [],
 };
 
-type FlattenedError = ReturnType<ZodError<Memo>['flatten']>;
+type FlattenFormatted = z.inferFlattenedErrors<typeof FormSchema>;
 
 interface Props {
   onSubmit: (data: MemoFormData) => void;
   initialValues?: MemoFormData;
-  externalZodError?: FlattenedError | null;
+  externalZodError?: FlattenFormatted | null;
 }
 
 export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) => {
@@ -72,26 +72,7 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
   }, [initialValues, form]);
 
   useEffect(() => {
-    if (!externalZodError) return;
-
-    const fieldErrors = externalZodError.fieldErrors as Record<string, string[]>;
-    Object.entries(fieldErrors).forEach(([field, messages]) => {
-      const message = messages?.[0];
-      if (!message) return;
-      const values = form.getValues();
-
-      if (field in values) {
-        form.setError(field as keyof typeof values, {
-          type: 'server',
-          message,
-        });
-      } else {
-        form.setError('root' as any, {
-          type: 'server',
-          message,
-        });
-      }
-    });
+    syncZodErrors(form, externalZodError)
   }, [externalZodError, form]);
 
   return (
@@ -102,9 +83,7 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
         <FormTextArea label="メモの内容" name="content" placeholder="内容を記入してください" />
         <FormRadioGroup label="重要度" name="importance" options={importances} />
         <FormCheckboxGroup label="タグ" name="tags" options={tagItems} />
-        {form.formState.errors.root && (
-        <p className="text-sm text-red-500">{form.formState.errors.root.message}</p>
-      )}
+        {form.formState.errors.root && <p className="text-sm text-red-500">{form.formState.errors.root.message}</p>}
         <div className="flex justify-center">
           <Button type="submit" className="w-32">
             送信

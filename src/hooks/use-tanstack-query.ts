@@ -129,11 +129,9 @@ export const useApiMutation = <TData = unknown, TError = unknown, TVariables = v
 ): UseMutationResult<TData, TError, TVariables, TContext> => {
   return useMutation<TData, TError, TVariables, TContext>({
     onSuccess: (data, variables, context) => {
-      console.log('Mutation successful:', data);
       options?.onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
-      console.error('Mutation error:', error);
       errorHandler(error);
       options?.onError?.(error, variables, context);
     },

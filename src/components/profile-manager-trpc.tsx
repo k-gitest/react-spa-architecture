@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form';
 import { validatedProfile } from '@/schemas/profile-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormWrapper, FormInput } from '@/components/form/form-parts';
-import { detectMimeTypeFromUint8Array, isAllowedMimeType } from '@/lib/utils';
+import { getExtensionIfAllowed, convertFileToBase64 } from '@/lib/utils';
 import { getAvatarUrl } from '@/lib/supabase';
 
 export const ProfileManager = () => {
@@ -22,8 +22,8 @@ export const ProfileManager = () => {
   const { data, isError, isLoading } = useGetProfile(userId || '');
 
   const defaultValues = {
-    avatar: "",
-    user_name: "",
+    avatar: '',
+    user_name: '',
   };
 
   const form = useForm({
@@ -41,21 +41,11 @@ export const ProfileManager = () => {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (userId && e.target.files && e.target.files.length > 0) {
       const folderName = userId;
-      const mimeType = await detectMimeTypeFromUint8Array(e.target.files[0]);
-      const extention = isAllowedMimeType(mimeType);
+      const extention = await getExtensionIfAllowed(e.target.files[0]);
       if (extention && data) {
         // ファイルをBase64に変換
-      const fileReader = new FileReader();
-      fileReader.readAsDataURL(e.target.files[0]);
-      
-      fileReader.onload = async () => {
-        // Base64文字列を取得（data:image/jpeg;base64,xxxxx の形式）
-        const base64File = fileReader.result as string;
-        // プレフィックスを除去して純粋なBase64文字列を取得
-        const base64Data = base64File.split(',')[1];
-        
+        const base64Data = await convertFileToBase64(e.target.files[0]);
         await uploadAvatar(base64Data, folderName, extention, data.avatar);
-      };
       } else {
         throw new Error('許可された画像形式ではありません。');
       }
@@ -66,8 +56,8 @@ export const ProfileManager = () => {
     if (session?.user.id) setUserId(session.user.id);
     if (data) {
       form.reset({
-        avatar: data.avatar || "",
-        user_name: data.user_name || "",
+        avatar: data.avatar || '',
+        user_name: data.user_name || '',
       });
     }
   }, [data, session, form]);

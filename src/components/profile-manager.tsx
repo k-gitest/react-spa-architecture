@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form';
 import { validatedProfile } from '@/schemas/profile-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormWrapper, FormInput } from '@/components/form/form-parts';
-import { detectMimeTypeFromUint8Array, isAllowedMimeType } from '@/lib/utils';
+import { getExtensionIfAllowed } from '@/lib/utils';
 import { getAvatarUrl } from '@/lib/supabase';
 
 export const ProfileManager = () => {
@@ -41,8 +41,7 @@ export const ProfileManager = () => {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (userId && e.target.files && e.target.files.length > 0) {
       const folderName = userId;
-      const mimeType = await detectMimeTypeFromUint8Array(e.target.files[0]);
-      const extention = isAllowedMimeType(mimeType);
+      const extention = await getExtensionIfAllowed(e.target.files[0]);
       if (extention && data) {
         await uploadAvatar(e.target.files[0], folderName, extention, data.avatar);
       } else {

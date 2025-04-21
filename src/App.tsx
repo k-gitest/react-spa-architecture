@@ -5,10 +5,13 @@ import { ThemeProvider } from '@/hooks/use-theme-provider';
 import { queryClient, QueryClientProvider } from '@/lib/queryClient';
 import { useSessionObserver } from '@/hooks/use-session-observer';
 import { HelmetProvider } from 'react-helmet-async';
+import { setupZodI18n } from '@/errors/zod-error-map';
 
 interface AppProps {
   children?: ReactNode;
 }
+
+setupZodI18n();
 
 export default function App({ children }: AppProps) {
   useSessionObserver();

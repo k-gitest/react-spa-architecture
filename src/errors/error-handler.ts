@@ -27,7 +27,7 @@ export const errorHandler = (error: unknown) => {
     }
     if (error.data.zodError) {
       const errorMessage = 'zodError';
-      toast({ title: `${errorMessage}` });
+      //toast({ title: `${errorMessage}` });
       return;
     }
 
