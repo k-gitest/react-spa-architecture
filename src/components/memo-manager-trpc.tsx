@@ -6,14 +6,14 @@ import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useMemos } from '@/hooks/use-memo-queries-trpc';
-import { ZodError } from 'zod';
-import { Memo } from '@/types/memo-form-data';
+import { z } from 'zod';
+import { FormSchema } from '@/schemas/memo-form-schema';
 import { TRPCClientError } from '@trpc/client';
 
-type FlattenedError = ReturnType<ZodError<Memo>['flatten']>;
+type FlattenFormatted = z.inferFlattenedErrors<typeof FormSchema>;
 
 export const MemoManagerTrpc = () => {
-  const [zodError, setZodError] = useState<FlattenedError | null>(null);
+  const [zodError, setZodError] = useState<FlattenFormatted | null>(null);
 
   const session = useSessionStore((state) => state.session);
   const [editIndex, setEditIndex] = useState<string | null>(null);

@@ -72,24 +72,32 @@ export const useQueryEffect = <TData, TError>(
   queryResult: UseQueryResult<TData, TError>,
   options?: UseEffectOptions<TData, TError>,
 ) => {
+  /*optionsはuseApiQueryが呼ばれるたびに参照が変わる可能性が高い
+    useEffectの依存配列にoptions?onSuccessとしていたがeslintエラーでoptionsへ変更
+    optionsを依存配列に含める場合、コールバック関数を呼び出し側でuseCallbackもしくはuseMemoを使用し再レンダリング対策をする
+    optionsが動的変更しない前提であればuseRefを使用して依存配列から除外する
+    useRefを使用する場合はカスタムRefを作成し共通フックとして利用する
+  */
   useEffect(() => {
-    if (queryResult.isSuccess && options?.onSuccess && queryResult.data !== undefined) {
-      options.onSuccess(queryResult.data);
+    if (queryResult.isSuccess && queryResult.data !== undefined) {
+      options?.onSuccess?.(queryResult.data);
     }
-  }, [queryResult.isSuccess, queryResult.data, options?.onSuccess]);
+  }, [queryResult.isSuccess, queryResult.data, options]);
 
   useEffect(() => {
-    if (queryResult.isError && options?.onError && queryResult.error !== null) {
-      options.onError(queryResult.error);
+    if (queryResult.isError && queryResult.error !== null) {
+      //カスタムオプションのエラー
+      options?.onError?.(queryResult.error);
+      //共通エラーハンドラ
       errorHandler(queryResult.error);
     }
-  }, [queryResult.isError, queryResult.error, options?.onError]);
+  }, [queryResult.isError, queryResult.error, options]);
 
   useEffect(() => {
-    if (queryResult.isFetched && options?.onSettled) {
-      options.onSettled(queryResult.isSuccess ? queryResult.data : queryResult.error);
+    if (queryResult.isFetched) {
+      options?.onSettled?.(queryResult.isSuccess ? queryResult.data : queryResult.error);
     }
-  }, [queryResult.isFetched, queryResult.isSuccess, queryResult.data, queryResult.error, options?.onSettled]);
+  }, [queryResult.isFetched, queryResult.isSuccess, queryResult.data, queryResult.error, options]);
 
   return queryResult;
 };

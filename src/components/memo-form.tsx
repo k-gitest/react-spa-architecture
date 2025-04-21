@@ -69,7 +69,7 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
     if (initialValues && !externalZodError) {
       form.reset(initialValues);
     }
-  }, [initialValues, form]);
+  }, [initialValues, externalZodError, form]);
 
   useEffect(() => {
     syncZodErrors(form, externalZodError)

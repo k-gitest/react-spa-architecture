@@ -236,6 +236,7 @@ const { isPending, data } = useApiMutation({
 - tRPCでのtanstack Queryも同様に統合前後で異なる、共通化処理の型が複雑
 - tRPCをsupabaseで使用するとエラーの型がことなるので合わせる必要がある
 - tRPCのエラーはTRPCErrorよりTRPCClientErrorにフォーマットで出力した方が扱いやすい
+- zodErrorをtrpcで他言語化する場合サーバーとクライアントの両方にmapperを置く必要がある
 - tanstack queryのuseQueryはv5でoptionsのコールバックが幾つか削除されており、自分で実装する必要がある
 - edge functionsの認証はtokenヘッダーをfunctions内でも使用する必要がある
 - supabaseからのコールバックはPKCEで自動処理されるのでパスクエリ判別はできないのでidentitiesなどから判別する必要がある
