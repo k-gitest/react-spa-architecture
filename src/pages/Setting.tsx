@@ -1,4 +1,4 @@
-import { SettingManager } from '@/components/setting-manager';
+import { SettingManager } from '@/features/settings/components/setting-manager';
 import { MainWrapper } from '@/components/layout/main-wrapper';
 import { Helmet } from 'react-helmet-async';
 

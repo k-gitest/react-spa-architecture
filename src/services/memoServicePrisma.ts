@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { MemoFormData } from '@/types/memo-form-data';
+import { MemoFormData } from '@/features/memo/types/memo-form-data';
 
 export const fetchmemos = async () => {
   try {

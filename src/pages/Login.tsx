@@ -1,5 +1,5 @@
-import { AccountForm } from '@/components/auth-form-tanstack';
-import { AccountForm as AccountFormTRPC } from '@/components/auth-form-trpc';
+import { AccountForm } from '@/features/auth/components/auth-form-tanstack';
+import { AccountForm as AccountFormTRPC } from '@/features/auth/components/auth-form-trpc';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { MainWrapper } from '@/components/layout/main-wrapper';

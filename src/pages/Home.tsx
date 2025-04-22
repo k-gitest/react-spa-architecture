@@ -1,6 +1,6 @@
-import { MemoManager } from '@/components/memo-manager';
-import { MemoManagerTrpc } from '@/components/memo-manager-trpc';
-import { MemoManagerTanstack } from '@/components/memo-manager-tanstack';
+import { MemoManager } from '@/features/memo/components/memo-manager';
+import { MemoManagerTrpc } from '@/features/memo/components/memo-manager-trpc';
+import { MemoManagerTanstack } from '@/features/memo/components/memo-manager-tanstack';
 import { MainWrapper } from '@/components/layout/main-wrapper';
 import { Helmet } from 'react-helmet-async';
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { emailVerifyOptAuthService } from '@/services/authService';
+import { emailVerifyOptAuthService } from '@/features/auth/services/authService';
 import { EmailOtpType } from '@supabase/supabase-js';
 
 const emalOtpType = ['signup', 'invite', 'magiclink', 'recovery', 'email_change', 'email'];

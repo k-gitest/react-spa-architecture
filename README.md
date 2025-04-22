@@ -1,16 +1,11 @@
 ## 概要
 
-Reactベースの拡張性と保守性を重視して設計されたSPAメモアプリケーション 
+拡張性と保守性を重視して設計されたReactベースのSPAメモアプリケーション 
 
 ## 目的
 - 拡張的で効率的な運用保守ができるアーキテクチャと単一責務のレイヤード設計を目指す
-- shadcn/uiのフォームUIをパーツ別にコンポーネントにして再利用可能にする
-- shadcn/uiのメディアクエリ別ドロワー/ダイアログを再利用可能にする
-- shadcn/uiのテーマをトグルで三段階切替にする（システム・ライト・ダーク）
-- shadcn/uiのtoastフックスで通信状態の表示を再利用可能にする
-- Fetch APIをラップしたHTTPクライアントを作成し再利用可能にする
-- tanstack-queryでデータ通信状態管理を再利用可能にする
-- tRPCでデータ通信状態管理を再利用可能にする
+- shadcn/uiのUIを使用してパーツ別カスタムUIコンポーネントを作成して再利用可能にする
+- supabase, tanstack-query, tRPCの各クライアントを使用してカスタムフックを作成して再利用可能にする
 - supabaseをバックエンドとして使用する（auth・database postgres・edge functions）
 - prismaをデータベース管理として使用する（DBスキーマ・マイグレーション）
 
@@ -38,24 +33,23 @@ Reactベースの拡張性と保守性を重視して設計されたSPAメモア
 /
 ├── public
 ├── src
-│    ├── components
+│    ├── components ...共通コンポーネントディレクトリ
 │    │    ├── form ...フォームパーツコンポーネント
 │    │    ├── layout ...レイアウトコンポーネント
 │    │    ├── ui ...shadcn/uiコンポーネント
-│    │    ├── auth-form-tanstack.tsx ...tanstackQuery認証フォーム
-│    │    ├── auth-form-trpc.tsx ...trpc認証フォーム
-│    │    ├── account-manager.tsx...アカウント設定管理
-│    │    ├── account-manager-trpc.tsx...アカウントtrpc設定管理
-│    │    ├── memo-form.tsx ...メモ入力フォーム
-│    │    ├── memo-list.tsx ...メモリスト表示
-│    │    ├── memo-manager.tsx ...supabaseメモ管理
-│    │    ├── memo-manager-tanstack.tsx ...tanstackQueryメモ管理
-│    │    ├── memo-manager-trpc.tsx ...trpcメモ管理
 │    │    ├── mode-toggle.tsx ...テーマ切替
-│    │    ├── responsive-dialog.tsx ...共有ドロワー/ダイアログ
-│    │    ├── profile-manager.tsx ...プロフィール設定管理
-│    │    ├── profile-manager-trpc.tsx ...プロフィールtrpc設定管理
-│    │    └── setting-manager.tsx ...ユーザー設定管理
+│    │    └── responsive-dialog.tsx ...ドロワー/ダイアログ
+│    ├── fetures ...機能別ディレクトリ
+│    │    ├── auth
+│    │    ├── account
+│    │    ├── memo
+│    │    ├── profile
+│    │    │     ├── components ...機能別コンポーネント
+│    │    │     ├── hooks ...機能別フックス
+│    │    │     ├── schemas ...機能別スキーマ
+│    │    │     ├── services ...機能別サービス
+│    │    │     └── types ...機能別型
+│    │    └── settings
 │    ├── lib
 │    │    ├── auth.ts ...認証カスタム関数
 │    │    ├── fetchClient.ts ...Fetch API クライアント
@@ -66,31 +60,19 @@ Reactベースの拡張性と保守性を重視して設計されたSPAメモア
 │    │    ├── util.ts ...ユーティリティ関数
 │    │    ├── constants.ts ...定数設定
 │    │    └── errors.ts ...カスタムエラー定義
-│    ├── errors ...エラーハンドリング設定
-│    ├── hooks
-│    │    ├── use-memo-queries-tanstack ...tanstackQueryデータ通信状態状態管理
-│    │    ├── use-memo-queries-trpc ...trpcデータ通信状態状態管理
+│    ├── errors ...共通エラーハンドリング設定
+│    ├── hooks ...共通フックスディレクトリ
 │    │    ├── use-theme-provider ...テーマ切替状態管理
 │    │    ├── use-session-observer ...ユーザー認証状態
 │    │    ├── use-session-store ...ユーザー認証状態管理
-│    │    ├── use-auth-queries-tanstack ...tanstackQueryユーザー認証通信状態管理
-│    │    ├── use-auth-queries-trpc ...trpcユーザー認証通信状態管理
-│    │    ├── use-account-queries-tanstack ...tanstackアカウント通信状態管理
-│    │    ├── use-account-queries-trpc ...trpcアカウント通信状態管理
-│    │    ├── use-profile-queries-tanstack ...tanstackデータ通信状態管理
-│    │    ├── use-profile-queries-trpc ...trpcデータ通信状態管理
 │    │    ├── use-tanstack-query ...tanstack query共通フック
 │    │    ├── use-toast ...toastUI状態管理
 │    │    └── use-media-query ...メディアクエリ判別
-│    ├── services
-│    │    ├── authService ...ユーザー認証
-│    │    ├── accountService ...アカウント設定
-│    │    ├── memoService ...メモCRUD
-│    │    └── profileService ...プロフィールCRUD
+│    ├── services ...共通サービス
 │    ├── pages ...ページコンポーネント
 │    ├── routes ...ページルーター
-│    ├── schemas ...zodスキーマ
-│    ├── types ...型
+│    ├── schemas ...共通スキーマ
+│    ├── types ...共通型
 │    └── App.tsx
 ├── prisma ...prismaスキーマ・マイグレーション
 ├── supabase/functions ...エッジファンクション
