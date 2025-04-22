@@ -1,62 +1,39 @@
-import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
+import { Hono } from 'https://deno.land/x/hono@v3.11.2/mod.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { corsMiddleware } from '../_shared/cors.ts';
+import type { Context } from 'https://deno.land/x/hono@v3.11.2/mod.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const app = new Hono();
 
-Deno.serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', {
-      status: 200,
-      headers: corsHeaders,
-    });
-  }
+app.use('*', corsMiddleware);
 
+app.post('/delete-user-account', async (c: Context) => {
   try {
-    const { user_id } = await req.json();
+    const { user_id } = await c.req.json();
 
-    const supabaseClient = createClient(Deno.env.get('SERVICE_URL')!, Deno.env.get('SERVICE_ROLE_KEY')!);
+    const supabase = createClient(Deno.env.get('SERVICE_URL')!, Deno.env.get('SERVICE_ROLE_KEY')!);
 
-    const { error } = await supabaseClient.auth.admin.deleteUser(user_id);
+    const { error } = await supabase.auth.admin.deleteUser(user_id);
 
     if (error) {
-      return new Response(
-        JSON.stringify({
+      return c.json(
+        {
           // errorオブジェクトはJSON.stringifyでAuthError型情報が失われるので再構築したAuthError型で返す
           error: {
             name: error.name,
             message: error.message,
             status: error.status,
-            code: error.code
+            code: error.code,
           },
-        }),
-        {
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-          status: error.status || 400,
         },
+        error.status || 400,
       );
     }
 
-    return new Response(JSON.stringify({ message: 'ユーザーアカウントの削除が成功しました' }), {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json',
-      },
-      status: 200,
-    });
+    return c.json({ message: 'ユーザーアカウントの削除が成功しました' }, 200);
   } catch (error) {
-    // AuthError型以外のエラーを返す
-    return new Response(JSON.stringify({ error: error }), {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json',
-      },
-      status: 400,
-    });
+    return c.json({ error: `${error}` }, 400);
   }
 });
+
+Deno.serve(app.fetch);
