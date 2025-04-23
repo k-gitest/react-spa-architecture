@@ -5,7 +5,7 @@ import { useAccount } from '@/features/account/hooks/use-account-queries-trpc';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useForm } from 'react-hook-form';
-import { FormWrapper, FormInput } from '../../../components/form/form-parts';
+import { FormWrapper, FormInput } from '@/components/form/form-parts';
 import { AccountUpdate } from '@/features/account/types/account-types';
 
 export const AccountManager = () => {
@@ -53,11 +53,11 @@ export const AccountManager = () => {
 
   useEffect(() => {
     console.log(session?.user);
-    if (session?.user.identities) {
+    if (session?.user?.identities) {
       console.log(session?.user?.identities[0]?.provider);
       if (session?.user?.identities[0]?.provider === 'email') setProvider(true);
     }
-    if (session?.user.recovery_sent_at) setNewPassword(true);
+    if (session?.user?.recovery_sent_at) setNewPassword(true);
   }, [session]);
 
   return (
