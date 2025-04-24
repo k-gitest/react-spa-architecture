@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Session } from '@supabase/supabase-js';
 
-interface AuthState {
+export interface AuthState {
   session: Session | null;
   setSession: (newSession: Session | null) => void;
 }

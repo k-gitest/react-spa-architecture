@@ -63,7 +63,7 @@ describe('Toast Component', () => {
       expect(screen.getByText('Test Toast')).toBeInTheDocument();
     });
 
-    // TOAST_REMOVE_DELAY より短く設定（現状 1000000ms なのでここでは消えないはず）
+    // TOAST_REMOVE_DELAY より短く設定（現状 1000000ms なのでここでは消えない）
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // 確認：消えていないこと（正しくはここでまだ存在している）

@@ -1,61 +1,38 @@
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import React from 'react';
 import { AccountManager } from '@/features/account/components/account-manager';
 
 // モック関数の定義
 const mockUpdateAccount = vi.fn();
 const mockResetPassword = vi.fn();
 const mockDeleteAccount = vi.fn();
-const mockSetSession = vi.fn();
 
-// モックの宣言（すべてファイルの先頭に書く）
-// ダイアログの内容部分を直接モックする方法
+// ダイアログのモック
 vi.mock('@/components/responsive-dialog', () => ({
-    ResponsiveDialog: ({ 
-      children, 
-      buttonTitle, 
-      dialogTitle, 
-      dialogDescription, 
-      ...rest 
-    }: { 
-      children: React.ReactNode; 
-      buttonTitle: string; 
-      dialogTitle: string; 
-      dialogDescription: string; 
-      [key: string]: any; 
-    }) => (
-      <div data-testid={`dialog-${buttonTitle}`}>
-        <button
-          data-testid={`open-dialog-${buttonTitle}`}
-          {...rest}
-        >
-          {buttonTitle}
-        </button>
-        <div data-testid={`dialog-content-${buttonTitle}`}>
-          <h2>{dialogTitle}</h2>
-          <p>{dialogDescription}</p>
-          {children}
-        </div>
+  ResponsiveDialog: ({
+    children,
+    buttonTitle,
+    dialogTitle,
+    dialogDescription,
+    ...rest
+  }: {
+    children: React.ReactNode;
+    buttonTitle: string;
+    dialogTitle: string;
+    dialogDescription: string;
+    [key: string]: any;
+  }) => (
+    <div data-testid={`dialog-${buttonTitle}`}>
+      <button data-testid={`open-dialog-${buttonTitle}`} {...rest}>
+        {buttonTitle}
+      </button>
+      <div data-testid={`dialog-content-${buttonTitle}`}>
+        <h2>{dialogTitle}</h2>
+        <p>{dialogDescription}</p>
+        {children}
       </div>
-    )
-  }));
-
-// useSessionStore のモック
-vi.mock('@/hooks/use-session-store', () => ({
-  useSessionStore: vi.fn().mockImplementation((selector) =>
-    selector({
-      session: {
-        user: {
-          id: 'test-user-id',
-          email: 'test@example.com',
-          identities: [{ provider: 'email' }],
-          updated_at: '2025-04-22T10:00:00Z',
-          recovery_sent_at: null,
-        },
-      },
-      setSession: mockSetSession,
-    }),
+    </div>
   ),
 }));
 
@@ -75,6 +52,7 @@ vi.mock('@/features/account/hooks/use-account-queries-tanstack', () => ({
 
 // react-hook-form のモック
 vi.mock('react-hook-form', () => {
+  //rhfのuseFormプロパティ設定
   const useFormMock = vi.fn().mockReturnValue({
     register: vi.fn(),
     handleSubmit: vi.fn((fn) => fn),
@@ -89,7 +67,7 @@ vi.mock('react-hook-form', () => {
   return { useForm: useFormMock, FormProvider: FormProviderMock, Controller: ControllerMock };
 });
 
-// FormWrapper と FormInput のモック
+// FormWrapperとFormInput のモック
 vi.mock('@/components/form/form-parts', () => ({
   FormWrapper: ({ children, onSubmit }: any) => (
     <form
@@ -107,6 +85,32 @@ vi.mock('@/components/form/form-parts', () => ({
   ),
 }));
 
+// useSessionStoreモックの初期値を設定
+let defaultSession: {
+  session?: {
+    user: {
+      id: string;
+      email: string;
+      updated_at: string;
+      identities: { provider: string }[];
+      recovery_sent_at?: string;
+    } | null;
+  };
+} = {
+  session: {
+    user: {
+      id: 'test-user-id',
+      email: 'user@example.com',
+      updated_at: '2025-04-01T00:00:00Z',
+      identities: [{ provider: 'email' }],
+    },
+  },
+};
+// useSessionStoreモック
+vi.mock('@/hooks/use-session-store', () => ({
+  useSessionStore: (selector: any) => selector(defaultSession),
+}));
+
 describe('AccountManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -114,24 +118,24 @@ describe('AccountManager', () => {
     vi.spyOn(React, 'useState').mockReturnValue([false, vi.fn()]);
   });
 
-  it('renders user information', () => {
+  it('ユーザー情報をレンダリング', () => {
     render(<AccountManager />);
     expect(screen.getByText('アカウント設定')).toBeInTheDocument();
-    expect(screen.getByText('メール：test@example.com')).toBeInTheDocument();
+    expect(screen.getByText('メール：user@example.com')).toBeInTheDocument();
     expect(screen.getByText(/最終ログイン：/)).toBeInTheDocument();
   });
 
-  it('renders email change dialog button for email provider', () => {
+  it('メール変更ダイアログボタンをレンダリング', () => {
     render(<AccountManager />);
     expect(screen.getByTestId('open-dialog-メールアドレス変更')).toBeInTheDocument();
   });
 
-  it('renders password change dialog button for email provider and no recovery_sent_at', () => {
+  it('providerがemail且つrecovery_sent_atが存在する場合はパスワード変更ダイアログボタン表示', () => {
     render(<AccountManager />);
     expect(screen.getByTestId('open-dialog-パスワード変更')).toBeInTheDocument();
   });
 
-  it('calls updateAccount on email change form submit', async () => {
+  it('メール変更フォームの送信時にupdateAccountを呼び出す', async () => {
     render(<AccountManager />);
     fireEvent.click(screen.getByTestId('open-dialog-メールアドレス変更'));
     const form = within(screen.getByTestId('dialog-メールアドレス変更')).getByTestId('form-wrapper');
@@ -139,7 +143,7 @@ describe('AccountManager', () => {
     expect(mockUpdateAccount).toHaveBeenCalledWith({ email: 'new@example.com', password: 'newpassword' });
   });
 
-  it('calls resetPassword on password change form submit', () => {
+  it('パスワード変更フォームの送信時にresetPasswordを呼び出す', () => {
     // アカウントマネージャーをレンダリング
     render(<AccountManager />);
 
@@ -159,81 +163,36 @@ describe('AccountManager', () => {
     });
   });
 
-  it('calls deleteAccount on delete button click', () => {
+  it('削除ボタンをクリックでdeleteAccountを呼び出す', () => {
     render(<AccountManager />);
     fireEvent.click(screen.getByText('アカウント削除'));
     expect(mockDeleteAccount).toHaveBeenCalledWith('test-user-id');
   });
 
-  /*
-  it('renders new password dialog when recovery_sent_at is present', () => {
-    const mockUseSessionStore = vi.mocked(require('@/hooks/use-session-store').useSessionStore); // テスト内で取得
-    mockUseSessionStore.mockImplementationOnce((selector: (state: any) => any) =>
-      selector({
-        session: {
-          user: {
-            id: 'test-user-id',
-            email: 'test@example.com',
-            identities: [{ provider: 'email' }],
-            updated_at: '2025-04-22T10:00:00Z',
-            recovery_sent_at: '2025-04-22T09:00:00Z',
-          },
-        },
-        setSession: vi.fn(),
-      }),
-    );
+  it('providerがemail且つrecovery_sent_atが存在する場合は新しいパスワードダイアログを表示', () => {
+    if (defaultSession.session?.user) {
+      defaultSession.session.user.recovery_sent_at = 'test-date';
+    }
     render(<AccountManager />);
     expect(screen.getByTestId('open-dialog-新しいパスワードへ変更')).toBeInTheDocument();
     expect(screen.queryByTestId('open-dialog-パスワード変更')).not.toBeInTheDocument();
   });
-  */
 
-  /*
-  it('calls updateAccount on new password form submit', async () => {
-    const mockUseSessionStore = vi.mocked(require('@/hooks/use-session-store').useSessionStore);
-    mockUseSessionStore.mockImplementationOnce((selector: (state: any) => any) =>
-      selector({
-        session: {
-          user: {
-            id: 'test-user-id',
-            email: 'test@example.com',
-            identities: [{ provider: 'google' }],
-            updated_at: '2025-04-22T10:00:00Z',
-            recovery_sent_at: null,
-          },
-        },
-        setSession: vi.fn(), // こちらもモック
-      }),
-    );
+  it('新しいパスワードフォームの送信時にupdateAccountを呼び出す', async () => {
     render(<AccountManager />);
     fireEvent.click(screen.getByTestId('open-dialog-新しいパスワードへ変更'));
     const form = within(screen.getByTestId('dialog-新しいパスワードへ変更')).getByTestId('form-wrapper');
     fireEvent.submit(form);
     expect(mockUpdateAccount).toHaveBeenCalledWith({ email: 'new@example.com', password: 'newpassword' });
   });
-  */
 
-  /*
-  it('does not render email and password change buttons for non-email providers', () => {
-    const mockUseSessionStore = vi.mocked(require('@/hooks/use-session-store').useSessionStore);
-    mockUseSessionStore.mockImplementationOnce((selector: (state: any) => any) =>
-      selector({
-        session: {
-          user: {
-            id: 'test-user-id',
-            email: 'test@example.com',
-            identities: [{ provider: 'google' }],
-            updated_at: '2025-04-22T10:00:00Z',
-            recovery_sent_at: null,
-          },
-        },
-        setSession: vi.fn(), // こちらもモック
-      }),
-    );
+  it('メールプロバイダ以外の場合はメールとパスワードの変更ボタン非表示', () => {
+    if (defaultSession.session?.user) {
+      defaultSession.session.user.identities[0].provider = 'google';
+    }
     render(<AccountManager />);
     expect(screen.queryByTestId('open-dialog-メールアドレス変更')).not.toBeInTheDocument();
     expect(screen.queryByTestId('open-dialog-パスワード変更')).not.toBeInTheDocument();
     expect(screen.queryByTestId('open-dialog-新しいパスワードへ変更')).not.toBeInTheDocument();
   });
-  */
 });

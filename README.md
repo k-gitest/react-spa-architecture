@@ -225,3 +225,5 @@ const { isPending, data } = useApiMutation({
 - webhookからのコールバックでAppが再マウントするのでcallback用ページで受けてから遷移する必要がある
 - supabase storageは初期値でCDNでキャッシュされるため適宜ハッシュを付けておく
 - Fileをedge側に送信するとFileではなくなるのでbase64に変換して送信しedge側で戻す
+- react18ではtesting-library/react-hooksではなくtesting-library/reactを使用する
+- viteでrequireが使用できないということはvitestでも使用できない

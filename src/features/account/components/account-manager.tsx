@@ -52,10 +52,8 @@ export const AccountManager = () => {
   }, [session?.user?.id, deleteAccount]);
 
   useEffect(() => {
-    console.log(session?.user);
-    if (session?.user.identities) {
-      console.log(session?.user?.identities[0]?.provider);
-      if (session?.user?.identities[0]?.provider === 'email') setProvider(true);
+    if (session?.user.identities && session?.user?.identities[0]?.provider === 'email') {
+      setProvider(true);
     }
     if (session?.user.recovery_sent_at) setNewPassword(true);
   }, [session]);
@@ -98,7 +96,7 @@ export const AccountManager = () => {
             </ResponsiveDialog>
           )}
 
-          {newPassword && (
+          {provider && newPassword && (
             <ResponsiveDialog
               isDesktop={isDesktop}
               buttonTitle="新しいパスワードへ変更"

@@ -1,6 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useApiQuery, useApiMutation } from '@/hooks/use-tanstack-query';
-import { createWrapper } from '../setup';
+import { queryClientWrapper } from '../setup';
 
 describe('useApiQuery', () => {
   it('クエリが成功したらonSuccessを呼び出す', async () => {
@@ -18,7 +18,7 @@ describe('useApiQuery', () => {
             onSuccess,
           }
         ),
-      { wrapper: createWrapper() }
+      { wrapper: queryClientWrapper() }
     );
 
     await waitFor(() => {
@@ -44,7 +44,7 @@ describe('useApiQuery', () => {
             onSuccess,
           }
         ),
-      { wrapper: createWrapper() }
+      { wrapper: queryClientWrapper() }
     );
 
     await waitFor(() => {
@@ -67,7 +67,7 @@ describe('useApiMutation', () => {
           mutationFn,
           onSuccess,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: queryClientWrapper() }
     );
 
     act(() => {
@@ -92,7 +92,7 @@ describe('useApiMutation', () => {
           mutationFn,
           onError,
         }),
-      { wrapper: createWrapper() }
+      { wrapper: queryClientWrapper() }
     );
 
     act(() => {

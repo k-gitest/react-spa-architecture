@@ -36,11 +36,11 @@ export const useAccount = () => {
 
   // 各メソッド実装
   const updateAccount = async (data: AccountUpdate) => {
-    await updateUserMutation.mutateAsync(data);
+    if (data?.email || data?.password) await updateUserMutation.mutateAsync(data);
   };
 
   const resetPassword = async (data: AccountUpdate) => {
-    if (data) await resetPasswordForEmailMutation.mutateAsync(data);
+    if (data?.email) await resetPasswordForEmailMutation.mutateAsync(data);
   };
 
   const deleteAccount = async (token: string) => {
