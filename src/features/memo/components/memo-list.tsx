@@ -31,10 +31,10 @@ export const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProp
           </CardFooter>
           <CardFooter>
             <div className="w-full flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => onEdit(memo.id)}>
+              <Button variant="outline" onClick={() => onEdit(memo.id)} data-testid={`update-memo-${memo.id}`}>
                 編集
               </Button>
-              <Button variant="outline" onClick={() => onDelete(memo.id)}>
+              <Button variant="outline" onClick={() => onDelete(memo.id)} data-testid={`delete-memo-${memo.id}`}>
                 削除
               </Button>
             </div>

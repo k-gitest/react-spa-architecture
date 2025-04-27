@@ -83,7 +83,7 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
         <FormTextArea label="メモの内容" name="content" placeholder="内容を記入してください" />
         <FormRadioGroup label="重要度" name="importance" options={importances} />
         <FormCheckboxGroup label="タグ" name="tags" options={tagItems} />
-        {form.formState.errors.root && <p className="text-sm text-red-500">{form.formState.errors.root.message}</p>}
+        {form.formState.errors?.root && <p className="text-sm text-red-500">{form.formState.errors.root?.message}</p>}
         <div className="flex justify-center">
           <Button type="submit" className="w-32">
             送信

@@ -76,8 +76,14 @@
 │    └── App.tsx
 ├── prisma ...prismaスキーマ・マイグレーション
 ├── supabase/functions ...エッジファンクション
+│    ├── _shared
 │    ├── delete-user-account ...アカウント削除
-│    └── trpc ...tRPCルーター
+│    └── trpc ...tRPC
+├── tests ...テスト
+│    ├── components
+│    ├── features
+│    ├── hooks
+│    └── pages
 ├── index.html
 ├── tailwind.config.js
 ├── package.json
@@ -227,3 +233,4 @@ const { isPending, data } = useApiMutation({
 - Fileをedge側に送信するとFileではなくなるのでbase64に変換して送信しedge側で戻す
 - react18ではtesting-library/react-hooksではなくtesting-library/reactを使用する
 - viteでrequireが使用できないということはvitestでも使用できない
+- shadcn/uiのフォームなどのDOM構造はボタン制御が多く、内部非同期も多いのでawait, waitFor, actの警告がでやすい
