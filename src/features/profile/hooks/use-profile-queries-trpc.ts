@@ -50,6 +50,7 @@ export const useProfile = () => {
     updateProfileMutation,
     uploadAvatarMutation,
     uploadAvatar,
-    updateProfile
+    updateProfile,
+    deleteAvatar
   };
 };

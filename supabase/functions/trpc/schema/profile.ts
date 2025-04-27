@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const profileFormSchema = z.object({
-  avatar: z.string().nullable(),
-  user_name: z.string().nullable(),
+  avatar: z.string().nullable().optional(),
+  user_name: z.string().nullable().optional(),
 });
 
 export const uploadAvatarInput = z.object({

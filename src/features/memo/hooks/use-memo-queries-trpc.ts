@@ -16,7 +16,6 @@ export const useMemos = () => {
   // メモの詳細取得
   const useGetMemo = (id: string | null) => {
     const queryOptions = trpc.memo.getMemo.queryOptions(id as string, { enabled: !!id });
-    console.log(queryOptions)
     return useApiQuery({...queryOptions});
   };
 

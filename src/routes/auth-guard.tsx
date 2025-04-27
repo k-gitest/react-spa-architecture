@@ -7,7 +7,7 @@ export const AuthGuard = () => {
 
   if (!session) {
     // セッションがない（認証されていない）場合、ログインページへリダイレクト
-    return <Navigate to="/auth/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // セッションがある（認証済み）の場合、子要素をレンダリング

@@ -32,7 +32,7 @@ export const useProfile = () => {
     mutationFn: ({ file, folderName, extention }: { file: File; folderName: string; extention: string }) =>
       upLoadAvatarService(file, folderName, extention),
     onSuccess: (data, variables) => {
-      updateProfile(variables.folderName, { avatar: data.path, user_name: null });
+      updateProfile(variables.folderName, { avatar: data.path });
     },
   });
 

@@ -17,48 +17,54 @@ export const ProfileManager = () => {
   const session = useSessionStore((state) => state.session);
 
   const [userId, setUserId] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
 
   const { useGetProfile, updateProfile, uploadAvatar } = useProfile();
   const { data, isError, isLoading } = useGetProfile(userId || '');
-
-  const defaultValues = {
-    avatar: '',
-    user_name: '',
-  };
+  const validatedProfileForm = validatedProfile.pick({
+    user_name: true,
+  });
 
   const form = useForm({
-    resolver: zodResolver(validatedProfile),
-    defaultValues: defaultValues,
+    resolver: zodResolver(validatedProfileForm),
+    defaultValues: {
+      user_name: '',
+    },
   });
 
   const handleProfileChangeSubmit = useCallback(
     async (data: Profile) => {
-      if (userId) await updateProfile(userId, data);
+      if (userId) await updateProfile(userId, { user_name: data.user_name });
     },
     [updateProfile, userId],
   );
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAvatarError(null);
     if (userId && e.target.files && e.target.files.length > 0) {
       const folderName = userId;
       const extention = await getExtensionIfAllowed(e.target.files[0]);
       if (extention && data) {
         await uploadAvatar(e.target.files[0], folderName, extention, data.avatar);
       } else {
-        throw new Error('許可された画像形式ではありません。');
+        setAvatarError('許可された画像形式ではありません');
       }
-    }
+    } else setAvatarError('ファイルが選択されていません');
   };
 
   useEffect(() => {
-    if (session?.user.id) setUserId(session.user.id);
+    if (session?.user.id) {
+      setUserId(session.user.id);
+    }
+  }, [session]);
+
+  useEffect(() => {
     if (data) {
       form.reset({
-        avatar: data.avatar || '',
         user_name: data.user_name || '',
       });
     }
-  }, [data, session, form]);
+  }, [data, form]);
 
   if (!session) return <p className="text-center">プロフィールは登録すると閲覧できます</p>;
   if (isError) return <p>データが取得できませんでした</p>;
@@ -76,10 +82,11 @@ export const ProfileManager = () => {
             />
             <AvatarFallback>avatar</AvatarFallback>
           </Avatar>
-          <Label htmlFor="picture">Picture</Label>
+          <Label htmlFor="avatar">Picture</Label>
           <Input id="avatar" type="file" onChange={handleFileUpload} />
+          {avatarError && <p className="color-red-600">{avatarError}</p>}
           <FormWrapper onSubmit={handleProfileChangeSubmit} form={form}>
-            <FormInput label="ユーザー名" placeholder="ユーザー名を入力してください" name="user_name" />
+            <FormInput label="ユーザー名" name="user_name" placeholder="ユーザー名を入力してください" />
             <Button type="submit">更新</Button>
           </FormWrapper>
         </div>
