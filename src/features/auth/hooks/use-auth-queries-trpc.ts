@@ -14,7 +14,7 @@ export const useAuth = () => {
   // サインアップ用
   const signUpMutationOptions = trpc.auth.signUp.mutationOptions({
     onSuccess: (data) => {
-      if (data.session) handleAuthSuccess(data.session, navigate, '/');
+      if (data.session) handleAuthSuccess(data.session, navigate, '/dashboard');
     },
   });
   const signUpMutation = useApiMutation(signUpMutationOptions);
@@ -22,7 +22,7 @@ export const useAuth = () => {
   // サインイン用
   const signInMutationOptions = trpc.auth.signInWithPassword.mutationOptions({
     onSuccess: (data) => {
-      if (data.session) handleAuthSuccess(data.session, navigate, '/');
+      if (data.session) handleAuthSuccess(data.session, navigate, '/dashboard');
     },
   });
   const signInMutation = useApiMutation(signInMutationOptions);

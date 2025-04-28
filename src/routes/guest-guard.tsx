@@ -6,7 +6,7 @@ export const GuestGuard = () => {
 
   if (session) {
     // セッションがある（ログイン済み）の場合、トップページへリダイレクト
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   // セッションがない（未ログイン）の場合、子要素をレンダリング

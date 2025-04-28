@@ -15,13 +15,13 @@ export const useAuth = () => {
   // サインアップ用
   const signUpMutation = useApiMutation<{ user: User | null; session: Session | null }, AuthError, { data: Account }>({
     mutationFn: ({ data }) => signUpAuthService(data),
-    onSuccess: () => navigate('/'),
+    onSuccess: () => navigate('/dashboard'),
   });
 
   // サインイン用
   const signInMutation = useApiMutation<{ user: User | null; session: Session | null }, AuthError, { data: Account }>({
     mutationFn: ({ data }) => signInWithPasswordAuthService(data),
-    onSuccess: () => navigate('/'),
+    onSuccess: () => navigate('/dashboard'),
   });
 
   // OAuth用

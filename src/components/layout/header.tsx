@@ -4,19 +4,9 @@ import { ModeToggle } from '@/components/mode-toggle';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useAuth } from '@/features/auth/hooks/use-auth-queries-tanstack';
 import { useAuth as useAuthTRPC } from '@/features/auth/hooks/use-auth-queries-trpc';
-import { Loader } from 'lucide-react';
 
 export const Header = () => {
   const session = useSessionStore((state) => state.session);
-  const { signOutMutation } = useAuth();
-  const { signOutMutation: signOutMutationTRPC } = useAuthTRPC();
-
-  const handleLogout = async () => {
-    signOutMutation.mutate();
-  };
-  const handleLogoutTRPC = async () => {
-    signOutMutationTRPC.mutate();
-  };
 
   return (
     <header className="text-center px-5 pt-5">
@@ -35,17 +25,7 @@ export const Header = () => {
         {session && (
           <>
             <Button variant="ghost" asChild>
-              <Link to="/auth/setting">Setting</Link>
-            </Button>
-            <Button variant="ghost" asChild onClick={handleLogout} disabled={signOutMutation.isPending}>
-              <Link to="/register">
-                {signOutMutation.isPending && <Loader className="animate-spin" />}ログアウト
-              </Link>
-            </Button>
-            <Button variant="ghost" asChild onClick={handleLogoutTRPC} disabled={signOutMutationTRPC.isPending}>
-              <Link to="/register">
-                {signOutMutationTRPC.isPending && <Loader className="animate-spin" />}ログアウト
-              </Link>
+              <Link to="/dashboard">ダッシュボード</Link>
             </Button>
           </>
         )}
