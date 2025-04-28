@@ -234,3 +234,5 @@ const { isPending, data } = useApiMutation({
 - react18ではtesting-library/react-hooksではなくtesting-library/reactを使用する
 - viteでrequireが使用できないということはvitestでも使用できない
 - shadcn/uiのフォームなどのDOM構造はボタン制御が多く、内部非同期も多いのでawait, waitFor, actの警告がでやすい
+- vitestでは複数の関数をモックする事はできないのでファイルを分割するか処理を分けるかなど対処が必要
+- 例えばある関数が成功したら別の関数が起動して処理を行うなどのモックのexpectは一つになる

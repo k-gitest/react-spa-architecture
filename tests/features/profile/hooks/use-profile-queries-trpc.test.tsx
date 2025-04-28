@@ -77,33 +77,34 @@ describe('useProfile', () => {
     });
   });
 
-  it('uploadAvatar はアバターをアップロードし、以前のアバターを削除する', async () => {
-    const mockDeleteMutateAsync = vi.fn().mockImplementation(async (path) => {
-      console.log('mockDeleteMutateAsync が呼ばれた:', path);
-      return undefined;
-    });
-    const mockUploadMutateAsync = vi.fn().mockImplementation(async (data) => {
-      console.log('mockUploadMutateAsync が呼ばれた:', data);
-      return undefined;
-    });
-  
-    (useApiMutation as ReturnType<typeof vi.fn>)
-      .mockReturnValueOnce({ mutateAsync: mockDeleteMutateAsync })
-      .mockReturnValueOnce({ mutateAsync: mockUploadMutateAsync });
-  
-    (trpc.profile.deleteAvatar.mutationOptions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({});
-    (trpc.profile.uploadAvatar.mutationOptions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({});
-  
+  it('uploadAvatar は currentUrl がある場合、先に deleteAvatar を呼び出す', async () => {
+    const mockDeleteMutateAsync = vi.fn().mockResolvedValue(undefined);
+    (useApiMutation as ReturnType<typeof vi.fn>).mockReturnValue({ mutateAsync: mockDeleteMutateAsync });
+    (trpc.profile.deleteAvatar.mutationOptions as ReturnType<typeof vi.fn>).mockReturnValue({});
+
     const { result } = renderHook(() => useProfile());
-    const { uploadAvatar, deleteAvatar } = result.current;
-    await act(async () => {
-      await deleteAvatar('avatar/path.jpg');
-    });
+    const { uploadAvatar } = result.current;
+
     await act(async () => {
       await uploadAvatar('file-content', 'folder-name', 'jpg', 'avatar/path.jpg?token=123');
     });
+
+    expect(mockDeleteMutateAsync).toHaveBeenCalledWith('avatar/path.jpg');
+  });
   
-    //expect(mockDeleteMutateAsync).toHaveBeenCalledWith('avatar/path.jpg');
+  it('uploadAvatar は currentUrlがない場合、アバターをアップロードする', async () => {
+    const mockUploadMutateAsync = vi.fn().mockResolvedValue(undefined);
+  
+    (useApiMutation as ReturnType<typeof vi.fn>).mockReturnValue({ mutateAsync: mockUploadMutateAsync });
+  
+    (trpc.profile.uploadAvatar.mutationOptions as unknown as ReturnType<typeof vi.fn>).mockReturnValue({});
+  
+    const { result } = renderHook(() => useProfile());
+    const { uploadAvatar } = result.current;
+    await act(async () => {
+      await uploadAvatar('file-content', 'folder-name', 'jpg', null);
+    });
+    
     expect(mockUploadMutateAsync).toHaveBeenCalledWith({
       file: 'file-content',
       folderName: 'folder-name',
