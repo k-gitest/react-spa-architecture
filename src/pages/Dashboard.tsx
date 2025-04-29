@@ -11,8 +11,8 @@ const Dashboard = () => {
         <meta name="description" content="React,vite,shadcn/uiで構築されたspaのメモapp" />
       </Helmet>
       <MemoManager />
-      <MemoManagerTrpc />
       <MemoManagerTanstack />
+      <MemoManagerTrpc />
     </>
   );
 };

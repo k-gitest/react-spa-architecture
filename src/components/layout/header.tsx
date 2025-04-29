@@ -2,8 +2,6 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
 import { useSessionStore } from '@/hooks/use-session-store';
-import { useAuth } from '@/features/auth/hooks/use-auth-queries-tanstack';
-import { useAuth as useAuthTRPC } from '@/features/auth/hooks/use-auth-queries-trpc';
 
 export const Header = () => {
   const session = useSessionStore((state) => state.session);

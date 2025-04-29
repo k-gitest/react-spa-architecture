@@ -11,10 +11,10 @@ import { useApiQuery, useApiMutation } from '@/hooks/use-tanstack-query';
 export const useProfile = () => {
   const queryClient = useQueryClient();
 
-  const useGetProfile = (id: string) => {
+  const useGetProfile = (id: string | null) => {
     return useApiQuery({
       queryKey: ['profile', id],
-      queryFn: () => getProfileService(id),
+      queryFn: () => (id ? getProfileService(id) : Promise.resolve(undefined)),
       enabled: !!id,
     });
   };

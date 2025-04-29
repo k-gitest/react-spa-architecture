@@ -18,3 +18,7 @@ export const MemoSchema = FormSchema.extend({
   created_at: z.string(),
   updated_at: z.string(),
 });
+
+export const MemoCategorySchema = z.object({
+  name: z.string(),
+});

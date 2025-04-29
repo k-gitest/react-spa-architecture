@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormSchema } from '@/features/memo/schemas/memo-form-schema';
@@ -14,17 +14,13 @@ import {
 } from '@/components/form/form-parts';
 import { z } from 'zod';
 import { syncZodErrors } from '@/lib/trpc';
+import { MemoCategory } from '@/features/memo/components/memo-category';
+import { useMemos } from '@/features/memo/hooks/use-memo-queries-tanstack';
 
 const importances = [
   { value: 'high', label: '大' },
   { value: 'medium', label: '中' },
   { value: 'low', label: '小' },
-] as const;
-
-const categories = [
-  { value: 'memo', label: 'メモ' },
-  { value: 'task', label: 'タスク' },
-  { value: 'diary', label: '日記' },
 ] as const;
 
 const tagItems = [
@@ -46,6 +42,11 @@ const defaultMemoFormData = {
 
 type FlattenFormatted = z.inferFlattenedErrors<typeof FormSchema>;
 
+interface CategoryOptions {
+  label: string;
+  value: string;
+}
+
 interface Props {
   onSubmit: (data: MemoFormData) => void;
   initialValues?: MemoFormData;
@@ -53,6 +54,9 @@ interface Props {
 }
 
 export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) => {
+  const { getCategory } = useMemos();
+  const { data: categoryData } = getCategory;
+  const [categories, setCategories] = useState<CategoryOptions[] | null>(null);
   const form = useForm<MemoFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: initialValues || defaultMemoFormData,
@@ -72,14 +76,32 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
   }, [initialValues, externalZodError, form]);
 
   useEffect(() => {
-    syncZodErrors(form, externalZodError)
+    syncZodErrors(form, externalZodError);
   }, [externalZodError, form]);
+
+  useEffect(() => {
+    if (categoryData) {
+      const categoryOptions = categoryData.map((category) => ({
+        label: category.name,
+        value: category.id,
+      }));
+      setCategories(categoryOptions);
+    }
+  }, [categoryData]);
 
   return (
     <div className="flex justify-center">
+      <MemoCategory />
       <FormWrapper onSubmit={handleSubmit} form={form}>
         <FormInput label="タイトル" name="title" placeholder="タイトルを入力してください" />
-        <FormSelect label="カテゴリー" name="category" options={categories} placeholder="カテゴリ選択" />
+        <FormSelect
+          label="カテゴリー"
+          name="category"
+          options={[
+            ...(categories ?? []),
+          ]}
+          placeholder="カテゴリ選択"
+        />
         <FormTextArea label="メモの内容" name="content" placeholder="内容を記入してください" />
         <FormRadioGroup label="重要度" name="importance" options={importances} />
         <FormCheckboxGroup label="タグ" name="tags" options={tagItems} />

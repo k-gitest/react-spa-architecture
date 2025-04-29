@@ -15,20 +15,19 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useProfile } from '@/features/profile/hooks/use-profile-queries-tanstack';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
 import { getAvatarUrl } from '@/lib/supabase';
 
 export const AuthHeader = () => {
   const session = useSessionStore((state) => state.session);
-  const [user, setUser] = useState<User | null>(null);
+  const [userId, setUserId] = useState<string | null>(null)
   const { signOutMutation } = useAuth();
   const { signOutMutation: signOutMutationTRPC } = useAuthTRPC();
   const { useGetProfile } = useProfile();
-  const { data } = useGetProfile(user?.id || '');
+  const { data } = useGetProfile(userId);
 
   useEffect(() => {
     if (session?.user) {
-      setUser(session.user);
+      setUserId(session.user.id)
     }
   }, [session]);
 
@@ -49,16 +48,16 @@ export const AuthHeader = () => {
         <nav className="flex justify-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger>
-                <Avatar>
-                  <AvatarImage
-                    src={data?.avatar ? getAvatarUrl(data.avatar) : session?.user.user_metadata.avatar_url}
-                    alt="avatar"
-                  />
-                  <AvatarFallback>avatar</AvatarFallback>
-                </Avatar>
+              <Avatar>
+                <AvatarImage
+                  src={data?.avatar ? getAvatarUrl(data.avatar) : session?.user.user_metadata.avatar_url}
+                  alt="avatar"
+                />
+                <AvatarFallback>avatar</AvatarFallback>
+              </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>{data?.user_name ?? session?.user.email}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <Link to="/auth/setting">Setting</Link>

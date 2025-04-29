@@ -146,13 +146,13 @@ export const FormSelect = ({
   options: readonly { value: string; label: string }[];
   name: string;
   placeholder?: string;
-}& SelectHTMLAttributes<HTMLSelectElement>) => (
+} & SelectHTMLAttributes<HTMLSelectElement>) => (
   <FormField
     name={name}
     render={({ field }) => (
       <FormItem>
         <FormLabel>{label}</FormLabel>
-        <Select onValueChange={field.onChange} value={field.value}>
+        <Select onValueChange={field.onChange} value={field.value} disabled={!options || options.length === 0}>
           <FormControl>
             <SelectTrigger>
               <SelectValue placeholder={placeholder} />

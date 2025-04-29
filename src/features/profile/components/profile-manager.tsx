@@ -20,7 +20,7 @@ export const ProfileManager = () => {
   const [avatarError, setAvatarError] = useState<string | null>(null);
 
   const { useGetProfile, updateProfile, uploadAvatar } = useProfile();
-  const { data, isError, isLoading } = useGetProfile(userId || '');
+  const { data, isError, isLoading } = useGetProfile(userId);
   const validatedProfileForm = validatedProfile.pick({
     user_name: true,
   });

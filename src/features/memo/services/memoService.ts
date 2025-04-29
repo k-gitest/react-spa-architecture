@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { MemoFormData } from '@/features/memo/types/memo-form-data';
+import { MemoFormData, Category } from '@/features/memo/types/memo-form-data';
 
 export const fetchMemosService = async () => {
   const { data, error } = await supabase.from('memos').select('*').order('created_at', { ascending: false });
@@ -26,4 +26,16 @@ export const updateMemoService = async (id: string, updates: MemoFormData) => {
 export const deleteMemoService = async (id: string) => {
   const { error } = await supabase.from('memos').delete().eq('id', id);
   if (error) throw error;
+};
+
+export const getCategoryService = async () => {
+  const { data, error } = await supabase.from('categories').select('*');
+  if (error) throw error;
+  return data;
+};
+
+export const addCategoryService = async (category: Category) => {
+  const { data, error } = await supabase.from('categories').insert(category).single();
+  if (error) throw error;
+  return data;
 };
