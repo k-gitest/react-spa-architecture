@@ -15,21 +15,13 @@ import {
 import { z } from 'zod';
 import { syncZodErrors } from '@/lib/trpc';
 import { MemoCategory } from '@/features/memo/components/memo-category';
+import { MemoTag } from '@/features/memo/components/memo-tag';
 import { useMemos } from '@/features/memo/hooks/use-memo-queries-tanstack';
 
 const importances = [
   { value: 'high', label: '大' },
   { value: 'medium', label: '中' },
   { value: 'low', label: '小' },
-] as const;
-
-const tagItems = [
-  { id: 'recents', label: 'Recents' },
-  { id: 'home', label: 'Home' },
-  { id: 'applications', label: 'Applications' },
-  { id: 'desktop', label: 'Desktop' },
-  { id: 'downloads', label: 'Downloads' },
-  { id: 'documents', label: 'Documents' },
 ] as const;
 
 const defaultMemoFormData = {
@@ -47,6 +39,11 @@ interface CategoryOptions {
   value: string;
 }
 
+interface TagsOptions {
+  label: string;
+  id: string;
+}
+
 interface Props {
   onSubmit: (data: MemoFormData) => void;
   initialValues?: MemoFormData;
@@ -54,9 +51,11 @@ interface Props {
 }
 
 export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) => {
-  const { getCategory } = useMemos();
+  const { getCategory, fetchTags } = useMemos();
   const { data: categoryData } = getCategory;
+  const { data: tagsData } = fetchTags;
   const [categories, setCategories] = useState<CategoryOptions[] | null>(null);
+  const [tags, setTags] = useState<TagsOptions[] | null>(null);
   const form = useForm<MemoFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: initialValues || defaultMemoFormData,
@@ -89,9 +88,20 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
     }
   }, [categoryData]);
 
+  useEffect(() => {
+    if (tagsData) {
+      const tagsOptions = tagsData.map((tag) => ({
+        label: tag.name,
+        id: tag.id,
+      }));
+      setTags(tagsOptions);
+    }
+  }, [tagsData]);
+
   return (
     <div className="flex justify-center">
       <MemoCategory />
+      <MemoTag />
       <FormWrapper onSubmit={handleSubmit} form={form}>
         <FormInput label="タイトル" name="title" placeholder="タイトルを入力してください" />
         <FormSelect
@@ -104,7 +114,9 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
         />
         <FormTextArea label="メモの内容" name="content" placeholder="内容を記入してください" />
         <FormRadioGroup label="重要度" name="importance" options={importances} />
-        <FormCheckboxGroup label="タグ" name="tags" options={tagItems} />
+        <FormCheckboxGroup label="タグ" name="tags" options={[
+            ...(tags ?? []),
+          ]} />
         {form.formState.errors?.root && <p className="text-sm text-red-500">{form.formState.errors.root?.message}</p>}
         <div className="flex justify-center">
           <Button type="submit" className="w-32">

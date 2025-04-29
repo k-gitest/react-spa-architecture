@@ -8,8 +8,10 @@ import {
   deleteMemoService,
   addCategoryService,
   getCategoryService,
+  addTagService,
+  fetchTagsService,
 } from '@/features/memo/services/memoService';
-import { Memo, MemoFormData, Category } from '@/features/memo/types/memo-form-data';
+import { Memo, MemoFormData, Category, Tag } from '@/features/memo/types/memo-form-data';
 import { toast } from '@/hooks/use-toast';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useApiQuery, useApiMutation } from '@/hooks/use-tanstack-query';
@@ -67,11 +69,27 @@ export const useMemos = () => {
     queryFn: () => getCategoryService(),
     enabled: !!session?.user.id,
   });
+
   // カテゴリ追加用
   const addCategoryMutation = useApiMutation<void, Error, Category>({
     mutationFn: (data) => addCategoryService(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['category'] });
+    },
+  });
+
+  // タグ取得用
+  const fetchTags = useApiQuery({
+    queryKey: ['tag'],
+    queryFn: () => fetchTagsService(),
+    enabled: !!session?.user.id,
+  });
+
+  // タグ追加用
+  const addTagMutation = useApiMutation<void, Error, Tag>({
+    mutationFn: (data) => addTagService(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tag'] });
     },
   });
 
@@ -104,6 +122,13 @@ export const useMemos = () => {
     [addCategoryMutation],
   );
 
+  const addTag = useCallback(
+    async (data: Tag & { user_id: string }) => {
+      await addTagMutation.mutateAsync(data);
+    },
+    [addTagMutation],
+  );
+
   return {
     memos: memosQuery.data,
     isMemosLoading: memosQuery.isLoading,
@@ -115,5 +140,7 @@ export const useMemos = () => {
     deleteMemo,
     addCategory,
     getCategory,
+    addTag,
+    fetchTags,
   };
 };

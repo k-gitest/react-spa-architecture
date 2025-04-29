@@ -22,3 +22,7 @@ export const MemoSchema = FormSchema.extend({
 export const MemoCategorySchema = z.object({
   name: z.string(),
 });
+
+export const MemoTagSchema = z.object({
+  name: z.string(),
+});

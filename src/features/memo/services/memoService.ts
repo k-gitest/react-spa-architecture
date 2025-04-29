@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { MemoFormData, Category } from '@/features/memo/types/memo-form-data';
+import { MemoFormData, Category, Tag } from '@/features/memo/types/memo-form-data';
 
 export const fetchMemosService = async () => {
   const { data, error } = await supabase.from('memos').select('*').order('created_at', { ascending: false });
@@ -36,6 +36,16 @@ export const getCategoryService = async () => {
 
 export const addCategoryService = async (category: Category) => {
   const { data, error } = await supabase.from('categories').insert(category).single();
+  if (error) throw error;
+  return data;
+};
+export const fetchTagsService = async () => {
+  const { data, error } = await supabase.from('tags').select('*');
+  if (error) throw error;
+  return data;
+};
+export const addTagService = async (tag: Tag) => {
+  const { data, error } = await supabase.from('tags').insert(tag).single();
   if (error) throw error;
   return data;
 };

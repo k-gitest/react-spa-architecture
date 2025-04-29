@@ -13,6 +13,7 @@ model User {
   memos   Memo[]
   profile Profile?
   categories Category[]
+  tags    Tag[]
 
   @@map("users")
 }
@@ -41,6 +42,7 @@ model Memo {
   updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
   user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   memo_categories MemoCategory[]
+  memo_tags MemoTag[]
 
   @@map("memos")
 }
@@ -51,6 +53,8 @@ model Category {
   user_id  String         @db.Uuid
   user    User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
   memo_categories MemoCategory[]
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@unique([user_id, name])
   @@map("categories")
@@ -64,4 +68,27 @@ model MemoCategory {
 
   @@id([memo_id, category_id])
   @@map("memo_categories")
+}
+
+model Tag {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique @db.VarChar(50)
+  memos      MemoTag[]
+  user_id    String   @db.Uuid
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@unique([user_id, name])
+  @@map("tags")
+}
+
+model MemoTag {
+  memoId   String @db.Uuid
+  memo     Memo   @relation(fields: [memoId], references: [id], onDelete: Cascade)
+  tagId    Int
+  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([memoId, tagId])
+  @@map("memo_tags")
 }
