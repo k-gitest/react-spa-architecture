@@ -1,7 +1,6 @@
-import { Hono } from 'https://deno.land/x/hono@v3.11.2/mod.ts';
+import { Hono, Context } from 'hono';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { corsMiddleware } from '../_shared/cors.ts';
-import type { Context } from 'https://deno.land/x/hono@v3.11.2/mod.ts';
 
 const app = new Hono();
 
@@ -25,8 +24,7 @@ app.post('/delete-user-account', async (c: Context) => {
             status: error.status,
             code: error.code,
           },
-        },
-        error.status || 400,
+        }
       );
     }
 

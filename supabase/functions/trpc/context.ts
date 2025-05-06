@@ -1,8 +1,11 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch';
+import { Database } from '../_shared/database.types.ts';
+import { PrismaClient } from '../../../generated/client/deno/edge.ts';
 
 export interface Context {
-  supabase: SupabaseClient;
+  supabase: SupabaseClient<Database>;
+  prisma: PrismaClient;
   req: Request;
 }
 
@@ -15,7 +18,7 @@ export async function createContext(opts: FetchCreateContextFnOptions) {
   if (!token) throw new Error(`トークンが見つかりませんでした`);
 
   // リクエストごとに Supabase クライアントを初期化し、認証ヘッダーを設定
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     global: {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -31,8 +34,13 @@ export async function createContext(opts: FetchCreateContextFnOptions) {
     console.log(`未認証ユーザー: ${error}`);
   }
 
+  const prisma = new PrismaClient({
+    datasourceUrl: Deno.env.get('DATABASE_URL'),
+  });
+
   return {
     supabase,
+    prisma,
     req: opts.req,
   } satisfies Context;
 }

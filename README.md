@@ -3,11 +3,12 @@
 拡張性と保守性を重視して設計されたReactベースのSPAメモアプリケーション 
 
 ## 目的
-- 拡張的で効率的な運用保守ができるアーキテクチャと単一責務のレイヤード設計を目指す
+- 拡張的で効率的な運用保守ができるアーキテクチャと責務分離のレイヤード設計を目指す
 - shadcn/uiのUIを使用してパーツ別カスタムUIコンポーネントを作成して再利用可能にする
 - supabase, tanstack-query, tRPCの各クライアントを使用してカスタムフックを作成して再利用可能にする
 - supabaseをバックエンドとして使用する（auth・database postgres・edge functions）
 - prismaをデータベース管理として使用する（DBスキーマ・マイグレーション）
+- edgeのORMにprisma・drizzleを使用する（トランザクション・リレーション）
 
 ## 開発環境  
 - react 18.2.0
@@ -24,6 +25,7 @@
 - tailwindcss 3.4.13
 - react-helmet-async 2.0.5
 - prisma 6.5.0
+- drizzle-orm 0.32.2
 - supabase 2.19.7
 - deno 2.2.5
 - hono 4.0.0
@@ -236,3 +238,7 @@ const { isPending, data } = useApiMutation({
 - shadcn/uiのフォームなどのDOM構造はボタン制御が多く、内部非同期も多いのでawait, waitFor, actの警告がでやすい
 - vitestでは複数の関数をモックする事はできないのでファイルを分割するか処理を分けるかなど対処が必要
 - 例えばある関数が成功したら別の関数が起動して処理を行うなどのモックのexpectは一つになる
+- supabase edgeでのprisma clientはdeno用のedgeを使用する必要がある
+- supabase edgeでprismaするにはdeno用adapterがないのでaccelerate経由でクエリを送信する必要がある
+- accelerateを使用しない場合、pgpl関数をRPCで呼ぶ、設計変える、drizzleに変えるなどがある
+- prismaでカラムを配列型にするとnot nullにならないので後でSQLで行う必要がある

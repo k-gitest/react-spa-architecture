@@ -7,8 +7,7 @@ export const FormSchema = z.object({
     .string()
     .refine((value) => ['high', 'medium', 'low'].includes(value), { message: '有効な重要度を選択してください' }),
   category: z
-    .string()
-    .refine((value) => ['memo', 'task', 'diary'].includes(value), { message: '有効なカテゴリを選択してください' }),
+    .string({ message: '有効なカテゴリを選択してください' }),
   tags: z.array(z.string()).min(1, { message: 'タグは必須です' }),
 });
 

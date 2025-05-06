@@ -21,9 +21,9 @@ export const MemoManagerTanstack = () => {
     useGetMemo,
     addMemo,
     updateMemo,
-    deleteMemo
+    deleteMemo,
   } = useMemos();
-  
+
   const { data: editMemoData } = useGetMemo(editIndex);
 
   const handleAddSubmit = useCallback(
@@ -37,7 +37,7 @@ export const MemoManagerTanstack = () => {
 
   const handleUpdateSubmit = useCallback(
     async (editIndex: string, data: MemoFormData) => {
-      updateMemo( editIndex, data );
+      updateMemo(editIndex, data);
     },
     [updateMemo],
   );

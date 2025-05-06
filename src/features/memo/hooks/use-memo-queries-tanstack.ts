@@ -71,7 +71,7 @@ export const useMemos = () => {
   });
 
   // カテゴリ追加用
-  const addCategoryMutation = useApiMutation<void, Error, Category>({
+  const addCategoryMutation = useApiMutation<void, Error, Category & { user_id: string }>({
     mutationFn: (data) => addCategoryService(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['category'] });
@@ -86,7 +86,7 @@ export const useMemos = () => {
   });
 
   // タグ追加用
-  const addTagMutation = useApiMutation<void, Error, Tag>({
+  const addTagMutation = useApiMutation<void, Error, Tag & { user_id: string }>({
     mutationFn: (data) => addTagService(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tag'] });

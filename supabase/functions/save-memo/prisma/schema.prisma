@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["deno"]
+  output          = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      String   @id @db.Uuid
+  memos   Memo[]
+  profile Profile?
+  categories Category[]
+  tags    Tag[]
+
+  @@map("users")
+}
+
+model Profile {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @unique @db.Uuid
+  avatar     String?
+  user_name  String?  @unique
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Memo {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @db.Uuid
+  title      String   @db.VarChar(100)
+  content    String
+  importance String
+  category   MemoCategory[]
+  tags       MemoTag[]
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("memos")
+}
+
+model Category {
+  id      Int            @id @default(autoincrement())
+  name    String         @db.VarChar(50)
+  user_id  String         @db.Uuid
+  user    User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  memo_categories MemoCategory[]
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@unique([user_id, name])
+  @@map("categories")
+}
+
+model MemoCategory {
+  memo_id     String   @db.Uuid
+  memo        Memo     @relation(fields: [memo_id], references: [id], onDelete: Cascade)
+  category_id Int
+  category    Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
+
+  @@id([memo_id, category_id])
+  @@map("memo_categories")
+}
+
+model Tag {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique @db.VarChar(50)
+  memos      MemoTag[]
+  user_id    String   @db.Uuid
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@unique([user_id, name])
+  @@map("tags")
+}
+
+model MemoTag {
+  memo_id   String @db.Uuid
+  memo     Memo   @relation(fields: [memo_id], references: [id], onDelete: Cascade)
+  tag_id    Int
+  tag      Tag    @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+
+  @@id([memo_id, tag_id])
+  @@map("memo_tags")
+}

@@ -1,12 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FetchClient } from '@/lib/fetchClient';
 import { trpc as trpcClient } from '@/lib/trpc';
 import { MainWrapper } from '@/components/layout/main-wrapper';
 import { Helmet } from 'react-helmet-async';
 import { TRPCClientError } from '@trpc/client';
+import { SUPABASE_ANON_KEY } from '@/lib/constants';
+import { useSessionStore } from '@/hooks/use-session-store';
+import { EDGE_REST_URI } from '@/lib/constants';
 
 const http = new FetchClient();
+const edge = new FetchClient({
+  baseUrl: EDGE_REST_URI,
+  timeout: 5000,
+  maxRetry: 2,
+});
 
 const fetchTodo = async (): Promise<Todo[]> => {
   console.log('fetch!!');
@@ -21,6 +29,7 @@ interface Todo {
 }
 
 const Fetch = () => {
+  const session = useSessionStore((state) => state.session);
   const [todos, setTodos] = useState<Todo[]>([]);
 
   const queryClient = useQueryClient();
@@ -31,40 +40,66 @@ const Fetch = () => {
     enabled: false,
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchEdge = useCallback(
+    async (id: string) => {
       try {
-        const data = await http.get<Todo[]>('/todos');
-        setTodos(data);
-      } catch (err) {
-        console.log(err);
+        const result = await edge.post('/save-memo/drizzle', {
+          headers: {
+            Authorization: `Bearer ${session?.access_token || SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({ name: 'test', user_id: id }),
+        });
+        console.log(result);
+      } catch (e) {
+        console.error(e);
       }
-    };
-    fetchData();
+    },
+    [session?.access_token] 
+  );
+
+  const fetchData = useCallback(async () => {
+    try {
+      const data = await http.get<Todo[]>('/todos');
+      setTodos(data);
+    } catch (err) {
+      console.log(err);
+    }
   }, []);
 
-  const handleFetch = () => {
-    return queryClient.invalidateQueries({ queryKey: ['todo'] });
-  };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-  // createTRPCOptionsProxyの場合
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchEdge(session.user.id);
+    }
+  }, [session?.user?.id, fetchEdge]);
+
+  const handleFetch = useCallback(() => {
+    return queryClient.invalidateQueries({ queryKey: ['todo'] });
+  }, [queryClient]);
+
   const helloQuery = useQuery(trpcClient.util.hello.queryOptions());
   const greetQuery = useQuery(trpcClient.util.greet.queryOptions('hoge'));
   const getMemosQuery = useQuery(trpcClient.memo.getMemos.queryOptions());
-  const memosKey = trpcClient.memo.getMemos.queryKey();
+  const memosKey = useMemo(() => trpcClient.memo.getMemos.queryKey(), []);
 
   useEffect(() => {
     if (getMemosQuery.error instanceof TRPCClientError) {
       console.log(getMemosQuery.error?.data);
     }
+  }, [getMemosQuery.error]);
+
+  useEffect(() => {
     if (greetQuery.error?.data?.zodError) {
       console.log(greetQuery.error?.data.zodError);
     }
-  }, [greetQuery, getMemosQuery]);
+  }, [greetQuery.error?.data?.zodError]);
 
-  const invalidateMemoKey = () => {
+  const invalidateMemoKey = useCallback(() => {
     return queryClient.invalidateQueries({ queryKey: memosKey });
-  };
+  }, [queryClient, memosKey]);
 
   if (isLoading) return <p>Loading users...</p>;
   if (isError) return <p>Error fetching users: {error?.message}</p>;

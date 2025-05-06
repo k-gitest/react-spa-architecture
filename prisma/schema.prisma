@@ -1,5 +1,7 @@
 generator client {
   provider        = "prisma-client-js"
+  previewFeatures = ["deno"]
+  output          = "../generated/client"
 }
 
 datasource db {
@@ -36,13 +38,11 @@ model Memo {
   title      String   @db.VarChar(100)
   content    String
   importance String
-  category   String
-  tags       String[] @default([])
+  category   MemoCategory[]
+  tags       MemoTag[]
   created_at DateTime @default(now()) @db.Timestamptz(3)
   updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
   user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  memo_categories MemoCategory[]
-  memo_tags MemoTag[]
 
   @@map("memos")
 }
@@ -84,11 +84,11 @@ model Tag {
 }
 
 model MemoTag {
-  memoId   String @db.Uuid
-  memo     Memo   @relation(fields: [memoId], references: [id], onDelete: Cascade)
-  tagId    Int
-  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  memo_id   String @db.Uuid
+  memo     Memo   @relation(fields: [memo_id], references: [id], onDelete: Cascade)
+  tag_id    Int
+  tag      Tag    @relation(fields: [tag_id], references: [id], onDelete: Cascade)
 
-  @@id([memoId, tagId])
+  @@id([memo_id, tag_id])
   @@map("memo_tags")
 }

@@ -1,9 +1,18 @@
 import { z } from 'zod';
 
 export const memoFormSchema = z.object({
-  title: z.string().min(1),
-  content: z.string().min(1),
-  importance: z.string().refine((value) => ['high', 'medium', 'low'].includes(value)),
-  category: z.string().refine((value) => ['memo', 'task', 'diary'].includes(value)),
-  tags: z.array(z.string()).min(1),
+  title: z.string().min(1, { message: 'タイトルは一文字以上にしてください' }),
+  content: z.string().min(1, { message: '内容は一文字以上にしてください' }),
+  importance: z
+    .string()
+    .refine((value) => ['high', 'medium', 'low'].includes(value), { message: '有効な重要度を選択してください' }),
+  category: z.string({ message: '有効なカテゴリを選択してください' }),
+  tags: z.array(z.string()).min(1, { message: 'タグは必須です' }),
+});
+
+export const memoSchema = memoFormSchema.extend({
+  id: z.string(),
+  user_id: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
 });

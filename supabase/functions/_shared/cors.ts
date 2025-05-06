@@ -1,4 +1,4 @@
-import { cors } from 'https://deno.land/x/hono@v3.11.2/middleware.ts';
+import { cors } from 'npm:hono@^4.0.0/cors';
 
 const allowedOrigins = ['http://localhost:3000'];
 const domainUrl = Deno.env.get('DOMAIN_URL');
@@ -10,3 +10,10 @@ export const corsMiddleware = cors({
   allowMethods: ['GET', 'POST', 'OPTIONS'],
   credentials: false,
 });
+
+export const corsHeaders = {
+  'Access-Control-Allow-Origin': Deno.env.get('DOMAIN_URL') ?? 'http://localhost:3000',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Content-Type': 'application/json',
+};

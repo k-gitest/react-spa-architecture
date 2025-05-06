@@ -12,7 +12,7 @@ interface MemoListProps {
 export const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProps) => {
   return (
     <div className="grid grid-cols-4 gap-4 p-4">
-      {memoData.map((memo, index) => (
+      {memoData?.map((memo, index) => (
         <Card key={index}>
           <CardHeader>
             <CardTitle className="break-words">{memo.title}</CardTitle>
@@ -24,7 +24,7 @@ export const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProp
           </CardContent>
           <CardFooter>
             <ul>
-              {memo.tags.map((tag, index) => (
+              {memo?.tags?.map((tag, index) => (
                 <li key={index}>{tag}</li>
               ))}
             </ul>

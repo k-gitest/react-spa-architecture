@@ -56,6 +56,7 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
   const { data: tagsData } = fetchTags;
   const [categories, setCategories] = useState<CategoryOptions[] | null>(null);
   const [tags, setTags] = useState<TagsOptions[] | null>(null);
+
   const form = useForm<MemoFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: initialValues || defaultMemoFormData,
@@ -70,6 +71,7 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
 
   useEffect(() => {
     if (initialValues && !externalZodError) {
+      console.log(initialValues);
       form.reset(initialValues);
     }
   }, [initialValues, externalZodError, form]);
@@ -82,7 +84,7 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
     if (categoryData) {
       const categoryOptions = categoryData.map((category) => ({
         label: category.name,
-        value: category.id,
+        value: String(category.id),
       }));
       setCategories(categoryOptions);
     }
@@ -92,7 +94,7 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
     if (tagsData) {
       const tagsOptions = tagsData.map((tag) => ({
         label: tag.name,
-        id: tag.id,
+        id: String(tag.id),
       }));
       setTags(tagsOptions);
     }
@@ -104,19 +106,10 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
       <MemoTag />
       <FormWrapper onSubmit={handleSubmit} form={form}>
         <FormInput label="タイトル" name="title" placeholder="タイトルを入力してください" />
-        <FormSelect
-          label="カテゴリー"
-          name="category"
-          options={[
-            ...(categories ?? []),
-          ]}
-          placeholder="カテゴリ選択"
-        />
+        <FormSelect label="カテゴリー" name="category" options={[...(categories ?? [])]} placeholder="カテゴリ選択" />
         <FormTextArea label="メモの内容" name="content" placeholder="内容を記入してください" />
         <FormRadioGroup label="重要度" name="importance" options={importances} />
-        <FormCheckboxGroup label="タグ" name="tags" options={[
-            ...(tags ?? []),
-          ]} />
+        <FormCheckboxGroup label="タグ" name="tags" options={[...(tags ?? [])]} />
         {form.formState.errors?.root && <p className="text-sm text-red-500">{form.formState.errors.root?.message}</p>}
         <div className="flex justify-center">
           <Button type="submit" className="w-32">
