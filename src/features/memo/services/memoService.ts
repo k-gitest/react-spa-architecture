@@ -98,7 +98,14 @@ export const getMemoService = async (id: string) => {
 };
 
 export const updateMemoService = async (id: string, updates: MemoFormData) => {
-  const { error } = await supabase.from('memos').update(updates).eq('id', id);
+  //const { error } = await supabase.from('memos').update(updates).eq('id', id);
+  const formatted = {
+    id: id,
+    ...updates,
+    category: Number(updates.category),
+    tags: updates.tags.map((t) => Number(t)),
+  };
+  const { error } = await supabase.functions.invoke('save-memo', { body: formatted, method: "PUT" });
   if (error) throw error;
 };
 

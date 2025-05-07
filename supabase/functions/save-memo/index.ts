@@ -3,6 +3,7 @@ import { createClient, AuthError } from 'jsr:@supabase/supabase-js@2';
 import { Prisma, PrismaClient } from '../../../generated/client/deno/edge.ts';
 import { routeDrizzle } from './drizzle.ts';
 import { corsHeaders } from '../_shared/cors.ts';
+import { PrismaError, prismaErrorHandler } from '../_shared/prisma-error.ts';
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -23,24 +24,26 @@ Deno.serve(async (req: Request) => {
 
     const { data, error } = await supabase.auth.getUser(token);
     if (error) {
-      console.error(error);
       throw error;
     }
 
     const url = new URL(req.url);
+
     if (req.method === 'POST' && url.pathname.endsWith('/drizzle')) {
       return routeDrizzle(saveData, data.user.id);
-    } else {
-      const prisma = new PrismaClient({
-        datasourceUrl: Deno.env.get('DATABASE_URL'),
-      });
+    }
 
-      console.log(saveData);
-      try {
-        const result = await prisma.$transaction(async (tx) => {
+    const prisma = new PrismaClient({
+      datasourceUrl: Deno.env.get('DATABASE_URL'),
+    });
+
+    try {
+      let result;
+      if (req.method === 'POST') {
+        result = await prisma.$transaction(async (tx) => {
           const newMemo = await tx.memo.create({
             data: {
-              user_id: saveData.user_id,
+              user_id: data.user.id,
               title: saveData.title,
               content: saveData.content,
               importance: saveData.importance,
@@ -57,68 +60,100 @@ Deno.serve(async (req: Request) => {
 
           return newMemo;
         });
-
-        return new Response(JSON.stringify({ result, ok: 'true' }), {
-          headers: corsHeaders,
-          status: 200,
+      } else if (req.method === 'PUT') {
+        // メモの所有者確認
+        const existingMemo = await prisma.memo.findUnique({
+          where: { id: saveData.id },
+          select: { user_id: true }
         });
-      } catch (error) {
-        console.error('メモとタグの保存に失敗しました:', error);
-        throw error;
-      } finally {
-        await prisma.$disconnect();
+
+        // メモが存在しない場合
+        if (!existingMemo) {
+          return new Response(
+            JSON.stringify({ error: 'メモが見つかりません', ok: false }),
+            { headers: corsHeaders, status: 404 }
+          );
+        }
+
+        // 所有者チェック
+        if (existingMemo.user_id !== data.user.id) {
+          return new Response(
+            JSON.stringify({ error: '権限がありません', ok: false }),
+            { headers: corsHeaders, status: 403 }
+          );
+        }
+
+        result = await prisma.$transaction(async (tx) => {
+          const updateData = await tx.memo.update({
+            where: {
+              id: saveData.id,
+            },
+            data: {
+              title: saveData.title,
+              content: saveData.content,
+              importance: saveData.importance,
+              category: {
+                deleteMany: {},
+                create: saveData.category ? { category_id: Number(saveData.category) } : undefined,
+              },
+              tags: {
+                deleteMany: {},
+                create: saveData.tags.map((tagId: number) => ({ tag_id: Number(tagId) })),
+              },
+            },
+          });
+          return updateData;
+        });
       }
+
+      return new Response(JSON.stringify({ result, ok: true }), {
+        headers: corsHeaders,
+        status: 200,
+      });
+    } catch (error) {
+      throw new PrismaError(error);
+    } finally {
+      await prisma.$disconnect();
     }
   } catch (error) {
-    console.error(error);
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
-        return new Response(
-          JSON.stringify({
-            message: 'このメールアドレスは既に使われています',
-            ok: false,
-          }),
-          {
-            headers: corsHeaders,
-            status: 400,
-          },
-        );
-      } else {
-        console.error(error);
-        return new Response(
-          JSON.stringify({
-            message: error,
-            ok: false,
-          }),
-          {
-            headers: corsHeaders,
-            status: 400,
-          },
-        );
+    let resultError = null;
+    let status = 400;
+
+    if (error instanceof PrismaError && error.name === 'PrismaError') {
+      resultError = prismaErrorHandler(error);
+
+      if (error.cause instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.cause.code === 'P2002') {
+          status = 409;
+        }
+      } else if (
+        error.cause instanceof Prisma.PrismaClientInitializationError ||
+        error.cause instanceof Prisma.PrismaClientRustPanicError ||
+        error.cause instanceof Prisma.PrismaClientUnknownRequestError
+      ) {
+        status = 500;
       }
-    }
-    if (error instanceof AuthError) {
-      return new Response(
-        JSON.stringify({
-          // AuthError型で返す
-          error: {
-            name: error.name,
-            message: error.message,
-            status: error.status,
-            code: error.code,
-          },
-        }),
-        {
-          headers: corsHeaders,
-          status: error.status || 400,
-        },
-      );
+    } else if (error instanceof AuthError) {
+      // AuthError型で返す
+      resultError = {
+        name: error.name,
+        message: error.message,
+        status: error.status,
+        code: error.code,
+      };
     } else {
-      console.error(error);
-      return new Response(JSON.stringify({ error: error }), {
-        headers: corsHeaders,
-        status: 400,
-      });
+      resultError = { message: '予期せぬエラーが発生しました。', name: 'UnknownError' };
     }
+
+    return new Response(
+      JSON.stringify({
+        error: resultError,
+        ok: false,
+      }),
+      {
+        headers: corsHeaders,
+        status: status,
+      },
+    );
   }
 });

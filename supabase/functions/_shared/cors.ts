@@ -7,13 +7,13 @@ if (domainUrl) allowedOrigins.push(domainUrl);
 export const corsMiddleware = cors({
   origin: allowedOrigins,
   allowHeaders: ['Content-Type', 'Authorization', 'x-client-info', 'apikey'],
-  allowMethods: ['GET', 'POST', 'OPTIONS'],
+  allowMethods: ['GET', 'POST', 'PUT', 'OPTIONS'],
   credentials: false,
 });
 
 export const corsHeaders = {
   'Access-Control-Allow-Origin': Deno.env.get('DOMAIN_URL') ?? 'http://localhost:3000',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, GET, PUT, OPTIONS',
   'Content-Type': 'application/json',
 };

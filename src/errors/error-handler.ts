@@ -30,6 +30,10 @@ export const errorHandler = (error: unknown) => {
       //toast({ title: `${errorMessage}` });
       return;
     }
+    if (error.data.prismaError) {
+      toast({ title: `${error.cause?.message}` });
+      return;
+    }
 
     const setPostgrestError = mapTRPCErrorCodeToPostgrestErrorCode(error.data);
     const errorMessage = handleApiError(setPostgrestError);

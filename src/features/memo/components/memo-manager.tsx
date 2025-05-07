@@ -121,6 +121,7 @@ export const MemoManager = () => {
         dialogTitle="Memo"
         dialogDescription="メモを残そう"
         className="flex justify-center"
+        hasOverflow={true}
       >
         <MemoForm onSubmit={handleFormSubmit} initialValues={editMemo} />
       </ResponsiveDialog>

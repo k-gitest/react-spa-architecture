@@ -178,6 +178,7 @@ export const memoRouter = router({
               },
             },
           });
+          return updateMmemo;
         });
 
         return { success: true };
