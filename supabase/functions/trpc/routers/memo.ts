@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { router, procedure } from '../trpc.ts';
 import { memoFormSchema } from '../schema/memo.ts';
+import { PrismaError } from '../../_shared/prisma-error.ts';
 //import { TRPCError } from '@trpc/server';
 
 export const memoRouter = router({
@@ -118,7 +119,7 @@ export const memoRouter = router({
       //const { error } = await ctx.supabase.from('memos').insert(input);
       //if(error) throw error;
 
-      try{
+      try {
         const result = await ctx.prisma.$transaction(async (tx) => {
           const newMemo = await tx.memo.create({
             data: {
@@ -136,15 +137,13 @@ export const memoRouter = router({
               },
             },
           });
-  
+
           return newMemo;
         });
         return { success: true };
+      } catch (error) {
+        throw new PrismaError(error);
       }
-      catch(error){
-        throw error;
-      }
-      
     }),
 
   // メモの更新
@@ -156,10 +155,35 @@ export const memoRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { error } = await ctx.supabase.from('memos').update(input.data).eq('id', input.id);
+      //const { error } = await ctx.supabase.from('memos').update(input.data).eq('id', input.id);
+      //if (error) throw error;
 
-      if (error) throw error;
-      return { success: true };
+      try {
+        const result = await ctx.prisma.$transaction(async (tx) => {
+          const updateMmemo = await tx.memo.update({
+            where: {
+              id: input.id,
+            },
+            data: {
+              title: input.data.title,
+              content: input.data.content,
+              importance: input.data.importance,
+              category: {
+                deleteMany: {},
+                create: input.data.category ? { category_id: Number(input.data.category) } : undefined,
+              },
+              tags: {
+                deleteMany: {},
+                create: input.data.tags.map((tagId) => ({ tag_id: Number(tagId) })),
+              },
+            },
+          });
+        });
+
+        return { success: true };
+      } catch (error) {
+        throw new PrismaError(error);
+      }
     }),
 
   // メモの削除
