@@ -30,7 +30,7 @@ Deno.serve(async (req: Request) => {
     const url = new URL(req.url);
 
     if (req.method === 'POST' && url.pathname.endsWith('/drizzle')) {
-      return routeDrizzle(saveData, data.user.id);
+      return routeDrizzle(saveData, data.user.id, req.method);
     }
 
     const prisma = new PrismaClient({

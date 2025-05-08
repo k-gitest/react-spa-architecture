@@ -47,7 +47,7 @@ export const addMemoService = async (props: MemoFormData & { user_id: string }) 
     category: Number(props.category),
     tags: props.tags.map((t) => Number(t)),
   };
-  const { error } = await supabase.functions.invoke('save-memo', { body: formatted });
+  const { error } = await supabase.functions.invoke('save-memo', { body: formatted, method: 'POST' });
   if (error) throw error;
 };
 
@@ -105,7 +105,7 @@ export const updateMemoService = async (id: string, updates: MemoFormData) => {
     category: Number(updates.category),
     tags: updates.tags.map((t) => Number(t)),
   };
-  const { error } = await supabase.functions.invoke('save-memo', { body: formatted, method: "PUT" });
+  const { error } = await supabase.functions.invoke('save-memo/drizzle', { body: formatted, method: 'PUT' });
   if (error) throw error;
 };
 
