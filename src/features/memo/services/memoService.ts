@@ -2,7 +2,6 @@ import { supabase } from '@/lib/supabase';
 import { MemoFormData, Category, Tag } from '@/features/memo/types/memo-form-data';
 
 export const fetchMemosService = async () => {
-  //const { data, error } = await supabase.from('memos').select('*').order('created_at', { ascending: false });
   const { data, error } = await supabase.from('memos').select(`
     *,
     category:memo_categories (
@@ -29,7 +28,6 @@ export const fetchMemosService = async () => {
 };
 
 export const addMemoService = async (props: MemoFormData & { user_id: string }) => {
-  //const { error } = await supabase.from('memos').insert(props).single();
   const formatted = {
     ...props,
     category: Number(props.category),
@@ -52,7 +50,6 @@ export const addMemoRPC = async (props: MemoFormData & { user_id: string }) => {
 };
 
 export const getMemoService = async (id: string) => {
-  //const { data: hoge } = await supabase.from('memos').select('*').eq('id', id).single();
   const { data, error } = await supabase
     .from('memos')
     .select(
@@ -86,7 +83,6 @@ export const getMemoService = async (id: string) => {
 };
 
 export const updateMemoService = async (id: string, updates: MemoFormData) => {
-  //const { error } = await supabase.from('memos').update(updates).eq('id', id);
   const formatted = {
     id: id,
     ...updates,
@@ -126,6 +122,7 @@ export const addCategoryService = async (category: Category & { user_id: string 
   if (error) throw error;
   return data;
 };
+
 export const fetchTagsService = async () => {
   const { data, error } = await supabase.from('tags').select('*');
   if (error) throw error;

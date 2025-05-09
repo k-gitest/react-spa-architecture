@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSessionStore } from '@/hooks/use-session-store';
+import { useProfile } from '@/features/profile/hooks/use-profile-queries-tanstack';
 import { Profile } from '@/features/profile/types/profile-types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -11,24 +12,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FormWrapper, FormInput } from '@/components/form/form-parts';
 import { getExtensionIfAllowed } from '@/lib/utils';
 import { getAvatarUrl } from '@/lib/supabase';
-import {
-  getProfileService,
-  updateProfileService,
-  upLoadAvatarService,
-  deleteAvatarService,
-} from '@/features/profile/services/profileService';
-import { toast } from '@/hooks/use-toast';
-import { PostgrestError } from '@supabase/supabase-js';
 
 export const ProfileManager = () => {
   const session = useSessionStore((state) => state.session);
 
   const [userId, setUserId] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState<string | null>(null);
-  const [data, setData] = useState<Profile | null>(null);
-  const [isError, setIsError] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const { useGetProfile, updateProfile, uploadAvatar } = useProfile();
+  const { data, isError, isLoading } = useGetProfile(userId);
   const validatedProfileForm = validatedProfile.pick({
     user_name: true,
   });
@@ -42,9 +34,9 @@ export const ProfileManager = () => {
 
   const handleProfileChangeSubmit = useCallback(
     async (data: Profile) => {
-      if (userId) await updateProfileService(userId, { user_name: data.user_name });
+      if (userId) await updateProfile(userId, { user_name: data.user_name });
     },
-    [updateProfileService, userId],
+    [updateProfile, userId],
   );
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,42 +45,18 @@ export const ProfileManager = () => {
       const folderName = userId;
       const extention = await getExtensionIfAllowed(e.target.files[0]);
       if (extention && data) {
-        // avatar画像アップロード前に現在のavatarを削除する
-        if (data.avatar) {
-          const cleanPath = data.avatar.replace(/\?.*$/, '');
-          await deleteAvatarService(cleanPath);
-        }
-        await upLoadAvatarService(e.target.files[0], folderName, extention );
+        await uploadAvatar(e.target.files[0], folderName, extention, data.avatar);
       } else {
         setAvatarError('許可された画像形式ではありません');
       }
     } else setAvatarError('ファイルが選択されていません');
   };
 
-  const getProfile = async (userId: string) => {
-    setIsLoading(true);
-    try {
-      const data = await getProfileService(userId);
-      setData(data);
-    } catch (error) {
-      setIsError(true);
-      if (error instanceof PostgrestError) {
-        toast({ title: error.message });
-      }
-    }
-    setIsLoading(false);
-  };
   useEffect(() => {
     if (session?.user.id) {
       setUserId(session.user.id);
     }
   }, [session]);
-
-  useEffect(() => {
-    if (userId) {
-      getProfile(userId);
-    }
-  }, [session?.user.id]);
 
   useEffect(() => {
     if (data) {

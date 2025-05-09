@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AccountManager } from '@/features/account/components/account-manager';
-import { ProfileManager } from '@/features/profile/components/profile-manager';
+import { ProfileManager } from '@/features/profile/components/profile-manager-tanstack';
 import { ProfileManager as ProfileManagerTRPC } from '@/features/profile/components/profile-manager-trpc';
 import { AccountManager as AccountManagerTRPC } from '@/features/account/components/account-manager-trpc';
 import { Button } from '@/components/ui/button';

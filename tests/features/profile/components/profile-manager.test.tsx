@@ -1,5 +1,5 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { ProfileManager } from '@/features/profile/components/profile-manager';
+import { ProfileManager } from '@/features/profile/components/profile-manager-tanstack';
 import { useProfile } from '@/features/profile/hooks/use-profile-queries-tanstack';
 import { useSessionStore } from '@/hooks/use-session-store';
 import userEvent from '@testing-library/user-event';
