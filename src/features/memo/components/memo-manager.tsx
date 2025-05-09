@@ -5,7 +5,13 @@ import { MemoList } from '@/features/memo/components/memo-list';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useSessionStore } from '@/hooks/use-session-store';
-import { fetchMemosService, addMemoService, getMemoService, updateMemoService, deleteMemoService } from '@/features/memo/services/memoService';
+import {
+  fetchMemosService,
+  addMemoRPC,
+  getMemoService,
+  updateMemoRPC,
+  deleteMemoService,
+} from '@/features/memo/services/memoService';
 
 export const MemoManager = () => {
   const session = useSessionStore((state) => state.session);
@@ -38,7 +44,7 @@ export const MemoManager = () => {
   );
 
   useEffect(() => {
-    if(session?.user.id){
+    if (session?.user.id) {
       memoListFetcher();
     }
   }, [memoListFetcher, session]);
@@ -46,7 +52,7 @@ export const MemoManager = () => {
   const handleAddSubmit = useCallback(
     async (data: MemoFormData, userId: string) => {
       try {
-        await addMemoService({ ...data, user_id: userId });
+        await addMemoRPC({ ...data, user_id: userId });
         memoListFetcher();
       } catch (err) {
         console.error(err);
@@ -58,7 +64,7 @@ export const MemoManager = () => {
   const handleUpdateSubmit = useCallback(
     async (data: MemoFormData, editIndex: string) => {
       try {
-        await updateMemoService(editIndex, { ...data });
+        await updateMemoRPC(editIndex, { ...data });
         memoListFetcher();
         setEditIndex(null);
       } catch (err) {

@@ -4,13 +4,7 @@ import { MemoFormData, Category, Tag } from '@/features/memo/types/memo-form-dat
 export const fetchMemosService = async () => {
   //const { data, error } = await supabase.from('memos').select('*').order('created_at', { ascending: false });
   const { data, error } = await supabase.from('memos').select(`
-    id,
-    title,
-    content,
-    importance,
-    user_id,
-    created_at,
-    updated_at,
+    *,
     category:memo_categories (
       category:categories (
         id,
@@ -27,13 +21,7 @@ export const fetchMemosService = async () => {
   if (error) throw error;
 
   const formatted = data.map((memo) => ({
-    id: memo.id,
-    title: memo.title,
-    content: memo.content,
-    importance: memo.importance,
-    created_at: memo.created_at,
-    updated_at: memo.updated_at,
-    user_id: memo.user_id,
+    ...memo,
     category: memo.category?.[0]?.category?.name ?? '',
     tags: memo.tags?.map((t) => t.tag.name) ?? [],
   }));
@@ -51,19 +39,25 @@ export const addMemoService = async (props: MemoFormData & { user_id: string }) 
   if (error) throw error;
 };
 
+export const addMemoRPC = async (props: MemoFormData & { user_id: string }) => {
+  const formatted = {
+    p_title: props.title,
+    p_content: props.content,
+    p_importance: props.importance,
+    p_category_id: Number(props.category),
+    p_tag_ids: props.tags.map((t) => Number(t)),
+  };
+  const { error } = await supabase.rpc('save_memo_rpc', formatted);
+  if (error) throw error;
+};
+
 export const getMemoService = async (id: string) => {
   //const { data: hoge } = await supabase.from('memos').select('*').eq('id', id).single();
   const { data, error } = await supabase
     .from('memos')
     .select(
-      `
-    id,
-    title,
-    content,
-    importance,
-    user_id,
-    created_at,
-    updated_at,
+      `    
+    *,
     category:memo_categories (
       category:categories (
         id,
@@ -84,13 +78,7 @@ export const getMemoService = async (id: string) => {
   if (error) throw error;
 
   const formatted = {
-    id: data.id,
-    title: data.title,
-    content: data.content,
-    importance: data.importance,
-    created_at: data.created_at,
-    updated_at: data.updated_at,
-    user_id: data.user_id,
+    ...data,
     category: String(data.category?.[0]?.category?.id) ?? '',
     tags: data.tags?.map((t) => String(t.tag.id)) ?? [],
   };
@@ -106,6 +94,19 @@ export const updateMemoService = async (id: string, updates: MemoFormData) => {
     tags: updates.tags.map((t) => Number(t)),
   };
   const { error } = await supabase.functions.invoke('save-memo/drizzle', { body: formatted, method: 'PUT' });
+  if (error) throw error;
+};
+
+export const updateMemoRPC = async (id: string, updates: MemoFormData) => {
+  const formatted = {
+    p_id: id,
+    p_title: updates.title,
+    p_content: updates.content,
+    p_importance: updates.importance,
+    p_category_id: Number(updates.category),
+    p_tag_ids: updates.tags.map((t) => Number(t)),
+  };
+  const { error } = await supabase.rpc('update_memo_rpc', formatted);
   if (error) throw error;
 };
 

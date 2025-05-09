@@ -256,7 +256,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      save_memo_rpc: {
+        Args: {
+          p_title: string
+          p_content: string
+          p_importance: string
+          p_category_id: number
+          p_tag_ids: number[]
+        }
+        Returns: undefined
+      }
+      update_memo_rpc: {
+        Args: {
+          p_id: string
+          p_title: string
+          p_content: string
+          p_importance: string
+          p_category_id: number
+          p_tag_ids: number[]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

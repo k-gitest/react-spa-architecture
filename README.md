@@ -242,3 +242,7 @@ const { isPending, data } = useApiMutation({
 - supabase edgeでprismaするにはdeno用adapterがないのでaccelerate経由でクエリを送信する必要がある
 - accelerateを使用しない場合、pgpl関数をRPCで呼ぶ、設計変える、drizzleに変えるなどがある
 - prismaでカラムを配列型にするとnot nullにならないので後でSQLで行う必要がある
+- supabase rpcで呼び出せるのはfunctionでprocedureではない
+- plpgのfunction内でトランザクションコマンドは使用できない。function内でprocedureを呼んでも使用不可。
+- plpg内のfunction内では例外発生で自動的にロールバックする。raise exceptionでEXCEPTIONブロックでもロールバックできる。
+- plpg内のprocedure内でトランザクションコマンドは使用できるが、制限が多く基本的には使用不可。自動ロールバックで行う必要がある。
