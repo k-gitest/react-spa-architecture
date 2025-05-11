@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { AccountManager } from '@/features/account/components/account-manager';
+import { AccountManager } from '@/features/account/components/account-manager-tanstack';
 
 // モック関数の定義
 const mockUpdateAccount = vi.fn();

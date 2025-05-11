@@ -1,22 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { useAccount } from '@/features/account/hooks/use-account-queries-tanstack';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useForm } from 'react-hook-form';
 import { FormWrapper, FormInput } from '@/components/form/form-parts';
 import { AccountUpdate } from '@/features/account/types/account-types';
-import {
-  updateAccountService,
-  resetPasswordForEmailAccountService,
-  deleteAccountService,
-} from '@/features/account/services/accountService';
-import { errorHandler } from '@/errors/error-handler';
 
 export const AccountManager = () => {
   const session = useSessionStore((state) => state.session);
   const userData = session?.user;
   const isDesktop = useMediaQuery('(min-width: 768px)');
+  const { updateAccount, resetPassword, deleteAccount } = useAccount();
   const [provider, setProvider] = useState<boolean>(false);
   const [newPassword, setNewPassword] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
@@ -26,50 +22,34 @@ export const AccountManager = () => {
   });
 
   const handleEmailChangeSubmit = useCallback(
-    async (data: AccountUpdate) => {
-      try {
-        await updateAccountService(data);
-        setOpen(false);
-      } catch (error) {
-        errorHandler(error);
-      }
+    (data: AccountUpdate) => {
+      updateAccount(data);
+      setOpen(false);
     },
-    [updateAccountService],
+    [updateAccount],
   );
 
   const handlePasswordChangeMailSubmit = useCallback(
-    async (data: AccountUpdate) => {
-      try {
-        await resetPasswordForEmailAccountService(data);
-        setOpen(false);
-      } catch (error) {
-        errorHandler(error);
-      }
+    (data: AccountUpdate) => {
+      resetPassword(data);
+      setOpen(false);
     },
-    [resetPasswordForEmailAccountService],
+    [resetPassword],
   );
 
   const handleNewPasswordSubmit = useCallback(
-    async (data: AccountUpdate) => {
-      try {
-        await updateAccountService(data);
-        setOpen(false);
-      } catch (error) {
-        errorHandler(error);
-      }
+    (data: AccountUpdate) => {
+      updateAccount(data);
+      setOpen(false);
     },
-    [updateAccountService],
+    [updateAccount],
   );
 
-  const handleDeleteUserAccountSubmit = useCallback(async () => {
+  const handleDeleteUserAccountSubmit = useCallback(() => {
     if (session?.user?.id) {
-      try {
-        await deleteAccountService(session.user.id);
-      } catch (error) {
-        errorHandler(error);
-      }
+      deleteAccount(session.user.id);
     }
-  }, [session?.user?.id, deleteAccountService]);
+  }, [session?.user?.id, deleteAccount]);
 
   useEffect(() => {
     if (session?.user.identities && session?.user?.identities[0]?.provider === 'email') {

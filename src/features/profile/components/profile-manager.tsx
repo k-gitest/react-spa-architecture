@@ -17,8 +17,7 @@ import {
   upLoadAvatarService,
   deleteAvatarService,
 } from '@/features/profile/services/profileService';
-import { toast } from '@/hooks/use-toast';
-import { PostgrestError } from '@supabase/supabase-js';
+import { errorHandler } from '@/errors/error-handler';
 
 export const ProfileManager = () => {
   const session = useSessionStore((state) => state.session);
@@ -42,7 +41,13 @@ export const ProfileManager = () => {
 
   const handleProfileChangeSubmit = useCallback(
     async (data: Profile) => {
-      if (userId) await updateProfileService(userId, { user_name: data.user_name });
+      if (userId) {
+        try {
+          await updateProfileService(userId, { user_name: data.user_name });
+        } catch (error) {
+          errorHandler(error);
+        }
+      }
     },
     [updateProfileService, userId],
   );
@@ -52,13 +57,24 @@ export const ProfileManager = () => {
     if (userId && e.target.files && e.target.files.length > 0) {
       const folderName = userId;
       const extention = await getExtensionIfAllowed(e.target.files[0]);
+
       if (extention && data) {
         // avatar画像アップロード前に現在のavatarを削除する
         if (data.avatar) {
           const cleanPath = data.avatar.replace(/\?.*$/, '');
-          await deleteAvatarService(cleanPath);
+          try {
+            await deleteAvatarService(cleanPath);
+          } catch (error) {
+            errorHandler(error);
+          }
         }
-        await upLoadAvatarService(e.target.files[0], folderName, extention );
+
+        try {
+          const avatarData = await upLoadAvatarService(e.target.files[0], folderName, extention);
+          await updateProfileService(folderName, { avatar: avatarData.path });
+        } catch (error) {
+          errorHandler(error);
+        }
       } else {
         setAvatarError('許可された画像形式ではありません');
       }
@@ -72,9 +88,7 @@ export const ProfileManager = () => {
       setData(data);
     } catch (error) {
       setIsError(true);
-      if (error instanceof PostgrestError) {
-        toast({ title: error.message });
-      }
+      errorHandler(error);
     }
     setIsLoading(false);
   };
@@ -88,7 +102,7 @@ export const ProfileManager = () => {
     if (userId) {
       getProfile(userId);
     }
-  }, [session?.user.id]);
+  }, [userId]);
 
   useEffect(() => {
     if (data) {

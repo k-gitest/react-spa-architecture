@@ -1,4 +1,5 @@
-import { AccountForm } from '@/features/auth/components/auth-form-tanstack';
+import { AccountForm } from '@/features/auth/components/auth-form';
+import { AccountForm as AccountFormTanstack } from '@/features/auth/components/auth-form-tanstack';
 import { AccountForm as AccountFormTRPC } from '@/features/auth/components/auth-form-trpc';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -14,6 +15,7 @@ const Login = () => {
       </Helmet>
       <div className="flex justify-center">
         <AccountForm type="login" />
+        <AccountFormTanstack type="login" />
         <AccountFormTRPC type="login" />
       </div>
 

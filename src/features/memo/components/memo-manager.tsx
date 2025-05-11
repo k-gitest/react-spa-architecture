@@ -12,6 +12,7 @@ import {
   updateMemoRPC,
   deleteMemoService,
 } from '@/features/memo/services/memoService';
+import { errorHandler } from '@/errors/error-handler';
 
 export const MemoManager = () => {
   const session = useSessionStore((state) => state.session);
@@ -27,7 +28,7 @@ export const MemoManager = () => {
       const data = await fetchMemosService();
       setMemoList(data);
     } catch (err) {
-      console.error(err);
+      errorHandler(err);
     }
   }, [setMemoList]);
 
@@ -37,7 +38,7 @@ export const MemoManager = () => {
         const data = await getMemoService(index);
         setEditMemo(data);
       } catch (err) {
-        console.error(err);
+        errorHandler(err);
       }
     },
     [setEditMemo],
@@ -47,15 +48,15 @@ export const MemoManager = () => {
     if (session?.user.id) {
       memoListFetcher();
     }
-  }, [memoListFetcher, session]);
+  }, [memoListFetcher, session?.user.id]);
 
   const handleAddSubmit = useCallback(
     async (data: MemoFormData, userId: string) => {
       try {
         await addMemoRPC({ ...data, user_id: userId });
-        memoListFetcher();
+        await memoListFetcher();
       } catch (err) {
-        console.error(err);
+        errorHandler(err);
       }
     },
     [memoListFetcher],
@@ -65,10 +66,10 @@ export const MemoManager = () => {
     async (data: MemoFormData, editIndex: string) => {
       try {
         await updateMemoRPC(editIndex, { ...data });
-        memoListFetcher();
+        await memoListFetcher();
         setEditIndex(null);
       } catch (err) {
-        console.error(err);
+        errorHandler(err);
       }
     },
     [memoListFetcher, setEditIndex],
@@ -77,10 +78,10 @@ export const MemoManager = () => {
   const handleFormSubmit = useCallback(
     async (data: MemoFormData) => {
       if (!editIndex && session?.user.id) {
-        handleAddSubmit(data, session.user.id);
+        await handleAddSubmit(data, session.user.id);
       }
       if (editIndex) {
-        handleUpdateSubmit(data, editIndex);
+        await handleUpdateSubmit(data, editIndex);
       }
       setOpen(false);
     },
@@ -88,9 +89,9 @@ export const MemoManager = () => {
   );
 
   const handleEditClick = useCallback(
-    (index: string) => {
+    async (index: string) => {
       setEditIndex(index);
-      memoFetcher(index);
+      await memoFetcher(index);
       setOpen(true);
     },
     [setEditIndex, memoFetcher, setOpen],
@@ -100,9 +101,9 @@ export const MemoManager = () => {
     async (index: string) => {
       try {
         await deleteMemoService(index);
-        memoListFetcher();
+        await memoListFetcher();
       } catch (err) {
-        console.error(err);
+        errorHandler(err);
       }
     },
     [memoListFetcher],

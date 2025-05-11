@@ -10,9 +10,8 @@ import {
   signUpAuthService,
   signInWithOAuthService,
 } from '@/features/auth/services/authService';
-import { toast } from '@/hooks/use-toast';
-import { AuthError } from '@supabase/supabase-js';
 import { useState } from 'react';
+import { errorHandler } from '@/errors/error-handler';
 
 export const AccountForm = (props: { type: string }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -27,17 +26,13 @@ export const AccountForm = (props: { type: string }) => {
       try {
         await signInWithPasswordAuthService(formData);
       } catch (error) {
-        if (error instanceof AuthError) {
-          toast({ title: error.message });
-        }
+        errorHandler(error);
       }
     } else {
       try {
         await signUpAuthService(formData);
       } catch (error) {
-        if (error instanceof AuthError) {
-          toast({ title: error.message });
-        }
+        errorHandler(error);
       }
       setIsLoading(false);
     }
@@ -47,10 +42,14 @@ export const AccountForm = (props: { type: string }) => {
 
   const handleGithub = async () => {
     setIsLoading(true);
-    signInWithOAuthService({
-      provider: 'github',
-      redirectTo: `${window.location.origin}/dashboard`,
-    });
+    try {
+      await signInWithOAuthService({
+        provider: 'github',
+        redirectTo: `${window.location.origin}/dashboard`,
+      });
+    } catch (error) {
+      errorHandler(error);
+    }
     setIsLoading(false);
   };
 
