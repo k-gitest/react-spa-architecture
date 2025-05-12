@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/mode-toggle';
+import { VariantToggle } from '@/components/variant-toggle';
 import { useSessionStore } from '@/hooks/use-session-store';
 
 export const Header = () => {
@@ -37,7 +38,7 @@ export const Header = () => {
             </Button>
           </>
         )}
-
+        <VariantToggle />
         <ModeToggle />
       </nav>
     </header>

@@ -2,13 +2,12 @@ import { useState, useCallback, useEffect } from 'react';
 import { MemoFormData } from '@/features/memo/types/memo-form-data';
 import { MemoForm } from '@/features/memo/components/memo-form';
 import { MemoList } from '@/features/memo/components/memo-list';
-import { ResponsiveDialog } from '@/components/responsive-dialog';
-import { useMediaQuery } from '@/hooks/use-media-query';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useMemos } from '@/features/memo/hooks/use-memo-queries-trpc';
 import { z } from 'zod';
 import { FormSchema } from '@/features/memo/schemas/memo-form-schema';
 import { TRPCClientError } from '@trpc/client';
+import { Button } from '@/components/ui/button';
 
 type FlattenFormatted = z.inferFlattenedErrors<typeof FormSchema>;
 
@@ -18,7 +17,6 @@ export const MemoManagerTrpc = () => {
   const session = useSessionStore((state) => state.session);
   const [editIndex, setEditIndex] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const { memos, isMemosLoading, memosError, useGetMemo, addMemo, updateMemo, deleteMemo } = useMemos();
 
@@ -89,6 +87,15 @@ export const MemoManagerTrpc = () => {
     if (!open) setEditIndex(null);
   }, [open]);
 
+  const handleAddClick = useCallback(() => {
+    setEditIndex(null);
+    setOpen(true);
+  }, []);
+
+  const handleBackToList = useCallback(() => {
+    setOpen(false);
+  }, []);
+
   if (!session) return <p className="text-center">メモ機能は会員限定です</p>;
 
   if (isMemosLoading) return <p className="text-center">Loading memos...</p>;
@@ -96,19 +103,18 @@ export const MemoManagerTrpc = () => {
 
   return (
     <div>
-      <ResponsiveDialog
-        open={open}
-        onOpenChange={setOpen}
-        isDesktop={isDesktop}
-        buttonTitle="メモ追加"
-        dialogTitle="Memo"
-        dialogDescription="メモを残そう"
-        className="flex justify-center"
-        hasOverflow={true}
-      >
-        <MemoForm onSubmit={handleFormSubmit} initialValues={editMemoData} externalZodError={zodError} />
-      </ResponsiveDialog>
-      {memos && <MemoList memoData={memos} onEdit={handleEditClick} onDelete={handleDeleteClick} />}
+      {open && (
+        <>
+          <Button onClick={() => handleBackToList()}>メモ一覧</Button>
+          <MemoForm onSubmit={handleFormSubmit} initialValues={editMemoData} externalZodError={zodError} />
+        </>
+      )}
+      {memos && !open && (
+        <>
+          <Button onClick={() => handleAddClick()}>メモ追加</Button>
+          <MemoList memoData={memos} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+        </>
+      )}
     </div>
   );
 };
