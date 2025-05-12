@@ -31,6 +31,7 @@
 - hono 4.0.0
 - node 20.18.1
 
+## ディレクトリ構造 
 ```text
 /
 ├── public
@@ -41,7 +42,7 @@
 │    │    ├── ui ...shadcn/uiコンポーネント
 │    │    ├── mode-toggle.tsx ...テーマ切替
 │    │    └── responsive-dialog.tsx ...ドロワー/ダイアログ
-│    ├── fetures ...機能別ディレクトリ
+│    ├── features ...機能別ディレクトリ
 │    │    ├── auth
 │    │    ├── account
 │    │    ├── memo
@@ -56,7 +57,6 @@
 │    │    ├── auth.ts ...認証カスタム関数
 │    │    ├── fetchClient.ts ...Fetch API クライアント
 │    │    ├── supabase.ts ...supabaseクライアント
-│    │    ├── prisma.ts ...prismaクライアント
 │    │    ├── queryClient.ts ...tanstackクライアント
 │    │    ├── trpc.ts ...trpcクライアント
 │    │    ├── util.ts ...ユーティリティ関数
@@ -71,15 +71,16 @@
 │    │    ├── use-toast ...toastUI状態管理
 │    │    └── use-media-query ...メディアクエリ判別
 │    ├── services ...共通サービス
-│    ├── pages ...ページコンポーネント
-│    ├── routes ...ページルーター
+│    ├── pages ...ページルーティング設定
+│    ├── routes ...react-routerルーティング設定
 │    ├── schemas ...共通スキーマ
 │    ├── types ...共通型
 │    └── App.tsx
 ├── prisma ...prismaスキーマ・マイグレーション
 ├── supabase/functions ...エッジファンクション
-│    ├── _shared
+│    ├── _shared ...cors設定など
 │    ├── delete-user-account ...アカウント削除
+│    ├── sava-memo ...中間テーブルへの保存
 │    └── trpc ...tRPC
 ├── tests ...テスト
 │    ├── components
@@ -93,10 +94,52 @@
 └── vite.config.js
 
 ```
+## レイヤー構造
+```text
+App (App.tsx)
+└── pages
+    └─ components
+         └─ features
+             └─ hooks
+                └─ services
+                    └─ Supabase interface
+                        ├── Edge Functions     
+                        ├── Trigger Functions  
+                        ├── Auth               
+                        └── Database(postgres)           
+```
+
+```mermaid
+graph TD
+    App --> Pages
+    Pages --> Components
+
+    subgraph Features
+        Components --> Hooks
+        Hooks --> Services
+    end
+
+    Services --> Supabase[Supabase Client]
+
+    subgraph Supabase Interface
+        Supabase --> EdgeFunctions[Edge Functions] --> Database[Database - PostgreSQL]
+        Supabase --> TriggerFunctions[Trigger Functions] --> Database
+        Supabase --> Auth[Auth - RLS / Sessions] --> Database
+        Supabase --> Database
+    end
+```
+
 ## メモ機能
 - メモにはタイトル、カテゴリー、コンテンツ、重要度、タグを入力できます
 - メモを追加するとメモの一覧が表示されます
 - 一覧表示からメモごとの編集と削除ができます
+
+## API切替
+- 複数のapiデータ通信の切替を行えます
+
+supabaseClientクエリ + trigger functions 
+supabaseClientクエリ + tanstack Query + edge functions prisma/ drizzle
+supabaseClientクエリ + tRPC + edge functions prisma
 
 ## フォームパーツコンポーネントの使い方
 shadcn/uiのFormコンポーネント内で使用できる  
@@ -115,6 +158,8 @@ import FormInput from "@/components/form/form-input";
 ```
 
 ## ドロワー/ダイアログコンポーネントの使い方
+- メディアクエリによるドロワーとダイアログの切替が行えます
+
 ```typescript
 import ResponsiveDialog from "@/components/responsive-dialog"
 import useMediaQuery  from "@/hooks/use-media-query"
@@ -130,6 +175,8 @@ import useMediaQuery  from "@/hooks/use-media-query"
 ```
 
 ## テーマトグルコンポーネントの使い方
+- システム / ライト / ダークのテーマ切替が行えます
+
 ```typescript
 import { ModeToggle } from "@/components/mode-toggle";
 
@@ -246,3 +293,6 @@ const { isPending, data } = useApiMutation({
 - plpgのfunction内でトランザクションコマンドは使用できない。function内でprocedureを呼んでも使用不可。
 - plpg内のfunction内では例外発生で自動的にロールバックする。raise exceptionでEXCEPTIONブロックでもロールバックできる。
 - plpg内のprocedure内でトランザクションコマンドは使用できるが、制限が多く基本的には使用不可。自動ロールバックで行う必要がある。
+
+
+
