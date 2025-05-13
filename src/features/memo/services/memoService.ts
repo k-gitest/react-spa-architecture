@@ -16,7 +16,7 @@ export const fetchMemosService = async () => {
         name
       )
     )
-  `);
+  `).order("updated_at", {ascending: false});
   if (error) throw error;
 
   const formatted = data.map((memo) => ({

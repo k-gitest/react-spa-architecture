@@ -52,9 +52,9 @@ const router = createBrowserRouter(
         <Route path="*" element={<NotFound />} />
       </Route>
       <Route element={<AuthLayoutWrapper />}>
-        <Route path="/dashboard" element={<Dashboard />} />
         {/* Protected routes */}
         <Route element={<AuthGuard />}>
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/auth/setting" element={<Setting />} />
           <Route path="/auth/confirm" element={<Confirm />} />
         </Route>

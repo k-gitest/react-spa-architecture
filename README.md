@@ -129,6 +129,61 @@ graph TD
     end
 ```
 
+## ER図
+```mermaid
+erDiagram
+  User ||--o{ Memo : has
+  User ||--|| Profile : has
+  User ||--o{ Category : has
+  User ||--o{ Tag : has
+
+  Memo ||--o{ MemoCategory : has
+  Memo ||--o{ MemoTag : has
+  Category ||--o{ MemoCategory : has
+  Tag ||--o{ MemoTag : has
+
+  User {
+    UUID id PK
+  }
+
+  Profile {
+    UUID id PK
+    UUID user_id FK
+    String avatar
+    String user_name
+  }
+
+  Memo {
+    UUID id PK
+    UUID user_id FK
+    String title
+    String content
+  }
+
+  Category {
+    int id PK
+    UUID user_id FK
+    String name
+  }
+
+  Tag {
+    int id PK
+    UUID user_id FK
+    String name
+  }
+
+  MemoCategory {
+    UUID memo_id FK
+    int category_id FK
+  }
+
+  MemoTag {
+    UUID memo_id FK
+    int tag_id FK
+  }
+```
+
+
 ## メモ機能
 - メモにはタイトル、カテゴリー、コンテンツ、重要度、タグを入力できます
 - メモを追加するとメモの一覧が表示されます

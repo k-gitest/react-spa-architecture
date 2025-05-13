@@ -67,7 +67,7 @@ export const AccountForm = (props: { type: string }) => {
         </FormWrapper>
       </div>
       <div className="text-center">
-        <Button onClick={handleGithub}>Githubで登録</Button>
+        <Button onClick={handleGithub}>{props.type === "register" ? "Githubで登録" : "Githubでログイン"}</Button>
       </div>
     </div>
   );
