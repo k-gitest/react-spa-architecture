@@ -6,6 +6,19 @@ import { ProfileManager as ProfileManagerTanstack } from '@/features/profile/com
 import { ProfileManager as ProfileManagerTRPC } from '@/features/profile/components/profile-manager-trpc';
 import { AccountManager as AccountManagerTRPC } from '@/features/account/components/account-manager-trpc';
 import { Button } from '@/components/ui/button';
+import { withBehaviorVariant } from '@/components/withBehaviorVariant';
+
+const ProfileComponents = withBehaviorVariant({
+  default: ProfileManager,
+  tanstack: ProfileManagerTanstack,
+  trpc: ProfileManagerTRPC,
+});
+
+const AccountComponents = withBehaviorVariant({
+  default: AccountManager,
+  tanstack: AccountManagerTanstack,
+  trpc: AccountManagerTRPC,
+});
 
 export const SettingManager = () => {
   const [display, setDisplay] = useState<string>('profile');
@@ -27,16 +40,12 @@ export const SettingManager = () => {
       <div className="w-full">
         {display === 'profile' && (
           <>
-            <ProfileManager />
-            <ProfileManagerTanstack />
-            <ProfileManagerTRPC />
+            <ProfileComponents />
           </>
         )}
         {display === 'account' && (
           <>
-            <AccountManager />
-            <AccountManagerTanstack />
-            <AccountManagerTRPC />
+            <AccountComponents />
           </>
         )}
       </div>

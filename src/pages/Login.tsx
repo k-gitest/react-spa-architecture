@@ -5,6 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { MainWrapper } from '@/components/layout/main-wrapper';
 import { Helmet } from 'react-helmet-async';
+import { withBehaviorVariant } from '@/components/withBehaviorVariant';
+
+const AuthFormComponents = withBehaviorVariant({
+  default: AccountForm,
+  tanstack: AccountFormTanstack,
+  trpc: AccountFormTRPC,
+});
 
 const Login = () => {
   return (
@@ -14,9 +21,7 @@ const Login = () => {
         <meta name="description" content="メモアプリのユーザーログインページです" />
       </Helmet>
       <div className="flex justify-center">
-        <AccountForm type="login" />
-        <AccountFormTanstack type="login" />
-        <AccountFormTRPC type="login" />
+        <AuthFormComponents type="login" />
       </div>
 
       <div className="flex justify-center p-4">

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ModeToggle } from '@/components/mode-toggle';
+import { VariantToggle } from '@/components/variant-toggle';
 import { useAuth } from '@/features/auth/hooks/use-auth-queries-tanstack';
 import { useAuth as useAuthTRPC } from '@/features/auth/hooks/use-auth-queries-trpc';
 import { Loader } from 'lucide-react';
@@ -19,7 +20,7 @@ import { getAvatarUrl } from '@/lib/supabase';
 
 export const AuthHeader = () => {
   const session = useSessionStore((state) => state.session);
-  const [userId, setUserId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null);
   const { signOutMutation } = useAuth();
   const { signOutMutation: signOutMutationTRPC } = useAuthTRPC();
   const { useGetProfile } = useProfile();
@@ -27,7 +28,7 @@ export const AuthHeader = () => {
 
   useEffect(() => {
     if (session?.user) {
-      setUserId(session.user.id)
+      setUserId(session.user.id);
     }
   }, [session]);
 
@@ -46,6 +47,9 @@ export const AuthHeader = () => {
         </h1>
 
         <nav className="flex justify-center gap-2">
+          <VariantToggle />
+          <ModeToggle />
+
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Avatar>
@@ -88,8 +92,6 @@ export const AuthHeader = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <ModeToggle />
         </nav>
       </div>
     </header>

@@ -9,9 +9,9 @@ type Variant = {
 
 // 実装バリアント一覧
 const IMPLEMENTATION_VARIANTS: Variant[] = [
-  { id: 'default', name: '標準実装' },
-  { id: 'tanstack', name: 'TanStack 実装' },
-  { id: 'trpc', name: 'tRPC 実装' }
+  { id: 'default', name: '標準' },
+  { id: 'tanstack', name: 'TanStack' },
+  { id: 'trpc', name: 'tRPC' }
 ];
 
 // Zustand ストアの型

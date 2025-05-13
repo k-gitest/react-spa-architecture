@@ -137,9 +137,9 @@ graph TD
 ## API切替
 - 複数のapiデータ通信の切替を行えます
 
-supabaseClientクエリ + trigger functions 
-supabaseClientクエリ + tanstack Query + edge functions prisma/ drizzle
-supabaseClientクエリ + tRPC + edge functions prisma
+- supabaseClientクエリ + trigger functions 
+- supabaseClientクエリ + tanstack Query + edge functions prisma/ drizzle
+- supabaseClientクエリ + tRPC + edge functions prisma
 
 ## フォームパーツコンポーネントの使い方
 shadcn/uiのFormコンポーネント内で使用できる  
@@ -293,6 +293,3 @@ const { isPending, data } = useApiMutation({
 - plpgのfunction内でトランザクションコマンドは使用できない。function内でprocedureを呼んでも使用不可。
 - plpg内のfunction内では例外発生で自動的にロールバックする。raise exceptionでEXCEPTIONブロックでもロールバックできる。
 - plpg内のprocedure内でトランザクションコマンドは使用できるが、制限が多く基本的には使用不可。自動ロールバックで行う必要がある。
-
-
-
