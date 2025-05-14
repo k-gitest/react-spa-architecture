@@ -13,6 +13,9 @@ import {
   deleteCategoryService,
   addTagService,
   fetchTagsService,
+  getTagService,
+  updateTagService,
+  deleteTagService,
 } from '@/features/memo/services/memoService';
 import { Memo, MemoFormData, Category, Tag } from '@/features/memo/types/memo-form-data';
 import { toast } from '@/hooks/use-toast';
@@ -113,9 +116,33 @@ export const useMemos = () => {
     enabled: !!session?.user.id,
   });
 
+  // タグ取得用
+  const useGetTag = (id: number | null) => {
+    return useApiQuery({
+      queryKey: ['tag', id],
+      queryFn: () => (id ? getTagService(id) : Promise.resolve(undefined)),
+      enabled: !!id,
+    });
+  };
+
   // タグ追加用
   const addTagMutation = useApiMutation<void, Error, Tag & { user_id: string }>({
     mutationFn: (data) => addTagService(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tag'] });
+    },
+  });
+
+  // タグ更新用
+  const updateTagMutation = useApiMutation<void, Error, Tag & { id: number }>({
+    mutationFn: (data) => updateTagService(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tag'] });
+    },
+  });
+
+  const deleteTagMutation = useApiMutation<void, Error, number>({
+    mutationFn: (data) => deleteTagService(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tag'] });
     },
@@ -171,6 +198,20 @@ export const useMemos = () => {
     [addTagMutation],
   );
 
+  const updateTag = useCallback(
+    async (data: Tag & { id: number }) => {
+      await updateTagMutation.mutateAsync(data);
+    },
+    [updateTagMutation],
+  );
+
+  const deleteTag = useCallback(
+    async (id: number) => {
+      await deleteTagMutation.mutateAsync(id);
+    },
+    [deleteTagMutation],
+  );
+
   return {
     memos: memosQuery.data,
     isMemosLoading: memosQuery.isLoading,
@@ -187,5 +228,8 @@ export const useMemos = () => {
     deleteCategory,
     addTag,
     fetchTags,
+    useGetTag,
+    updateTag,
+    deleteTag,
   };
 };

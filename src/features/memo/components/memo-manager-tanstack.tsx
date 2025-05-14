@@ -5,8 +5,10 @@ import { MemoList } from '@/features/memo/components/memo-list';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useMemos } from '@/features/memo/hooks/use-memo-queries-tanstack';
 //import { Button } from '@/components/ui/button';
-import { MemoCategoryManager } from '@/features/memo/components/memo-category-manager';
+//import { MemoCategoryManager } from '@/features/memo/components/memo-category-manager';
+//import { MemoTagManager } from '@/features/memo/components/memo-tag-manager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MemoTagManager, MemoCategoryManager } from '@/features/memo/components/memo-item-manager';
 
 export const MemoManagerTanstack = () => {
   const session = useSessionStore((state) => state.session);
@@ -106,6 +108,7 @@ export const MemoManagerTanstack = () => {
             <TabsTrigger value="memoList">メモ一覧</TabsTrigger>
             <TabsTrigger value="addMemo">メモ追加</TabsTrigger>
             <TabsTrigger value="categorySetting">カテゴリ設定</TabsTrigger>
+            <TabsTrigger value="tagSetting">タグ設定</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="memoList">
@@ -117,6 +120,9 @@ export const MemoManagerTanstack = () => {
         </TabsContent>
         <TabsContent value="categorySetting">
           <MemoCategoryManager />
+        </TabsContent>
+        <TabsContent value="tagSetting">
+          <MemoTagManager />
         </TabsContent>
       </Tabs>
 

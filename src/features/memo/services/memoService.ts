@@ -123,7 +123,7 @@ export const fetchCategoryService = async () => {
 };
 
 export const getCategoryService = async (id: number) => {
-  const { data, error } = await supabase.from('categories').select('*').eq("id", id).single();
+  const { data, error } = await supabase.from('categories').select('*').eq('id', id).single();
   if (error) throw error;
   return data;
 };
@@ -149,8 +149,25 @@ export const fetchTagsService = async () => {
   if (error) throw error;
   return data;
 };
+
+export const getTagService = async (id: number) => {
+  const { data, error } = await supabase.from('tags').select('*').eq('id', id).single();
+  if (error) throw error;
+  return data;
+};
+
 export const addTagService = async (tag: Tag & { user_id: string }) => {
   const { data, error } = await supabase.from('tags').insert(tag).single();
   if (error) throw error;
   return data;
+};
+
+export const updateTagService = async (data: { id: number; name: string }) => {
+  const { error } = await supabase.from('tags').update({ name: data.name }).eq('id', data.id).single();
+  if (error) throw error;
+};
+
+export const deleteTagService = async (id: number) => {
+  const { error } = await supabase.from('tags').delete().eq('id', id).single();
+  if (error) throw error;
 };

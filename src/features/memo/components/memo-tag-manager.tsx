@@ -12,11 +12,11 @@ import { MemoCategorySchema } from '@/features/memo/schemas/memo-form-schema';
 import { Category } from '@/features/memo/types/memo-form-data';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-export const MemoCategoryManager = () => {
+export const MemoTagManager = () => {
   const session = useSessionStore((state) => state.session);
-  const [category, setCategory] = useState('');
+  const [tag, setTag] = useState('');
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const { fetchCategory, useGetCategory, addCategory, updateCategory, deleteCategory } = useMemos();
+  const { fetchTags, useGetTag, addTag, updateTag, deleteTag } = useMemos();
   const [open, setOpen] = useState<boolean>(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
@@ -25,19 +25,19 @@ export const MemoCategoryManager = () => {
     defaultValues: { name: '' },
   });
 
-  const handleCategorySubmit = useCallback(() => {
-    if (session?.user?.id && category.trim()) {
-      addCategory({ name: category.trim(), user_id: session.user.id });
-      setCategory('');
+  const handleTagSubmit = useCallback(() => {
+    if (session?.user?.id && tag.trim()) {
+      addTag({ name: tag.trim(), user_id: session?.user?.id });
+      setTag('');
     }
-  }, [addCategory, session?.user?.id]);
+  }, [addTag, session?.user?.id]);
 
-  const handleUpdateCategorySubmit = useCallback(
+  const handleUpdateTagSubmit = useCallback(
     async (data: { name: string }) => {
-      if (editIndex) updateCategory({ ...data, id: editIndex });
+      if (editIndex) updateTag({ ...data, id: editIndex });
       setOpen(false);
     },
-    [updateCategory],
+    [updateTag],
   );
 
   const handleEditClick = useCallback(
@@ -50,16 +50,16 @@ export const MemoCategoryManager = () => {
 
   const handleDeleteClick = useCallback(
     async (index: number) => {
-      deleteCategory(index);
+      deleteTag(index);
     },
-    [deleteCategory],
+    [deleteTag],
   );
 
   useEffect(() => {
     if (!open) setEditIndex(null);
   }, [open]);
 
-  const { data } = useGetCategory(editIndex);
+  const { data } = useGetTag(editIndex);
 
   useEffect(() => {
     if (editIndex && data) {
@@ -71,18 +71,18 @@ export const MemoCategoryManager = () => {
 
   return (
     <div>
-      {fetchCategory.data && (
+      {fetchTags.data && (
         <>
           <MemoItemAddDialog
-            buttonTitle="カテゴリー追加"
-            dialogTitle="Category"
-            dialogDescription="新しいカテゴリーを追加"
-            placeholder="カテゴリーを入力してください"
-            value={category}
-            setValue={setCategory}
-            onSubmit={handleCategorySubmit}
+            buttonTitle="タグ追加"
+            dialogTitle="Tag"
+            dialogDescription="新しいタグを追加"
+            placeholder="登録するタグを入力してください"
+            value={tag}
+            setValue={setTag}
+            onSubmit={handleTagSubmit}
           />
-          <TagCategoryList itemList={fetchCategory.data} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+          <TagCategoryList itemList={fetchTags.data} onEdit={handleEditClick} onDelete={handleDeleteClick} />
         </>
       )}
       {open && (
@@ -90,12 +90,12 @@ export const MemoCategoryManager = () => {
           open={open}
           onOpenChange={setOpen}
           isDesktop={isDesktop}
-          dialogTitle="カテゴリ名の変更"
-          dialogDescription="カテゴリ名を変更してください"
+          dialogTitle="タグ名の変更"
+          dialogDescription="タグ名を変更してください"
           className="flex justify-center"
         >
-          <FormWrapper onSubmit={handleUpdateCategorySubmit} form={form}>
-            <FormInput label="カテゴリ" name="name" placeholder="カテゴリ名を入力してください" />
+          <FormWrapper onSubmit={handleUpdateTagSubmit} form={form}>
+            <FormInput label="タグ" name="name" placeholder="タグ名を入力してください" />
             <Button type="submit">送信</Button>
           </FormWrapper>
         </ResponsiveDialog>
