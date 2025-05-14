@@ -7,7 +7,10 @@ import {
   updateMemoService,
   deleteMemoService,
   addCategoryService,
+  fetchCategoryService,
   getCategoryService,
+  updateCategoryService,
+  deleteCategoryService,
   addTagService,
   fetchTagsService,
 } from '@/features/memo/services/memoService';
@@ -63,16 +66,41 @@ export const useMemos = () => {
     },
   });
 
-  // カテゴリ取得用
-  const getCategory = useApiQuery({
+  // カテゴリ一覧取得用
+  const fetchCategory = useApiQuery({
     queryKey: ['category'],
-    queryFn: () => getCategoryService(),
+    queryFn: () => fetchCategoryService(),
     enabled: !!session?.user.id,
   });
+
+  // カテゴリ取得用
+  const useGetCategory = (id: number | null) => {
+    return useApiQuery({
+      queryKey: ['category', id],
+      queryFn: () => (id ? getCategoryService(id) : Promise.resolve(undefined)),
+      enabled: !!id,
+    });
+  };
 
   // カテゴリ追加用
   const addCategoryMutation = useApiMutation<void, Error, Category & { user_id: string }>({
     mutationFn: (data) => addCategoryService(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['category'] });
+    },
+  });
+
+  // カテゴリ更新用
+  const updateCategoryMutation = useApiMutation<void, Error, Category & { id: number }>({
+    mutationFn: (data) => updateCategoryService(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['category'] });
+    },
+  });
+
+  // カテゴリ削除用
+  const deleteCategoryMutation = useApiMutation<void, Error, number>({
+    mutationFn: (data) => deleteCategoryService(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['category'] });
     },
@@ -122,6 +150,20 @@ export const useMemos = () => {
     [addCategoryMutation],
   );
 
+  const updateCategory = useCallback(
+    async (data: Category & { id: number }) => {
+      await updateCategoryMutation.mutateAsync(data);
+    },
+    [addCategoryMutation],
+  );
+
+  const deleteCategory = useCallback(
+    async (id: number) => {
+      await deleteCategoryMutation.mutateAsync(id);
+    },
+    [addCategoryMutation],
+  );
+
   const addTag = useCallback(
     async (data: Tag & { user_id: string }) => {
       await addTagMutation.mutateAsync(data);
@@ -139,7 +181,10 @@ export const useMemos = () => {
     updateMemo,
     deleteMemo,
     addCategory,
-    getCategory,
+    fetchCategory,
+    useGetCategory,
+    updateCategory,
+    deleteCategory,
     addTag,
     fetchTags,
   };

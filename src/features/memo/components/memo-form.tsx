@@ -51,8 +51,8 @@ interface Props {
 }
 
 export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) => {
-  const { getCategory, fetchTags } = useMemos();
-  const { data: categoryData } = getCategory;
+  const { fetchCategory, fetchTags } = useMemos();
+  const { data: categoryData } = fetchCategory;
   const { data: tagsData } = fetchTags;
   const [categories, setCategories] = useState<CategoryOptions[] | null>(null);
   const [tags, setTags] = useState<TagsOptions[] | null>(null);

@@ -30,16 +30,17 @@ export const MemoCategory = () => {
       dialogTitle="Category"
       dialogDescription="新しいカテゴリーを追加"
       className="flex justify-center"
-      hasOverflow={true}
     >
-      <Input
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        placeholder="カテゴリーを入力してください"
-      />
-      <Button type="button" onClick={() => handleCategorySubmit()}>
-        送信
-      </Button>
+      <div className='flex flex-col gap-4'>
+        <Input
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          placeholder="カテゴリーを入力してください"
+        />
+        <Button type="button" onClick={() => handleCategorySubmit()}>
+          送信
+        </Button>
+      </div>
     </ResponsiveDialog>
   );
 };

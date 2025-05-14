@@ -2,7 +2,10 @@ import { supabase } from '@/lib/supabase';
 import { MemoFormData, Category, Tag } from '@/features/memo/types/memo-form-data';
 
 export const fetchMemosService = async () => {
-  const { data, error } = await supabase.from('memos').select(`
+  const { data, error } = await supabase
+    .from('memos')
+    .select(
+      `
     *,
     category:memo_categories (
       category:categories (
@@ -16,7 +19,9 @@ export const fetchMemosService = async () => {
         name
       )
     )
-  `).order("updated_at", {ascending: false});
+  `,
+    )
+    .order('updated_at', { ascending: false });
   if (error) throw error;
 
   const formatted = data.map((memo) => ({
@@ -111,8 +116,14 @@ export const deleteMemoService = async (id: string) => {
   if (error) throw error;
 };
 
-export const getCategoryService = async () => {
+export const fetchCategoryService = async () => {
   const { data, error } = await supabase.from('categories').select('*');
+  if (error) throw error;
+  return data;
+};
+
+export const getCategoryService = async (id: number) => {
+  const { data, error } = await supabase.from('categories').select('*').eq("id", id).single();
   if (error) throw error;
   return data;
 };
@@ -121,6 +132,16 @@ export const addCategoryService = async (category: Category & { user_id: string 
   const { data, error } = await supabase.from('categories').insert(category).single();
   if (error) throw error;
   return data;
+};
+
+export const updateCategoryService = async (data: { id: number; name: string }) => {
+  const { error } = await supabase.from('categories').update({ name: data.name }).eq('id', data.id).single();
+  if (error) throw error;
+};
+
+export const deleteCategoryService = async (id: number) => {
+  const { error } = await supabase.from('categories').delete().eq('id', id).single();
+  if (error) throw error;
 };
 
 export const fetchTagsService = async () => {

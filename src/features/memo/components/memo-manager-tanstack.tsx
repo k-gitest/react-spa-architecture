@@ -4,12 +4,15 @@ import { MemoForm } from '@/features/memo/components/memo-form';
 import { MemoList } from '@/features/memo/components/memo-list';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useMemos } from '@/features/memo/hooks/use-memo-queries-tanstack';
-import { Button } from '@/components/ui/button';
+//import { Button } from '@/components/ui/button';
+import { MemoCategoryManager } from '@/features/memo/components/memo-category-manager';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const MemoManagerTanstack = () => {
   const session = useSessionStore((state) => state.session);
   const [editIndex, setEditIndex] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
+  //const [viewCategory, setViewCategory] = useState<boolean>(false);
 
   const {
     memos: memoList,
@@ -73,14 +76,22 @@ export const MemoManagerTanstack = () => {
     if (!open) setEditIndex(null);
   }, [open]);
 
+  /*
   const handleAddClick = useCallback(() => {
     setEditIndex(null);
     setOpen(true);
+    setViewCategory(false);
   }, []);
 
   const handleBackToList = useCallback(() => {
     setOpen(false);
+    setViewCategory(false);
   }, []);
+
+  const handleCategoryClick = useCallback(() => {
+    setViewCategory(true);
+  }, []);
+  */
 
   if (!session) return <p className="text-center">メモ機能は会員限定です</p>;
 
@@ -89,18 +100,40 @@ export const MemoManagerTanstack = () => {
 
   return (
     <div>
-      {open && (
-        <>
-          <Button onClick={() => handleBackToList()}>メモ一覧</Button>
+      <Tabs defaultValue="memoList" className="w-full">
+        <div className="flex flex-raw justify-center mb-10">
+          <TabsList>
+            <TabsTrigger value="memoList">メモ一覧</TabsTrigger>
+            <TabsTrigger value="addMemo">メモ追加</TabsTrigger>
+            <TabsTrigger value="categorySetting">カテゴリ設定</TabsTrigger>
+          </TabsList>
+        </div>
+        <TabsContent value="memoList">
+          {memoList && <MemoList memoData={memoList} onEdit={handleEditClick} onDelete={handleDeleteClick} />}
+          {!memoList && <p>データがありませんでした。</p>}
+        </TabsContent>
+        <TabsContent value="addMemo">
           <MemoForm onSubmit={handleFormSubmit} initialValues={editMemoData} />
-        </>
+        </TabsContent>
+        <TabsContent value="categorySetting">
+          <MemoCategoryManager />
+        </TabsContent>
+      </Tabs>
+
+      {/*
+      <div className="flex gap-2">
+        <Button onClick={handleAddClick}>メモ追加</Button>
+        <Button onClick={handleBackToList}>メモ一覧</Button>
+        <Button onClick={handleCategoryClick}>カテゴリ設定</Button>
+      </div>
+      {viewCategory ? (
+        <MemoCategoryManager />
+      ) : open ? (
+        <MemoForm onSubmit={handleFormSubmit} initialValues={editMemoData} />
+      ) : (
+        memoList && <MemoList memoData={memoList} onEdit={handleEditClick} onDelete={handleDeleteClick} />
       )}
-      {memoList && !open && (
-        <>
-          <Button onClick={() => handleAddClick()}>メモ追加</Button>
-          <MemoList memoData={memoList} onEdit={handleEditClick} onDelete={handleDeleteClick} />
-        </>
-      )}
+      */}
     </div>
   );
 };

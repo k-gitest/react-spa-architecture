@@ -35,7 +35,7 @@ export const ResponsiveDialog = React.memo(
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
     isDesktop: boolean;
-    buttonTitle: string;
+    buttonTitle?: string;
     dialogTitle: string;
     dialogDescription: string;
     className?: string;
@@ -47,11 +47,13 @@ export const ResponsiveDialog = React.memo(
     if (isDesktop) {
       return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-          <div className={cn('w-full', className)}>
-            <DialogTrigger asChild>
-              <Button variant="outline">{buttonTitle}</Button>
-            </DialogTrigger>
-          </div>
+          {buttonTitle && (
+            <div className={cn('w-full', className)}>
+              <DialogTrigger asChild>
+                <Button variant="outline">{buttonTitle}</Button>
+              </DialogTrigger>
+            </div>
+          )}
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>{dialogTitle}</DialogTitle>
@@ -86,4 +88,4 @@ export const ResponsiveDialog = React.memo(
     );
   },
 );
-ResponsiveDialog.displayName = 'ResponsiveDialog'
+ResponsiveDialog.displayName = 'ResponsiveDialog';
