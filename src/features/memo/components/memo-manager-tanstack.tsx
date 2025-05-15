@@ -35,7 +35,31 @@ export const MemoManagerTanstack = () => {
     fetchTags,
     addCategory,
     addTag,
+    useGetTag,
+    useGetCategory,
+    updateTag,
+    updateCategory,
+    deleteTag,
+    deleteCategory,
   } = useMemos();
+
+  // propsで渡すタグ操作関数をまとめたオブジェクト
+  const tagOperations = {
+    fetchData: fetchTags,
+    addItem: addTag,
+    updateItem: updateTag,
+    deleteItem: deleteTag,
+    useGetItem: useGetTag,
+  };
+
+  // propsで渡すカテゴリ操作関数をまとめたオブジェクト
+  const categoryOperations = {
+    fetchData: fetchCategory,
+    addItem: addCategory,
+    updateItem: updateCategory,
+    deleteItem: deleteCategory,
+    useGetItem: useGetCategory,
+  };
 
   const { data: editMemoData } = useGetMemo(editIndex);
 
@@ -173,10 +197,10 @@ export const MemoManagerTanstack = () => {
           />
         </TabsContent>
         <TabsContent value="categorySetting">
-          <MemoCategoryManager />
+          <MemoCategoryManager operations={categoryOperations} />
         </TabsContent>
         <TabsContent value="tagSetting">
-          <MemoTagManager />
+          <MemoTagManager operations={tagOperations} />
         </TabsContent>
       </Tabs>
     </div>

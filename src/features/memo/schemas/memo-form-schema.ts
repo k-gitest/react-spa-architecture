@@ -23,7 +23,7 @@ export const MemoCategorySchema = z.object({
 });
 
 export const CategorySchema = MemoCategorySchema.extend({
-  id: z.string(),
+  id: z.number(),
   user_id: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
@@ -34,7 +34,7 @@ export const MemoTagSchema = z.object({
 });
 
 export const TagSchema = MemoTagSchema.extend({
-  id: z.string(),
+  id: z.number(),
   user_id: z.string(),
   created_at: z.string(),
   updated_at: z.string(),

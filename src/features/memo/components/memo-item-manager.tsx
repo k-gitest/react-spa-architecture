@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSessionStore } from '@/hooks/use-session-store';
-import { useMemos } from '@/features/memo/hooks/use-memo-queries-tanstack';
 import { TagCategoryList } from '@/features/memo/components/memo-item-list';
 import { MemoItemAddDialog } from '@/features/memo/components/memo-item-add-dialog';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
@@ -9,12 +8,20 @@ import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
 import { FormWrapper, FormInput } from '@/components/form/form-parts';
 import { MemoCategorySchema } from '@/features/memo/schemas/memo-form-schema';
-import { Category } from '@/features/memo/types/memo-form-data';
+import { Category, CategoryOutput, TagOutput } from '@/features/memo/types/memo-form-data';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-// 共通コンポーネントの型定義
+// 受け取るprops.operationsのデータ取得・操作機能の型定義
+type MemoOperations = {
+  fetchData: { data?: CategoryOutput[] | TagOutput[] | null };
+  addItem: (data: { name: string; user_id: string }) => Promise<void>;
+  updateItem: (data: { id: number; name: string }) => Promise<void>;
+  deleteItem: (id: number) => Promise<void>;
+  useGetItem: (id: number | null) => { data?: CategoryOutput | TagOutput | null };
+};
+
+// 受け取るpropsの型定義
 type MemoManagerProps = {
-  type: 'tag' | 'category';
   buttonTitle: string;
   dialogTitle: string;
   dialogDescription: string;
@@ -22,10 +29,10 @@ type MemoManagerProps = {
   itemPlaceholder: string;
   editDialogTitle: string;
   editDialogDescription: string;
+  operations: MemoOperations;
 };
 
 export const MemoItemManager = ({
-  type,
   buttonTitle,
   dialogTitle,
   dialogDescription,
@@ -33,22 +40,11 @@ export const MemoItemManager = ({
   itemPlaceholder,
   editDialogTitle,
   editDialogDescription,
+  operations,
 }: MemoManagerProps) => {
   const session = useSessionStore((state) => state.session);
   const [itemValue, setItemValue] = useState('');
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const {
-    fetchTags,
-    fetchCategory,
-    useGetTag,
-    useGetCategory,
-    addTag,
-    addCategory,
-    updateTag,
-    updateCategory,
-    deleteTag,
-    deleteCategory,
-  } = useMemos();
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [open, setOpen] = useState<boolean>(false);
@@ -59,12 +55,7 @@ export const MemoItemManager = ({
     defaultValues: { name: '' },
   });
 
-  // 渡された引数typeに基づいて適切な関数とデータを選択
-  const fetchData = type === 'tag' ? fetchTags : fetchCategory;
-  const addItem = type === 'tag' ? addTag : addCategory;
-  const updateItem = type === 'tag' ? updateTag : updateCategory;
-  const deleteItem = type === 'tag' ? deleteTag : deleteCategory;
-  const useGetItem = type === 'tag' ? useGetTag : useGetCategory;
+  const { fetchData, addItem, updateItem, deleteItem, useGetItem } = operations;
 
   const handleItemSubmit = useCallback(() => {
     if (session?.user?.id && itemValue.trim()) {
@@ -148,11 +139,9 @@ export const MemoItemManager = ({
   );
 };
 
-// タグ管理コンポーネント
-export const MemoTagManager = () => {
+export const MemoTagManager = ({ operations }: { operations: MemoOperations }) => {
   return (
     <MemoItemManager
-      type="tag"
       buttonTitle="タグ追加"
       dialogTitle="Tag"
       dialogDescription="新しいタグを追加"
@@ -160,15 +149,14 @@ export const MemoTagManager = () => {
       itemPlaceholder="登録するタグを入力してください"
       editDialogTitle="タグ名の変更"
       editDialogDescription="タグ名を変更してください"
+      operations={operations}
     />
   );
 };
 
-// カテゴリ管理コンポーネント
-export const MemoCategoryManager = () => {
+export const MemoCategoryManager = ({ operations }: { operations: MemoOperations }) => {
   return (
     <MemoItemManager
-      type="category"
       buttonTitle="カテゴリー追加"
       dialogTitle="Category"
       dialogDescription="新しいカテゴリーを追加"
@@ -176,6 +164,7 @@ export const MemoCategoryManager = () => {
       itemPlaceholder="カテゴリーを入力してください"
       editDialogTitle="カテゴリ名の変更"
       editDialogDescription="カテゴリ名を変更してください"
+      operations={operations}
     />
   );
 };
