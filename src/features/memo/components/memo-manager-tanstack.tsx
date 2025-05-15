@@ -4,17 +4,23 @@ import { MemoForm } from '@/features/memo/components/memo-form';
 import { MemoList } from '@/features/memo/components/memo-list';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useMemos } from '@/features/memo/hooks/use-memo-queries-tanstack';
-//import { Button } from '@/components/ui/button';
-//import { MemoCategoryManager } from '@/features/memo/components/memo-category-manager';
-//import { MemoTagManager } from '@/features/memo/components/memo-tag-manager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MemoTagManager, MemoCategoryManager } from '@/features/memo/components/memo-item-manager';
+
+interface CategoryOptions {
+  label: string;
+  value: string;
+}
+
+interface TagsOptions {
+  label: string;
+  id: string;
+}
 
 export const MemoManagerTanstack = () => {
   const session = useSessionStore((state) => state.session);
   const [editIndex, setEditIndex] = useState<string | null>(null);
-  const [open, setOpen] = useState<boolean>(false);
-  //const [viewCategory, setViewCategory] = useState<boolean>(false);
+  const [tabValue, setTabValue] = useState('memoList');
 
   const {
     memos: memoList,
@@ -25,9 +31,60 @@ export const MemoManagerTanstack = () => {
     addMemo,
     updateMemo,
     deleteMemo,
+    fetchCategory,
+    fetchTags,
+    addCategory,
+    addTag,
   } = useMemos();
 
   const { data: editMemoData } = useGetMemo(editIndex);
+
+  const { data: categoryData } = fetchCategory;
+  const { data: tagsData } = fetchTags;
+  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState<CategoryOptions[] | null>(null);
+  const [tag, setTag] = useState('');
+  const [tags, setTags] = useState<TagsOptions[] | null>(null);
+  const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
+  const [addTagialogOpen, setAddTagDialogOpen] = useState(false);
+
+  const handleCategorySubmit = useCallback(() => {
+    if (session?.user?.id && category.trim()) {
+      addCategory({ name: category.trim(), user_id: session.user.id });
+      setCategory('');
+      setAddCategoryDialogOpen(false);
+      setAddTagDialogOpen(false);
+    }
+  }, [addCategory, session?.user?.id, category]);
+
+  const handleTagSubmit = useCallback(() => {
+    if (session?.user?.id && tag.trim()) {
+      addTag({ name: tag.trim(), user_id: session?.user?.id });
+      setTag('');
+      setAddCategoryDialogOpen(false);
+      setAddTagDialogOpen(false);
+    }
+  }, [addTag, session?.user?.id, tag]);
+
+  useEffect(() => {
+    if (categoryData) {
+      const categoryOptions = categoryData.map((category) => ({
+        label: category.name,
+        value: String(category.id),
+      }));
+      setCategories(categoryOptions);
+    }
+  }, [categoryData]);
+
+  useEffect(() => {
+    if (tagsData) {
+      const tagsOptions = tagsData.map((tag) => ({
+        label: tag.name,
+        id: String(tag.id),
+      }));
+      setTags(tagsOptions);
+    }
+  }, [tagsData]);
 
   const handleAddSubmit = useCallback(
     async (data: MemoFormData) => {
@@ -53,19 +110,16 @@ export const MemoManagerTanstack = () => {
       if (editIndex) {
         handleUpdateSubmit(editIndex, data);
       }
-      setOpen(false);
       setEditIndex(null);
+      setTabValue('memoList');
     },
     [editIndex, session?.user.id, handleAddSubmit, handleUpdateSubmit],
   );
 
-  const handleEditClick = useCallback(
-    (index: string) => {
-      setEditIndex(index);
-      setOpen(true);
-    },
-    [setEditIndex],
-  );
+  const handleEditClick = useCallback((index: string) => {
+    setEditIndex(index);
+    setTabValue('addMemo');
+  }, []);
 
   const handleDeleteClick = useCallback(
     async (index: string) => {
@@ -75,25 +129,10 @@ export const MemoManagerTanstack = () => {
   );
 
   useEffect(() => {
-    if (!open) setEditIndex(null);
-  }, [open]);
-
-  /*
-  const handleAddClick = useCallback(() => {
-    setEditIndex(null);
-    setOpen(true);
-    setViewCategory(false);
-  }, []);
-
-  const handleBackToList = useCallback(() => {
-    setOpen(false);
-    setViewCategory(false);
-  }, []);
-
-  const handleCategoryClick = useCallback(() => {
-    setViewCategory(true);
-  }, []);
-  */
+    if (tabValue !== 'addMemo') {
+      setEditIndex(null);
+    }
+  }, [tabValue]);
 
   if (!session) return <p className="text-center">メモ機能は会員限定です</p>;
 
@@ -102,7 +141,7 @@ export const MemoManagerTanstack = () => {
 
   return (
     <div>
-      <Tabs defaultValue="memoList" className="w-full">
+      <Tabs value={tabValue} onValueChange={setTabValue} className="w-full">
         <div className="flex flex-raw justify-center mb-10">
           <TabsList>
             <TabsTrigger value="memoList">メモ一覧</TabsTrigger>
@@ -116,7 +155,22 @@ export const MemoManagerTanstack = () => {
           {!memoList && <p>データがありませんでした。</p>}
         </TabsContent>
         <TabsContent value="addMemo">
-          <MemoForm onSubmit={handleFormSubmit} initialValues={editMemoData} />
+          <MemoForm
+            onSubmit={handleFormSubmit}
+            initialValues={editMemoData}
+            categories={categories}
+            tags={tags}
+            category={category}
+            setCategory={setCategory}
+            tag={tag}
+            setTag={setTag}
+            handleCategorySubmit={handleCategorySubmit}
+            handleTagSubmit={handleTagSubmit}
+            categoryOpen={addCategoryDialogOpen}
+            setCategoryOpen={setAddCategoryDialogOpen}
+            tagOpen={addTagialogOpen}
+            setTagOpen={setAddTagDialogOpen}
+          />
         </TabsContent>
         <TabsContent value="categorySetting">
           <MemoCategoryManager />
@@ -125,21 +179,6 @@ export const MemoManagerTanstack = () => {
           <MemoTagManager />
         </TabsContent>
       </Tabs>
-
-      {/*
-      <div className="flex gap-2">
-        <Button onClick={handleAddClick}>メモ追加</Button>
-        <Button onClick={handleBackToList}>メモ一覧</Button>
-        <Button onClick={handleCategoryClick}>カテゴリ設定</Button>
-      </div>
-      {viewCategory ? (
-        <MemoCategoryManager />
-      ) : open ? (
-        <MemoForm onSubmit={handleFormSubmit} initialValues={editMemoData} />
-      ) : (
-        memoList && <MemoList memoData={memoList} onEdit={handleEditClick} onDelete={handleDeleteClick} />
-      )}
-      */}
     </div>
   );
 };

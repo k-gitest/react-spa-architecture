@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormSchema } from '@/features/memo/schemas/memo-form-schema';
@@ -15,8 +15,6 @@ import {
 import { z } from 'zod';
 import { syncZodErrors } from '@/lib/trpc';
 import { MemoItemAddDialog } from '@/features/memo/components/memo-item-add-dialog';
-import { useMemos } from '@/features/memo/hooks/use-memo-queries-tanstack';
-import { useSessionStore } from '@/hooks/use-session-store';
 
 const importances = [
   { value: 'high', label: '大' },
@@ -34,12 +32,12 @@ const defaultMemoFormData = {
 
 type FlattenFormatted = z.inferFlattenedErrors<typeof FormSchema>;
 
-interface CategoryOptions {
+interface CategoryOption {
   label: string;
   value: string;
 }
 
-interface TagsOptions {
+interface TagOption {
   label: string;
   id: string;
 }
@@ -48,36 +46,41 @@ interface Props {
   onSubmit: (data: MemoFormData) => void;
   initialValues?: MemoFormData;
   externalZodError?: FlattenFormatted | null;
+  categories: CategoryOption[] | null;
+  tags: TagOption[] | null;
+  category: string;
+  setCategory: (value: string) => void;
+  tag: string;
+  setTag: (value: string) => void;
+  handleCategorySubmit: () => void;
+  handleTagSubmit: () => void;
+  categoryOpen: boolean;
+  setCategoryOpen: (open: boolean) => void;
+  tagOpen: boolean;
+  setTagOpen: (open: boolean) => void;
 }
 
-export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) => {
-  const { fetchCategory, fetchTags, addCategory, addTag } = useMemos();
-  const { data: categoryData } = fetchCategory;
-  const { data: tagsData } = fetchTags;
-  const [category, setCategory] = useState('');
-  const [categories, setCategories] = useState<CategoryOptions[] | null>(null);
-  const [tag, setTag] = useState('');
-  const [tags, setTags] = useState<TagsOptions[] | null>(null);
-  const session = useSessionStore((state) => state.session);
-
+export const MemoForm = ({
+  onSubmit,
+  initialValues,
+  externalZodError,
+  categories,
+  tags,
+  category,
+  setCategory,
+  tag,
+  setTag,
+  handleCategorySubmit,
+  handleTagSubmit,
+  categoryOpen,
+  setCategoryOpen,
+  tagOpen,
+  setTagOpen,
+}: Props) => {
   const form = useForm<MemoFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: initialValues || defaultMemoFormData,
   });
-
-  const handleCategorySubmit = useCallback(() => {
-    if (session?.user?.id && category.trim()) {
-      addCategory({ name: category.trim(), user_id: session.user.id });
-      setCategory('');
-    }
-  }, [addCategory, session?.user?.id]);
-
-  const handleTagSubmit = useCallback(() => {
-    if (session?.user?.id && tag.trim()) {
-      addTag({ name: tag.trim(), user_id: session?.user?.id });
-      setTag('');
-    }
-  }, [addTag, session?.user?.id]);
 
   const handleSubmit = useCallback(
     (data: MemoFormData) => {
@@ -97,26 +100,6 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
     syncZodErrors(form, externalZodError);
   }, [externalZodError, form]);
 
-  useEffect(() => {
-    if (categoryData) {
-      const categoryOptions = categoryData.map((category) => ({
-        label: category.name,
-        value: String(category.id),
-      }));
-      setCategories(categoryOptions);
-    }
-  }, [categoryData]);
-
-  useEffect(() => {
-    if (tagsData) {
-      const tagsOptions = tagsData.map((tag) => ({
-        label: tag.name,
-        id: String(tag.id),
-      }));
-      setTags(tagsOptions);
-    }
-  }, [tagsData]);
-
   return (
     <div className="flex justify-center">
       <FormWrapper onSubmit={handleSubmit} form={form}>
@@ -130,6 +113,8 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
           value={category}
           setValue={setCategory}
           onSubmit={handleCategorySubmit}
+          open={categoryOpen}
+          setOpen={setCategoryOpen}
         />
         <FormTextArea label="メモの内容" name="content" placeholder="内容を記入してください" />
         <FormRadioGroup label="重要度" name="importance" options={importances} />
@@ -143,6 +128,8 @@ export const MemoForm = ({ onSubmit, initialValues, externalZodError }: Props) =
           value={tag}
           setValue={setTag}
           onSubmit={handleTagSubmit}
+          open={tagOpen}
+          setOpen={setTagOpen}
         />
         {form.formState.errors?.root && <p className="text-sm text-red-500">{form.formState.errors.root?.message}</p>}
         <div className="flex justify-center">

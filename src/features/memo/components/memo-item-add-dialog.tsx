@@ -1,8 +1,7 @@
-import { useState } from "react";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { ResponsiveDialog } from "@/components/responsive-dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { ResponsiveDialog } from '@/components/responsive-dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 type MemoItemAddDialogProps = {
   buttonTitle: string;
@@ -10,6 +9,8 @@ type MemoItemAddDialogProps = {
   dialogDescription: string;
   placeholder: string;
   value: string;
+  open: boolean;
+  setOpen: (open: boolean) => void;
   setValue: (value: string) => void;
   onSubmit: () => void;
 };
@@ -20,10 +21,11 @@ export const MemoItemAddDialog = ({
   dialogDescription,
   placeholder,
   value,
+  open,
+  setOpen,
   setValue,
   onSubmit,
 }: MemoItemAddDialogProps) => {
-  const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   return (

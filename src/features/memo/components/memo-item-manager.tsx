@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useMemos } from '@/features/memo/hooks/use-memo-queries-tanstack';
-import { TagCategoryList } from '@/features/memo/components/memo-tag-category-list';
+import { TagCategoryList } from '@/features/memo/components/memo-item-list';
 import { MemoItemAddDialog } from '@/features/memo/components/memo-item-add-dialog';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -50,6 +50,7 @@ export const MemoItemManager = ({
     deleteCategory,
   } = useMemos();
 
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [open, setOpen] = useState<boolean>(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
@@ -58,7 +59,7 @@ export const MemoItemManager = ({
     defaultValues: { name: '' },
   });
 
-  // 型に基づいて適切な関数とデータを選択
+  // 渡された引数typeに基づいて適切な関数とデータを選択
   const fetchData = type === 'tag' ? fetchTags : fetchCategory;
   const addItem = type === 'tag' ? addTag : addCategory;
   const updateItem = type === 'tag' ? updateTag : updateCategory;
@@ -69,6 +70,7 @@ export const MemoItemManager = ({
     if (session?.user?.id && itemValue.trim()) {
       addItem({ name: itemValue.trim(), user_id: session.user.id });
       setItemValue('');
+      setAddDialogOpen(false);
     }
   }, [addItem, session?.user?.id, itemValue]);
 
@@ -121,12 +123,10 @@ export const MemoItemManager = ({
             value={itemValue}
             setValue={setItemValue}
             onSubmit={handleItemSubmit}
+            open={addDialogOpen}
+            setOpen={setAddDialogOpen}
           />
-          <TagCategoryList
-            itemList={fetchData.data}
-            onEdit={handleEditClick}
-            onDelete={handleDeleteClick}
-          />
+          <TagCategoryList itemList={fetchData.data} onEdit={handleEditClick} onDelete={handleDeleteClick} />
         </>
       )}
       {open && (
@@ -139,11 +139,7 @@ export const MemoItemManager = ({
           className="flex justify-center"
         >
           <FormWrapper onSubmit={handleUpdateItemSubmit} form={form}>
-            <FormInput
-              label={itemLabel}
-              name="name"
-              placeholder={itemPlaceholder}
-            />
+            <FormInput label={itemLabel} name="name" placeholder={itemPlaceholder} />
             <Button type="submit">送信</Button>
           </FormWrapper>
         </ResponsiveDialog>
