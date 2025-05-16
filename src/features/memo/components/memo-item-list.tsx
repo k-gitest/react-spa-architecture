@@ -16,7 +16,7 @@ interface ItemListProps<T extends ItemList> {
   onDelete: (id: number) => void;
 }
 
-export const TagCategoryList = React.memo(
+export const MemoItemList = React.memo(
   <T extends ItemList>({ itemList, onEdit, onDelete }: ItemListProps<T>) => {
     return (
       <div className="flex flex-col gap-2 p-4">
@@ -39,4 +39,4 @@ export const TagCategoryList = React.memo(
     );
   },
 );
-TagCategoryList.displayName = 'TagCategoryList';
+MemoItemList.displayName = 'MemoItemList';

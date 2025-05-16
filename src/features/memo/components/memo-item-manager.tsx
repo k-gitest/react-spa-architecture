@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSessionStore } from '@/hooks/use-session-store';
-import { TagCategoryList } from '@/features/memo/components/memo-item-list';
+import { MemoItemList } from '@/features/memo/components/memo-item-list';
 import { MemoItemAddDialog } from '@/features/memo/components/memo-item-add-dialog';
 import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -117,7 +117,7 @@ export const MemoItemManager = ({
             open={addDialogOpen}
             setOpen={setAddDialogOpen}
           />
-          <TagCategoryList itemList={fetchData.data} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+          <MemoItemList itemList={fetchData.data} onEdit={handleEditClick} onDelete={handleDeleteClick} />
         </>
       )}
       {open && (
