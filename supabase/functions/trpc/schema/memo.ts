@@ -16,3 +16,11 @@ export const memoSchema = memoFormSchema.extend({
   created_at: z.string(),
   updated_at: z.string(),
 });
+
+export const categorySchema = z.object({
+  name: z.string(),
+});
+
+export const tagSchema = z.object({
+  name: z.string(),
+});

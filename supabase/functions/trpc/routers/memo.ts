@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { router, procedure } from '../trpc.ts';
-import { memoFormSchema } from '../schema/memo.ts';
+import { memoFormSchema, categorySchema, tagSchema } from '../schema/memo.ts';
 import { PrismaError } from '../../_shared/prisma-error.ts';
 //import { TRPCError } from '@trpc/server';
 
@@ -42,7 +42,7 @@ export const memoRouter = router({
         cause: error,
       });
       */
-      throw new Error('An error occurred while fetching memos');
+      throw error;
     }
 
     const formatted = data.map((memo) => ({
@@ -194,4 +194,71 @@ export const memoRouter = router({
     if (error) throw error;
     return { success: true };
   }),
+
+  // カテゴリ一覧取得
+  getCategories: procedure.query(async ({ ctx }) => {
+    const { data, error } = await ctx.supabase.from('categories').select('*');
+    if (error) throw error;
+    return data;
+  }),
+
+  // 単一カテゴリ取得
+  getCategory: procedure.input(z.number()).query(async ({ ctx, input }) => {
+    const { data, error } = await ctx.supabase.from('categories').select('*').eq('id', input).single();
+    if (error) throw error;
+    return data;
+  }),
+
+  // カテゴリ追加
+  addCategory: procedure.input(categorySchema.extend({ user_id: z.string() })).mutation(async ({ ctx, input }) => {
+    const { data, error } = await ctx.supabase.from('categories').insert(input).single();
+    if (error) throw error;
+    return data;
+  }),
+
+  // カテゴリ更新
+  updateCategory: procedure.input(categorySchema.extend({ id: z.number() })).mutation(async ({ ctx, input }) => {
+    const { error } = await ctx.supabase.from('categories').update({ name: input.name }).eq('id', input.id).single();
+    if (error) throw error;
+  }),
+
+  // カテゴリ削除
+  deleteCategory: procedure.input(z.number()).mutation(async ({ ctx, input }) => {
+    const { error } = await ctx.supabase.from('categories').delete().eq('id', input).single();
+    if (error) throw error;
+  }),
+
+  // タグ一覧取得
+  getTags: procedure.query(async ({ ctx }) => {
+    const { data, error } = await ctx.supabase.from('tags').select('*');
+    if (error) throw error;
+    return data;
+  }),
+
+  // 単一タグ取得
+  getTag: procedure.input(z.number()).query(async ({ ctx, input }) => {
+    const { data, error } = await ctx.supabase.from('tags').select('*').eq('id', input).single();
+    if (error) throw error;
+    return data;
+  }),
+
+  // タグ追加
+  addTag: procedure.input(tagSchema.extend({ user_id: z.string() })).mutation(async ({ ctx, input }) => {
+    const { data, error } = await ctx.supabase.from('tags').insert(input).single();
+    if (error) throw error;
+    return data;
+  }),
+
+  // タグ更新
+  updateTag: procedure.input(tagSchema.extend({ id: z.number() })).mutation(async ({ ctx, input }) => {
+    const { error } = await ctx.supabase.from('tags').update({ name: input.name }).eq('id', input.id).single();
+    if (error) throw error;
+  }),
+
+  // タグ削除
+  deleteTag: procedure.input(z.number()).mutation(async ({ ctx, input }) => {
+    const { error } = await ctx.supabase.from('tags').delete().eq('id', input).single();
+    if (error) throw error;
+  }),
+
 });
