@@ -52,7 +52,7 @@ export const AuthHeader = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Avatar className="h-10 w-10 border border-black-700 cursor-pointer dark:bg-white">
+              <Avatar role="button" className="h-10 w-10 border border-black-700 cursor-pointer dark:bg-white">
                 <AvatarImage
                   src={data?.avatar ? getAvatarUrl(data.avatar) : session?.user.user_metadata.avatar_url}
                   alt="avatar"

@@ -82,15 +82,28 @@ describe('AccountForm コンポーネントのテスト', () => {
     });
   });
 
-  it('Githubボタンを押すとOAuthサインインが呼ばれること', async () => {
-    render(<AccountForm type="signup" />);
+  it('Githubボタン（register）でOAuthが呼ばれること', async () => {
+    render(<AccountForm type="register" />);
 
     fireEvent.click(screen.getByRole('button', { name: /Githubで登録/i }));
 
     await waitFor(() => {
       expect(signInWithOAuth).toHaveBeenCalledWith({
         provider: 'github',
-        redirectTo: window.location.origin,
+        redirectTo: `${window.location.origin}/dashboard`,
+      });
+    });
+  });
+
+  it('Githubボタン（login）でOAuthが呼ばれること', async () => {
+    render(<AccountForm type="login" />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Githubでログイン/i }));
+
+    await waitFor(() => {
+      expect(signInWithOAuth).toHaveBeenCalledWith({
+        provider: 'github',
+        redirectTo: `${window.location.origin}/dashboard`,
       });
     });
   });
@@ -108,6 +121,6 @@ describe('AccountForm コンポーネントのテスト', () => {
     const button = screen.getByRole('button', { name: /送信/i });
 
     expect(button).toBeDisabled();
-    //expect(screen.getByTestId('loader-icon')).toBeInTheDocument(); // Loader に testId を付けるとテストしやすい
+    expect(button.querySelector('svg')).toBeInTheDocument(); // Lucide Loader icon が含まれているか
   });
 });

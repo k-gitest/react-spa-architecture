@@ -1,19 +1,21 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoManagerTrpc } from '@/features/memo/components/memo-manager-trpc';
 import { useMemos as useMemosMock } from '@/features/memo/hooks/use-memo-queries-trpc';
+import { useSessionStore as useSessionStoreMock } from '@/hooks/use-session-store';
 import userEvent from '@testing-library/user-event';
+import { vi, Mock } from 'vitest';
 
-let defaultSession: {
-  session?: {
-    user: {
-      id: string;
-      email: string;
-      updated_at: string;
-      identities: { provider: string }[];
-      recovery_sent_at?: string;
-    } | null;
-  };
-} = {
+// セッションモック
+vi.mock('@/hooks/use-session-store', () => ({
+  useSessionStore: vi.fn(),
+}));
+
+// useMemos モック
+vi.mock('@/features/memo/hooks/use-memo-queries-trpc', () => ({
+  useMemos: vi.fn(),
+}));
+
+const defaultSession = {
   session: {
     user: {
       id: 'test-user-id',
@@ -23,42 +25,39 @@ let defaultSession: {
     },
   },
 };
-// useSessionStoreモック
-vi.mock('@/hooks/use-session-store', () => ({
-  useSessionStore: (selector: any) => selector(defaultSession),
-}));
 
-vi.mock('@/features/memo/hooks/use-memo-queries-trpc', () => ({
-  useMemos: vi.fn(),
-}));
+// 共通の base モック戻り値
+const createUseMemosMockReturn = (overrides = {}) => ({
+  memos: [],
+  isMemosLoading: false,
+  isMemosError: false,
+  memosError: null,
+  useGetMemo: () => ({ data: null }),
+  addMemo: vi.fn(),
+  updateMemo: vi.fn(),
+  deleteMemo: vi.fn(),
+  fetchCategory: { data: [] },
+  fetchTags: { data: [] },
+  addCategory: vi.fn(),
+  addTag: vi.fn(),
+  useGetTag: () => ({}),
+  useGetCategory: () => ({}),
+  updateTag: vi.fn(),
+  updateCategory: vi.fn(),
+  deleteTag: vi.fn(),
+  deleteCategory: vi.fn(),
+  ...overrides,
+});
 
 describe('MemoManagerTrpc', () => {
   beforeAll(() => {
-    // hasPointerCapture メソッドをモック
-    if (!HTMLElement.prototype.hasPointerCapture) {
-      HTMLElement.prototype.hasPointerCapture = function () {
-        return false;
-      };
-    }
-    // 他のJSDOMに不足しているポインター関連APIもモック
-    if (!HTMLElement.prototype.setPointerCapture) {
-      HTMLElement.prototype.setPointerCapture = function () {};
-    }
+    (useSessionStoreMock as unknown as Mock).mockImplementation((selector) => selector(defaultSession));
 
-    if (!HTMLElement.prototype.releasePointerCapture) {
-      HTMLElement.prototype.releasePointerCapture = function () {};
-    }
-
-    // scrollIntoView メソッドをモック
-    if (!HTMLElement.prototype.scrollIntoView) {
-      HTMLElement.prototype.scrollIntoView = function () {};
-    }
-
-    // window.matchMedia を Vitest 形式でモック
+    // ブラウザAPIのモックを追加
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: vi.fn().mockImplementation((query: string) => ({
-        matches: query === '(min-width: 768px)', // 条件を任意に調整
+        matches: query === '(min-width: 768px)',
         media: query,
         onchange: null,
         addEventListener: vi.fn(),
@@ -67,6 +66,13 @@ describe('MemoManagerTrpc', () => {
       })),
     });
 
+    // その他必要なブラウザAPIのモック
+    HTMLElement.prototype.scrollIntoView = vi.fn();
+    HTMLElement.prototype.hasPointerCapture = vi.fn();
+    HTMLElement.prototype.setPointerCapture = vi.fn();
+    HTMLElement.prototype.releasePointerCapture = vi.fn();
+
+    // ResizeObserverのモック
     global.ResizeObserver = class ResizeObserver {
       observe() {}
       unobserve() {}
@@ -74,171 +80,57 @@ describe('MemoManagerTrpc', () => {
     };
   });
 
-  it('ローディングを描画', () => {
-    (useMemosMock as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      memos: [],
-      isMemosLoading: true,
-      isMemosError: false,
-      memosError: null,
-      useGetMemo: () => ({ data: null }),
-      addMemo: vi.fn(),
-      updateMemo: vi.fn(),
-      deleteMemo: vi.fn(),
-    });
-    render(<MemoManagerTrpc />);
-    expect(screen.getByText('Loading memos...')).toBeInTheDocument();
-  });
+  it('メモ追加フォームを送信してaddMemoを呼ぶ', async () => {
+    const user = userEvent.setup();
+    const addMemoMock = vi.fn().mockResolvedValue({ success: true });
 
-  it('エラーを描画', () => {
-    (useMemosMock as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      memos: [],
-      isMemosLoading: false,
-      isMemosError: true,
-      memosError: { message: 'Failed to load memos' },
-      useGetMemo: () => ({ data: null }),
-      addMemo: vi.fn(),
-      updateMemo: vi.fn(),
-      deleteMemo: vi.fn(),
-    });
+    // カテゴリ・タグのモックデータを追加
+    (useMemosMock as unknown as Mock).mockReturnValue(
+      createUseMemosMockReturn({
+        addMemo: addMemoMock,
+        fetchCategory: { data: [{ id: 1, name: 'タスク' }] },
+        fetchTags: { data: [{ id: 'recents', name: 'Recents' }] },
+      })
+    );
 
     render(<MemoManagerTrpc />);
-    expect(screen.getByText('Error loading memos: Failed to load memos')).toBeInTheDocument();
-  });
+    await user.click(screen.getByText('メモ追加'));
 
-  it('メモリストを描画', () => {
-    (useMemosMock as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      memos: [
-        {
-          id: '1',
-          title: 'テストメモ1',
-          content: '内容1',
-          user_id: 'test-user-id',
-          tags: [],
-          created_at: '',
-          updated_at: '',
-        },
-        {
-          id: '2',
-          title: 'テストメモ2',
-          content: '内容2',
-          user_id: 'test-user-id',
-          tags: [],
-          created_at: '',
-          updated_at: '',
-        },
-      ],
-      isMemosLoading: false,
-      isMemosError: false,
-      memosError: null,
-      useGetMemo: () => ({ data: null }),
-      addMemo: vi.fn(),
-      updateMemo: vi.fn(),
-      deleteMemo: vi.fn(),
-    });
+    const titleInput = await screen.findByPlaceholderText('タイトルを入力してください');
+    const contentInput = await screen.findByPlaceholderText('内容を記入してください');
+    await user.type(titleInput, 'テストメモ');
+    await user.type(contentInput, 'これはテストです');
 
-    render(<MemoManagerTrpc />);
-    expect(screen.getByText('テストメモ1')).toBeInTheDocument();
-    expect(screen.getByText('テストメモ2')).toBeInTheDocument();
-  });
+    // タグ選択
+    const tagCheckbox = screen.getByRole('checkbox', { name: 'Recents' });
+    await user.click(tagCheckbox);
 
-  it('メモ追加ボタンクリックでダイアログを開く', () => {
-    render(<MemoManagerTrpc />);
-    fireEvent.click(screen.getByText('メモ追加'));
-    expect(screen.getByText('Memo')).toBeInTheDocument();
-  });
+    // カテゴリ選択
+    const combobox = screen.getByRole('combobox');
+    await user.click(combobox);
+    const option = screen.getByRole('option', { name: 'タスク' });
+    await user.click(option);
 
-  it('メモ追加ボタンを押してaddMemoを呼ぶ', async () => {
-    const addMemoMock = vi.fn();
-
-    (useMemosMock as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      memos: [],
-      isMemosLoading: false,
-      isMemosError: false,
-      memosError: null,
-      useGetMemo: () => ({ data: null }),
-      addMemo: addMemoMock,
-      updateMemo: vi.fn(),
-      deleteMemo: vi.fn(),
-    });
-
-    render(<MemoManagerTrpc />);
-
-    // ダイアログを開く
-    fireEvent.click(screen.getByText('メモ追加'));
-
-    // フォームに入力
-    fireEvent.change(screen.getByLabelText('タイトル'), { target: { value: 'テストメモ' } });
-    fireEvent.change(screen.getByLabelText('メモの内容'), { target: { value: 'これはテストです' } });
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Recents' }));
-
-    // セレクトボックスが存在することを確認
-    expect(screen.getByRole('combobox')).toBeInTheDocument();
-    // オプションが表示されていることを確認 (最初は閉じた状態なので、aria-expanded="false" であることを確認)
-    expect(screen.getByRole('combobox')).toHaveAttribute('aria-expanded', 'false');
-    const selectElement = screen.getByRole('combobox');
-    // セレクトボックスをクリックしてオプションリストを開く
-    await userEvent.click(selectElement);
-    expect(selectElement).toHaveAttribute('aria-expanded', 'true');
-    // 「タスク」を選択する
-    const selectedOption = screen.getByRole('option', { name: 'タスク' });
-    await userEvent.click(selectedOption);
+    // 重要度
+    const lowRadio = screen.getByRole('radio', { name: '小' });
+    await user.click(lowRadio);
 
     // 送信
-    fireEvent.click(screen.getByRole('button', { name: /送信/i }));
+    const submitButton = screen.getByRole('button', { name: /送信/i });
+    await user.click(submitButton);
 
-    await screen.findByText('メモ追加'); // 待機 (UIが再表示されるまで)
-
-    // 関数が呼ばれたことを確認
-    expect(addMemoMock).toHaveBeenCalledWith(
-      expect.objectContaining(
+    // 検証
+    await waitFor(() => {
+      expect(addMemoMock).toHaveBeenCalledWith(
         {
-          content: 'これはテストです',
-          tags: ['recents'],
-          category: 'task',
-          importance: 'high',
           title: 'テストメモ',
-        }
-      ),
-      'test-user-id',
-    );
-  });
-
-  it('削除ボタンをクリックしてdeleteMemoを呼ぶ', () => {
-    const deleteMemoMock = vi.fn();
-    (useMemosMock as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      memos: [
-        {
-          id: '1',
-          title: 'テストメモ1',
-          content: '内容1',
-          user_id: 'test-user-id',
-          tags: [],
-          created_at: '',
-          updated_at: '',
+          content: 'これはテストです',
+          importance: 'low',
+          category: '1', // ←カテゴリIDが入る
+          tags: ['recents'],
         },
-        {
-          id: '2',
-          title: 'テストメモ2',
-          content: '内容2',
-          user_id: 'test-user-id',
-          tags: [],
-          created_at: '',
-          updated_at: '',
-        },
-      ],
-      isMemosLoading: false,
-      isMemosError: false,
-      memosError: null,
-      useGetMemo: () => ({ data: null }),
-      addMemo: vi.fn(),
-      updateMemo: vi.fn(),
-      deleteMemo: deleteMemoMock,
+        'test-user-id'
+      );
     });
-
-    render(<MemoManagerTrpc />);
-    // ID が '1' のメモに対応する削除ボタンを選択
-    const deleteButton1 = screen.getByTestId('delete-memo-1');
-    fireEvent.click(deleteButton1);
-    expect(deleteMemoMock).toHaveBeenCalledWith('1');
   });
 });

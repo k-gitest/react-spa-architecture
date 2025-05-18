@@ -8,7 +8,7 @@ import { handleAuthSuccess, removeLocalStorageAccessToken } from '@/lib/auth';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useApiMutation } from '@/hooks/use-tanstack-query';
 
-// モックの設定
+// モックの設定 
 vi.mock('react-router-dom', () => ({
   useNavigate: vi.fn(),
 }));
@@ -116,7 +116,7 @@ describe('useAuth', () => {
     // onSuccess が動作するか確認
     if (capturedOnSuccess) {
       capturedOnSuccess({ session: { token: 'test-token' } });
-      expect(handleAuthSuccess).toHaveBeenCalledWith({ token: 'test-token' }, expect.any(Function), '/');
+      expect(handleAuthSuccess).toHaveBeenCalledWith({ token: 'test-token' }, expect.any(Function), '/dashboard');
     }
   });
 
@@ -152,7 +152,7 @@ describe('useAuth', () => {
     // onSuccess が動作するか確認
     if (capturedOnSuccess) {
       capturedOnSuccess({ session: { token: 'test-token' } });
-      expect(handleAuthSuccess).toHaveBeenCalledWith({ token: 'test-token' }, expect.any(Function), '/');
+      expect(handleAuthSuccess).toHaveBeenCalledWith({ token: 'test-token' }, expect.any(Function), '/dashboard');
     }
   });
   

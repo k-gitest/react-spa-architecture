@@ -4,14 +4,14 @@ import { describe, it, vi, beforeEach } from 'vitest';
 import { FormProvider, useFormContext } from 'react-hook-form';
 import React from 'react';
 
-// テストごとにモックの挙動を変えるため、外部変数として用意
+// 外部変数でモック関数とフラグを管理
 const signUp = vi.fn();
 const signIn = vi.fn();
 const signInWithOAuth = vi.fn();
 let isPendingSignUp = false;
 let isPendingSignIn = false;
 
-// useAuth をモック
+// useAuth のモック
 vi.mock('@/features/auth/hooks/use-auth-queries-trpc', () => ({
   useAuth: () => ({
     signUp,
@@ -22,7 +22,7 @@ vi.mock('@/features/auth/hooks/use-auth-queries-trpc', () => ({
   }),
 }));
 
-// FormWrapper / FormInput モック（FormContext つなぎ込み）
+// FormWrapper / FormInput のモック（FormContext 反映）
 vi.mock('@/components/form/form-parts', async () => {
   const actual = await vi.importActual<typeof import('@/components/form/form-parts')>(
     '@/components/form/form-parts'
@@ -39,19 +39,14 @@ vi.mock('@/components/form/form-parts', async () => {
       return (
         <div>
           <label htmlFor={name}>{label}</label>
-          <input
-            {...register(name)}
-            id={name}
-            name={name}
-            placeholder={placeholder}
-          />
+          <input {...register(name)} id={name} name={name} placeholder={placeholder} />
         </div>
       );
     },
   };
 });
 
-describe('AccountForm コンポーネントのテスト', () => {
+describe('AccountForm (trpc版) のテスト', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     isPendingSignUp = false;
@@ -78,26 +73,39 @@ describe('AccountForm コンポーネントのテスト', () => {
     });
   });
 
-  it('Githubで登録ボタンがクリックできること', async () => {
-    render(<AccountForm type="signup" />);
+  it('Githubボタン（register）のクリックでOAuthが呼ばれること', async () => {
+    render(<AccountForm type="register" />);
 
     fireEvent.click(screen.getByRole('button', { name: /Githubで登録/i }));
 
     await waitFor(() => {
       expect(signInWithOAuth).toHaveBeenCalledWith({
         provider: 'github',
-        redirectTo: window.location.origin,
+        redirectTo: `${window.location.origin}/dashboard`,
       });
     });
   });
 
-  it('読み込み中にLoaderが表示され、ボタンが無効になること', () => {
+  it('Githubボタン（login）のクリックでOAuthが呼ばれること', async () => {
+    render(<AccountForm type="login" />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Githubでログイン/i }));
+
+    await waitFor(() => {
+      expect(signInWithOAuth).toHaveBeenCalledWith({
+        provider: 'github',
+        redirectTo: `${window.location.origin}/dashboard`,
+      });
+    });
+  });
+
+  it('読み込み中にLoaderが表示され、送信ボタンが無効になること', () => {
     isPendingSignUp = true;
 
     render(<AccountForm type="signup" />);
     const submitButton = screen.getByRole('button', { name: /送信/i });
 
     expect(submitButton).toBeDisabled();
-    //expect(screen.getByTestId('loader-icon')).toBeInTheDocument(); // Loaderにテスト用のtestIdを付ける
+    expect(submitButton.querySelector('svg')).toBeInTheDocument(); // LucideのLoaderが存在する
   });
 });

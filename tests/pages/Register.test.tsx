@@ -11,36 +11,35 @@ vi.mock('@/components/layout/main-wrapper', () => ({
   ),
 }));
 
-// AccountForm (TanStack) のモック
+// withBehaviorVariant に渡す各フォームをモック
+vi.mock('@/features/auth/components/auth-form', () => ({
+  AccountForm: ({ type }: { type: 'login' | 'register' }) => (
+    <div data-testid={`account-form-default-${type}`}>AccountForm (Default) - {type}</div>
+  ),
+}));
+
 vi.mock('@/features/auth/components/auth-form-tanstack', () => ({
   AccountForm: ({ type }: { type: 'login' | 'register' }) => (
     <div data-testid={`account-form-tanstack-${type}`}>AccountForm (TanStack) - {type}</div>
   ),
 }));
 
-// AccountForm (TRPC) のモック
 vi.mock('@/features/auth/components/auth-form-trpc', () => ({
   AccountForm: ({ type }: { type: 'login' | 'register' }) => (
     <div data-testid={`account-form-trpc-${type}`}>AccountForm (TRPC) - {type}</div>
   ),
 }));
 
-// react-router-dom の Link と BrowserRouter のモック
-vi.mock('react-router-dom', () => {
-  const original = vi.importActual('react-router-dom');
-  return {
-    ...original,
-    Link: ({ to, children }: { to: string; children: React.ReactNode }) => (
-      <a href={to} data-testid="link-to-login">{children}</a>
-    ),
-    BrowserRouter: ({ children }: { children: React.ReactNode }) => (
-      <div data-testid="browser-router">{children}</div>
-    ),
-  };
-});
+// useBehaviorVariant のモック
+vi.mock('@/hooks/use-behavior-variant', () => ({
+  useBehaviorVariant: () => ({
+    getCurrentVariant: () => ({ id: 'default', name: '標準' }),
+    toggleVariant: vi.fn(),
+  }),
+}));
 
-describe('Register', () => {
-  it('renders the main wrapper and both register forms', () => {
+describe('Register Page', () => {
+  it('MainWrapper と default の登録フォームを表示する', () => {
     render(
       <HelmetProvider>
         <Register />
@@ -48,17 +47,11 @@ describe('Register', () => {
       { wrapper: BrowserRouter }
     );
 
-    // MainWrapper が存在することを確認
     expect(screen.getByTestId('main-wrapper')).toBeInTheDocument();
-
-    // TanStack の登録フォームが存在することを確認
-    expect(screen.getByTestId('account-form-tanstack-register')).toBeInTheDocument();
-
-    // TRPC の登録フォームが存在することを確認
-    expect(screen.getByTestId('account-form-trpc-register')).toBeInTheDocument();
+    expect(screen.getByTestId('account-form-default-register')).toBeInTheDocument();
   });
 
-  it('renders the login link', () => {
+  it('ログインページへのリンクが表示されている', () => {
     render(
       <HelmetProvider>
         <Register />
@@ -66,14 +59,12 @@ describe('Register', () => {
       { wrapper: BrowserRouter }
     );
 
-    // ログインへのリンクが存在することを確認
-    const loginLink = screen.getByTestId('link-to-login');
+    const loginLink = screen.getByRole('link', { name: /ログインページ/ });
     expect(loginLink).toBeInTheDocument();
     expect(loginLink).toHaveAttribute('href', '/login');
-    expect(loginLink).toHaveTextContent('ログインページ');
   });
 
-  it('sets the correct page title and meta description', async () => {
+  it('ページタイトルと meta description が正しく設定されている', async () => {
     render(
       <HelmetProvider>
         <Register />
@@ -87,8 +78,8 @@ describe('Register', () => {
     });
 
     await waitFor(() => {
-      const metaDescription = document.querySelector('meta[name="description"]');
-      expect(metaDescription?.getAttribute('content')).toBe('メモアプリのユーザー新規登録ページです');
+      const meta = document.querySelector('meta[name="description"]');
+      expect(meta?.getAttribute('content')).toBe('メモアプリのユーザー新規登録ページです');
     });
   });
 });

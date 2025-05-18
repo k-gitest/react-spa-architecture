@@ -2,10 +2,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoManager } from '@/features/memo/components/memo-manager';
 import {
   fetchMemosService,
-  addMemoService,
+  addMemoRPC,  // addMemoService → addMemoRPC に変更
   getMemoService,
   updateMemoService,
   deleteMemoService,
+  fetchCategoryService,
+  fetchTagsService,
 } from '@/features/memo/services/memoService';
 import userEvent from '@testing-library/user-event';
 
@@ -37,10 +39,12 @@ vi.mock('@/hooks/use-session-store', () => ({
 // サービス関数をモック化
 vi.mock('@/features/memo/services/memoService', () => ({
   fetchMemosService: vi.fn(),
-  addMemoService: vi.fn(),
+  addMemoRPC: vi.fn(),  // addMemoService → addMemoRPC に変更
   getMemoService: vi.fn(),
   updateMemoService: vi.fn(),
   deleteMemoService: vi.fn(),
+  fetchCategoryService: vi.fn(),
+  fetchTagsService: vi.fn(),
 }));
 
 describe('MemoManager', () => {
@@ -117,77 +121,67 @@ describe('MemoManager', () => {
 
   it('メモ追加ボタンクリックでダイアログを開く', async () => {
     render(<MemoManager />);
-    
-    // 「メモ追加」が出るまで待つ！（fetch完了後）
-    await screen.findByText('メモ追加');
-  
-    fireEvent.click(screen.getByText('メモ追加'));
-  
-    // ダイアログが開くのを待つ
-    await screen.findByText('Memo');
+    // 「メモ追加」タブをクリックしてアクティブにする
+    const addTab = screen.getByRole('tab', { name: 'メモ追加' });
+    await userEvent.click(addTab);
+
+    // 「タイトル」ラベルが現れるまで待つ
+    await waitFor(() => {
+      expect(screen.getByLabelText('タイトル')).toBeInTheDocument();
+    });
   });
 
   it('メモ追加ボタンを押してaddMemoを呼ぶ', async () => {
-    const mockAddMemoService = addMemoService as unknown as ReturnType<typeof vi.fn>;
-    mockAddMemoService.mockResolvedValue(undefined); // 成功時の戻り値をモック
+    const mockAddMemoRPC = addMemoRPC as unknown as ReturnType<typeof vi.fn>;  // 変数名も修正
+    mockAddMemoRPC.mockResolvedValue(undefined);
 
     (fetchMemosService as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    // カテゴリ・タグのモックを追加
+    const mockCategories = [{ id: 1, name: 'カテゴリ名' }];
+    const mockTags = [{ id: 'recents', name: 'タグ名' }];
+    (fetchCategoryService as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(mockCategories);
+    (fetchTagsService as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(mockTags);
 
     render(<MemoManager />);
-    // MemoList が描画され、「メモ追加」が表示されるのを待つ
     await waitFor(() => expect(fetchMemosService).toHaveBeenCalled());
-    await waitFor(() => expect(screen.getByText('メモ追加')).toBeInTheDocument());
 
-    // ダイアログを開く
-    await userEvent.click(screen.getByText('メモ追加'));
+    // 「メモ追加」タブをクリック
+    const addTab = screen.getByRole('tab', { name: 'メモ追加' });
+    await userEvent.click(addTab);
+
+    // フォームが表示されるまで待つ
     await waitFor(() => {
       expect(screen.getByLabelText('タイトル')).toBeInTheDocument();
       expect(screen.getByLabelText('メモの内容')).toBeInTheDocument();
       expect(screen.getByRole('combobox')).toBeInTheDocument();
     });
 
-    // フォームに入力
     await userEvent.type(screen.getByLabelText('タイトル'), 'テストメモ');
     await userEvent.type(screen.getByLabelText('メモの内容'), 'これはテストです');
-    //fireEvent.change(screen.getByLabelText('タイトル'), { target: { value: 'テストメモ' } });
-    //fireEvent.change(screen.getByLabelText('メモの内容'), { target: { value: 'これはテストです' } });
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Recents' }));
+    await userEvent.click(screen.getByRole('radio', { name: '大' }));
 
-    // セレクトボックスが存在することを確認
-    await waitFor(()=>{
-      expect(screen.getByRole('combobox')).toBeInTheDocument();
-      // オプションが表示されていることを確認 (最初は閉じた状態なので、aria-expanded="false" であることを確認)
-    expect(screen.getByRole('combobox')).toHaveAttribute('aria-expanded', 'false');
-    })
-    
-    
-    const selectElement = screen.getByRole('combobox');
-    // セレクトボックスをクリックしてオプションリストを開く
-    await userEvent.click(selectElement);
-    await waitFor(() => {
-      expect(selectElement).toHaveAttribute('aria-expanded', 'true');
-    });
+    // カテゴリー選択
+    const categoryCombo = screen.getByRole('combobox');
+    await userEvent.click(categoryCombo);
 
-    // 「タスク」を選択する
-    const selectedOption = screen.getByRole('option', { name: 'タスク' });
-    await userEvent.click(selectedOption);
+    // 全optionからtextContentで探す
+    const options = screen.getByRole('option', { name: 'カテゴリ名' });
+    await userEvent.click(options);
 
-    // 送信
+    // タグ選択
+    const tagCheckbox = screen.getByRole('checkbox', { name: 'タグ名' });
+    await userEvent.click(tagCheckbox);
+
     await userEvent.click(screen.getByRole('button', { name: /送信/i }));
-    await waitFor(() => {
-      expect(mockAddMemoService).toHaveBeenCalled();
-    });
 
-    await screen.findByText('メモ追加'); // 待機 (UIが再表示されるまで)
-    await waitFor(() => {});
-
-    // 関数が呼ばれたことを確認
-    expect(mockAddMemoService).toHaveBeenCalledWith(
+    expect(mockAddMemoRPC).toHaveBeenCalledWith(  // 期待値のチェックも修正
       expect.objectContaining({
         title: 'テストメモ',
         content: 'これはテストです',
+        category: "1",
+        importance: 'high',
         tags: ['recents'],
-        category: 'task',
+        user_id: 'test-user-id',
       }),
     );
   });

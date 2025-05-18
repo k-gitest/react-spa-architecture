@@ -4,7 +4,7 @@ import { useAuth } from '@/features/auth/hooks/use-auth-queries-tanstack';
 import { AuthError, Provider } from '@supabase/supabase-js';
 import { Account } from '@/features/account/types/account-types';
 
-// モックのインポート
+// モックのインポート 
 vi.mock('@/hooks/use-tanstack-query', () => ({
   useApiMutation: <TData, TError, TVariables>(config: {
     onSuccess?: (data: TData) => void;
@@ -67,7 +67,7 @@ describe('useAuth', () => {
     const { signUpAuthService } = await import('@/features/auth/services/authService');
     
     expect(signUpAuthService).toHaveBeenCalledWith(userData);
-    expect(mockNavigate).toHaveBeenCalledWith('/');
+    expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
   });
 
   it('signIn が正しく動作する', async () => {
@@ -82,7 +82,7 @@ describe('useAuth', () => {
     const { signInWithPasswordAuthService } = await import('@/features/auth/services/authService');
     
     expect(signInWithPasswordAuthService).toHaveBeenCalledWith(userData);
-    expect(mockNavigate).toHaveBeenCalledWith('/');
+    expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
   });
 
   it('signInWithOAuth が正しく動作する', async () => {

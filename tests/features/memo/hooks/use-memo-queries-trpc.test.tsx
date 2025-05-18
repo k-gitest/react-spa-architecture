@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useMemos } from '@/features/memo/hooks/use-memo-queries-trpc';
 import { QueryClient, QueryClientProvider, UseQueryResult, UseMutationResult } from '@tanstack/react-query';
 import { MemoFormData } from '@/features/memo/types/memo-form-data';
@@ -27,6 +27,32 @@ vi.mock('@/lib/trpc', () => {
         deleteMemo: {
           mutationOptions: vi.fn(),
         },
+        getCategories: {
+          queryKey: vi.fn().mockReturnValue(['categories']),
+          queryOptions: vi.fn().mockReturnValue({}),
+        },
+        getCategory: {
+          queryOptions: vi.fn((input) => ({
+            queryKey: ['category', input?.id],
+            enabled: !!input?.id,
+          })),
+        },
+        getTags: {
+          queryKey: vi.fn().mockReturnValue(['tags']),
+          queryOptions: vi.fn().mockReturnValue({}),
+        },
+        getTag: {
+          queryOptions: vi.fn((input) => ({
+            queryKey: ['tag', input?.id],
+            enabled: !!input?.id,
+          })),
+        },
+        addCategory: { mutationOptions: vi.fn() },
+        updateCategory: { mutationOptions: vi.fn() },
+        deleteCategory: { mutationOptions: vi.fn() },
+        addTag: { mutationOptions: vi.fn() },
+        updateTag: { mutationOptions: vi.fn() },
+        deleteTag: { mutationOptions: vi.fn() },
       },
     },
   };
@@ -165,23 +191,22 @@ describe('useMemos Hook', () => {
     expect(result.current.memosError).toEqual(mockError);
   });
 
-  it('useGetMemo が指定されたIDのメモを返すこと', () => {
+  it('useGetMemo が指定されたIDのメモを返すこと', async () => {
     const mockMemo = { id: '123', title: '単一メモ', content: 'テスト内容' };
 
-    // 最初のuseApiQueryはメモ一覧のクエリ用
-    useApiQuery.mockReturnValueOnce({
-      data: null,
-      isLoading: false,
-    } as unknown as UseQueryResult);
+    // モックをリセット
+    useApiQuery.mockReset();
 
-    // 2回目の呼び出しはuseGetMemo用
-    useApiQuery.mockReturnValueOnce({
+    // メモ一覧のクエリと個別メモのクエリの両方に対するモックを設定
+    useApiQuery.mockReturnValue({
       data: mockMemo,
       isLoading: false,
       isError: false,
       error: null,
       isPending: false,
       isSuccess: true,
+      status: 'success',
+      fetchStatus: 'idle',
     } as unknown as UseQueryResult);
 
     const { result } = renderHook(
@@ -189,10 +214,15 @@ describe('useMemos Hook', () => {
         const memosHook = useMemos();
         return memosHook.useGetMemo('123');
       },
-      { wrapper },
+      { wrapper }
     );
 
-    expect(result.current.data).toEqual(mockMemo);
+    // act内でawaitを使用して非同期処理の完了を待つ
+    await waitFor(() => {
+      expect(result.current.data).toEqual(mockMemo);
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.isSuccess).toBe(true);
+    });
   });
 
   it('id が null の場合、useGetMemoクエリを無効にすること', () => {
@@ -321,4 +351,92 @@ describe('useMemos Hook', () => {
     }
   });
   
+});
+
+// カテゴリ関連のテスト
+describe('Category Operations', () => {
+  it('カテゴリ一覧を取得できること', () => {
+    const mockCategories = [
+      { id: 1, name: 'カテゴリ1', user_id: 'test-user-id' },
+      { id: 2, name: 'カテゴリ2', user_id: 'test-user-id' },
+    ];
+
+    useApiQuery.mockReturnValue({
+      data: mockCategories,
+      isLoading: false,
+      error: null,
+    } as unknown as UseQueryResult);
+
+    const { result } = renderHook(() => useMemos(), { wrapper });
+    expect(result.current.fetchCategory.data).toEqual(mockCategories);
+  });
+
+  it('カテゴリを追加できること', async () => {
+    const mockMutateAsync = vi.fn().mockResolvedValue({ id: 1, name: '新規カテゴリ' });
+    useApiMutation.mockImplementation((options) => ({
+      mutateAsync: mockMutateAsync,
+      isError: false,
+      isPending: false,
+      isSuccess: true,
+      error: null,
+      _onSuccess: options?.onSuccess,
+    } as unknown as UseMutationResult));
+
+    const { result } = renderHook(() => useMemos(), { wrapper });
+
+    const newCategory = { name: '新規カテゴリ', user_id: 'test-user-id' };
+    await result.current.addCategory(newCategory);
+
+    expect(mockMutateAsync).toHaveBeenCalledWith(newCategory);
+    
+    const mutation = useApiMutation.mock.results[3].value;
+    if (mutation._onSuccess) {
+      await mutation._onSuccess();
+      expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['categories'] });
+    }
+  });
+});
+
+// タグ関連のテスト
+describe('Tag Operations', () => {
+  it('タグ一覧を取得できること', () => {
+    const mockTags = [
+      { id: 1, name: 'タグ1', user_id: 'test-user-id' },
+      { id: 2, name: 'タグ2', user_id: 'test-user-id' },
+    ];
+
+    useApiQuery.mockReturnValue({
+      data: mockTags,
+      isLoading: false,
+      error: null,
+    } as unknown as UseQueryResult);
+
+    const { result } = renderHook(() => useMemos(), { wrapper });
+    expect(result.current.fetchTags.data).toEqual(mockTags);
+  });
+
+  it('タグを追加できること', async () => {
+    const mockMutateAsync = vi.fn().mockResolvedValue({ id: 1, name: '新規タグ' });
+    useApiMutation.mockImplementation((options) => ({
+      mutateAsync: mockMutateAsync,
+      isError: false,
+      isPending: false,
+      isSuccess: true,
+      error: null,
+      _onSuccess: options?.onSuccess,
+    } as unknown as UseMutationResult));
+
+    const { result } = renderHook(() => useMemos(), { wrapper });
+
+    const newTag = { name: '新規タグ', user_id: 'test-user-id' };
+    await result.current.addTag(newTag);
+
+    expect(mockMutateAsync).toHaveBeenCalledWith(newTag);
+    
+    const mutation = useApiMutation.mock.results[6].value;
+    if (mutation._onSuccess) {
+      await mutation._onSuccess();
+      expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['tags'] });
+    }
+  });
 });
