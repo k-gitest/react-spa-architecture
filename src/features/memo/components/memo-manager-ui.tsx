@@ -3,57 +3,18 @@ import { Button } from '@/components/ui/button';
 import { MemoForm } from '@/features/memo/components/memo-form';
 import { MemoList } from '@/features/memo/components/memo-list';
 import { MemoTagManager, MemoCategoryManager } from '@/features/memo/components/memo-item-manager';
-import { Memo, MemoFormData } from '@/features/memo/types/memo-form-data';
-import { FormSchema } from '@/features/memo/schemas/memo-form-schema';
-import { Category, CategoryOutput, TagOutput } from '@/features/memo/types/memo-form-data';
-import { z } from 'zod';
-
-type FlattenFormatted = z.inferFlattenedErrors<typeof FormSchema>;
-
-type MemoOperations = {
-  fetchData: { data?: CategoryOutput[] | TagOutput[] | null };
-  addItem: (data: { name: string; user_id: string }) => Promise<void>;
-  updateItem: (data: { id: number; name: string }) => Promise<void>;
-  deleteItem: (id: number) => Promise<void>;
-  useGetItem: (id: number | null) => { data?: CategoryOutput | TagOutput | null };
-};
-
-interface CategoryOption {
-  label: string;
-  value: string;
-}
-interface TagOption {
-  label: string;
-  id: string;
-}
-
-interface MemoFormProps {
-  onSubmit: (data: MemoFormData) => void;
-  initialValues?: MemoFormData;
-  categories: CategoryOption[] | null;
-  tags: TagOption[] | null;
-  category: string;
-  setCategory: (value: string) => void;
-  tag: string;
-  setTag: (value: string) => void;
-  handleCategorySubmit: () => void;
-  handleTagSubmit: () => void;
-  categoryOpen: boolean;
-  setCategoryOpen: (open: boolean) => void;
-  tagOpen: boolean;
-  setTagOpen: (open: boolean) => void;
-  externalZodError?: FlattenFormatted | null; // 修正
-}
+import { Memo } from '@/features/memo/types/memo-form-data';
+import { MemoOperations, MemoFormProps } from '@/features/memo/types/memo-form-data';
 
 interface MemoManagerUIProps {
   tabValue: string;
   setTabValue: (value: string) => void;
-  memoList: Memo[]; // 修正
+  memoList: Memo[];
   handleEditClick: (index: string) => void;
   handleDeleteClick: (index: string) => void;
   formProps: MemoFormProps;
-  categoryOperations: MemoOperations; // 修正
-  tagOperations: MemoOperations;      // 修正
+  categoryOperations: MemoOperations;
+  tagOperations: MemoOperations;
 }
 
 export const MemoManagerUI: React.FC<MemoManagerUIProps> = ({
@@ -96,11 +57,7 @@ export const MemoManagerUI: React.FC<MemoManagerUIProps> = ({
           </div>
 
           {Array.isArray(memoList) && memoList.length > 0 && (
-            <MemoList 
-              memoData={memoList} 
-              onEdit={handleEditClick} 
-              onDelete={handleDeleteClick} 
-            />
+            <MemoList memoData={memoList} onEdit={handleEditClick} onDelete={handleDeleteClick} />
           )}
         </TabsContent>
         <TabsContent value="addMemo">

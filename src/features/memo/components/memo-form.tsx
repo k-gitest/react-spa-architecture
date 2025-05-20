@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormSchema } from '@/features/memo/schemas/memo-form-schema';
-import { MemoFormData } from '@/features/memo/types/memo-form-data';
+import { MemoFormData, MemoFormProps } from '@/features/memo/types/memo-form-data';
 import { Button } from '@/components/ui/button';
 import {
   FormWrapper,
@@ -12,7 +12,6 @@ import {
   FormCheckboxGroup,
   FormRadioGroup,
 } from '@/components/form/form-parts';
-import { z } from 'zod';
 import { syncZodErrors } from '@/lib/trpc';
 import { MemoItemAddDialog } from '@/features/memo/components/memo-item-add-dialog';
 
@@ -30,36 +29,6 @@ const defaultMemoFormData = {
   tags: [],
 };
 
-type FlattenFormatted = z.inferFlattenedErrors<typeof FormSchema>;
-
-interface CategoryOption {
-  label: string;
-  value: string;
-}
-
-interface TagOption {
-  label: string;
-  id: string;
-}
-
-interface Props {
-  onSubmit: (data: MemoFormData) => void;
-  initialValues?: MemoFormData;
-  externalZodError?: FlattenFormatted | null;
-  categories: CategoryOption[] | null;
-  tags: TagOption[] | null;
-  category: string;
-  setCategory: (value: string) => void;
-  tag: string;
-  setTag: (value: string) => void;
-  handleCategorySubmit: () => void;
-  handleTagSubmit: () => void;
-  categoryOpen: boolean;
-  setCategoryOpen: (open: boolean) => void;
-  tagOpen: boolean;
-  setTagOpen: (open: boolean) => void;
-}
-
 export const MemoForm = ({
   onSubmit,
   initialValues,
@@ -76,7 +45,7 @@ export const MemoForm = ({
   setCategoryOpen,
   tagOpen,
   setTagOpen,
-}: Props) => {
+}: MemoFormProps) => {
   const form = useForm<MemoFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: initialValues || defaultMemoFormData,

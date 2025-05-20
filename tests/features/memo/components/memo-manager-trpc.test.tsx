@@ -84,7 +84,6 @@ describe('MemoManagerTrpc', () => {
     const user = userEvent.setup();
     const addMemoMock = vi.fn().mockResolvedValue({ success: true });
 
-    // カテゴリ・タグのモックデータを追加
     (useMemosMock as unknown as Mock).mockReturnValue(
       createUseMemosMockReturn({
         addMemo: addMemoMock,
@@ -94,7 +93,8 @@ describe('MemoManagerTrpc', () => {
     );
 
     render(<MemoManagerTrpc />);
-    await user.click(screen.getByText('メモ追加'));
+    // タブの「メモ追加」をクリック
+    await user.click(screen.getByRole('tab', { name: 'メモ追加' }));
 
     const titleInput = await screen.findByPlaceholderText('タイトルを入力してください');
     const contentInput = await screen.findByPlaceholderText('内容を記入してください');
@@ -115,18 +115,29 @@ describe('MemoManagerTrpc', () => {
     const lowRadio = screen.getByRole('radio', { name: '小' });
     await user.click(lowRadio);
 
+    // カテゴリー追加ダイアログを開いてカテゴリー名を入力し追加（必要なら）
+    // await user.click(screen.getByRole('button', { name: /カテゴリー追加/i }));
+    // const categoryInput = await screen.findByPlaceholderText('カテゴリーを入力してください');
+    // await user.type(categoryInput, '新カテゴリ');
+    // await user.click(screen.getByRole('button', { name: /送信/i }));
+
+    // タグ追加ダイアログを開いてタグ名を入力し追加（必要なら）
+    // await user.click(screen.getByRole('button', { name: /タグ追加/i }));
+    // const tagInput = await screen.findByPlaceholderText('登録するタグを入力してください');
+    // await user.type(tagInput, '新タグ');
+    // await user.click(screen.getByRole('button', { name: /送信/i }));
+
     // 送信
     const submitButton = screen.getByRole('button', { name: /送信/i });
     await user.click(submitButton);
 
-    // 検証
     await waitFor(() => {
       expect(addMemoMock).toHaveBeenCalledWith(
         {
           title: 'テストメモ',
           content: 'これはテストです',
           importance: 'low',
-          category: '1', // ←カテゴリIDが入る
+          category: '1',
           tags: ['recents'],
         },
         'test-user-id'

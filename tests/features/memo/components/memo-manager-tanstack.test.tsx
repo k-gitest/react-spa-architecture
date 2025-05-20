@@ -141,22 +141,38 @@ describe('MemoManagerTanstack', () => {
     );
 
     render(<MemoManagerTanstack />);
-    await user.click(screen.getByText('メモ追加'));
+    // タブの「メモ追加」をクリック
+    await user.click(screen.getByRole('tab', { name: 'メモ追加' }));
 
-    // プレースホルダーにマッチする input 要素を待つ（表示完了を待つ）
+    // タイトル・内容入力
     const titleInput = await screen.findByPlaceholderText('タイトルを入力してください');
     const contentInput = await screen.findByPlaceholderText('内容を記入してください');
-
     await user.type(titleInput, 'テストメモ');
     await user.type(contentInput, 'これはテストです');
 
+    // タグ選択
     await user.click(screen.getByRole('checkbox', { name: 'Recents' }));
 
+    // カテゴリ選択
     const combobox = screen.getByRole('combobox');
     await user.click(combobox);
     const option = screen.getByRole('option', { name: 'タスク' });
     await user.click(option);
 
+    // カテゴリー追加ダイアログを開いてカテゴリー名を入力し追加
+    await user.click(screen.getByRole('button', { name: /カテゴリー追加/i }));
+    const categoryInput = await screen.findByPlaceholderText('カテゴリーを入力してください');
+    await user.type(categoryInput, '新カテゴリ');
+    // 「追加」→「送信」に修正
+    await user.click(screen.getByRole('button', { name: /送信/i }));
+
+    // タグ追加ダイアログを開いてタグ名を入力し追加
+    await user.click(screen.getByRole('button', { name: /タグ追加/i }));
+    const tagInput = await screen.findByPlaceholderText('登録するタグを入力してください');
+    await user.type(tagInput, '新タグ');
+    await user.click(screen.getByRole('button', { name: /送信/i }));
+
+    // 送信
     await user.click(screen.getByRole('button', { name: /送信/i }));
 
     expect(addMemoMock).toHaveBeenCalledWith(

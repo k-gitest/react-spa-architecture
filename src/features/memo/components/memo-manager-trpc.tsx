@@ -1,28 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
 import { MemoFormData } from '@/features/memo/types/memo-form-data';
-import { MemoForm } from '@/features/memo/components/memo-form';
-import { MemoList } from '@/features/memo/components/memo-list';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useMemos } from '@/features/memo/hooks/use-memo-queries-trpc';
-import { z } from 'zod';
-import { FormSchema } from '@/features/memo/schemas/memo-form-schema';
+import { FlattenFormatted, CategoryOption, TagOption } from '@/features/memo/types/memo-form-data';
 import { TRPCClientError } from '@trpc/client';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MemoTagManager, MemoCategoryManager } from '@/features/memo/components/memo-item-manager';
-import { Button } from '@/components/ui/button';
 import { MemoManagerUI } from '@/features/memo/components/memo-manager-ui';
-
-type FlattenFormatted = z.inferFlattenedErrors<typeof FormSchema>;
-
-interface CategoryOptions {
-  label: string;
-  value: string;
-}
-
-interface TagsOptions {
-  label: string;
-  id: string;
-}
 
 export const MemoManagerTrpc = () => {
   const [zodError, setZodError] = useState<FlattenFormatted | null>(null);
@@ -31,9 +13,9 @@ export const MemoManagerTrpc = () => {
   const [tabValue, setTabValue] = useState('memoList');
 
   const [category, setCategory] = useState('');
-  const [categories, setCategories] = useState<CategoryOptions[] | null>(null);
+  const [categories, setCategories] = useState<CategoryOption[] | null>(null);
   const [tag, setTag] = useState('');
-  const [tags, setTags] = useState<TagsOptions[] | null>(null);
+  const [tags, setTags] = useState<TagOption[] | null>(null);
   const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
   const [addTagDialogOpen, setAddTagDialogOpen] = useState(false);
 
@@ -185,66 +167,6 @@ export const MemoManagerTrpc = () => {
 
   return (
     <div>
-      {/* 
-      <Tabs value={tabValue} onValueChange={setTabValue} className="w-full">
-        <div className="flex flex-raw justify-center mb-10">
-          <TabsList>
-            <TabsTrigger value="memoList">メモ一覧</TabsTrigger>
-            <TabsTrigger value="addMemo">メモ追加</TabsTrigger>
-            <TabsTrigger value="categorySetting">カテゴリ設定</TabsTrigger>
-            <TabsTrigger value="tagSetting">タグ設定</TabsTrigger>
-          </TabsList>
-        </div>
-        <TabsContent value="memoList">
-          <div className="flex flex-col items-center gap-2">
-            {!Array.isArray(memoList) && <p>データがありませんでした。</p>}
-            {Array.isArray(memoList) && memoList.length === 0 && (
-              <>
-                <p>メモはまだありません</p>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setTabValue('addMemo');
-                  }}
-                >
-                  メモ追加
-                </Button>
-              </>
-            )}
-          </div>
-
-          {Array.isArray(memoList) && memoList.length > 0 && (
-            <MemoList memoData={memoList} onEdit={handleEditClick} onDelete={handleDeleteClick} />
-          )}
-        </TabsContent>
-        <TabsContent value="addMemo">
-          <MemoForm
-            onSubmit={handleFormSubmit}
-            initialValues={editMemoData}
-            externalZodError={zodError}
-            categories={categories}
-            tags={tags}
-            category={category}
-            setCategory={setCategory}
-            tag={tag}
-            setTag={setTag}
-            handleCategorySubmit={handleCategorySubmit}
-            handleTagSubmit={handleTagSubmit}
-            categoryOpen={addCategoryDialogOpen}
-            setCategoryOpen={setAddCategoryDialogOpen}
-            tagOpen={addTagDialogOpen}
-            setTagOpen={setAddTagDialogOpen}
-          />
-        </TabsContent>
-        <TabsContent value="categorySetting">
-          <MemoCategoryManager operations={categoryOperations} />
-        </TabsContent>
-        <TabsContent value="tagSetting">
-          <MemoTagManager operations={tagOperations} />
-        </TabsContent>
-      </Tabs>
-      */}
-
       <MemoManagerUI
         tabValue={tabValue}
         setTabValue={setTabValue}

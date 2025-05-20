@@ -8,20 +8,11 @@ import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
 import { FormWrapper, FormInput } from '@/components/form/form-parts';
 import { MemoCategorySchema } from '@/features/memo/schemas/memo-form-schema';
-import { Category, CategoryOutput, TagOutput } from '@/features/memo/types/memo-form-data';
+import { Category } from '@/features/memo/types/memo-form-data';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { MemoOperations } from '@/features/memo/types/memo-form-data';
 
-// 受け取るprops.operationsのデータ取得・操作機能の型定義
-type MemoOperations = {
-  fetchData: { data?: CategoryOutput[] | TagOutput[] | null };
-  addItem: (data: { name: string; user_id: string }) => Promise<void>;
-  updateItem: (data: { id: number; name: string }) => Promise<void>;
-  deleteItem: (id: number) => Promise<void>;
-  useGetItem: (id: number | null) => { data?: CategoryOutput | TagOutput | null };
-};
-
-// 受け取るpropsの型定義
-type MemoManagerProps = {
+type MemoItemManagerProps = {
   buttonTitle: string;
   dialogTitle: string;
   dialogDescription: string;
@@ -41,7 +32,7 @@ export const MemoItemManager = ({
   editDialogTitle,
   editDialogDescription,
   operations,
-}: MemoManagerProps) => {
+}: MemoItemManagerProps) => {
   const session = useSessionStore((state) => state.session);
   const [itemValue, setItemValue] = useState('');
   const [editIndex, setEditIndex] = useState<number | null>(null);
