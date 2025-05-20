@@ -22,22 +22,18 @@ export const AccountForm = (props: { type: string }) => {
 
   const handleSubmit = async (formData: Account) => {
     setIsLoading(true);
-    if (props.type === 'login') {
-      try {
+    try {
+      if (props.type === 'login') {
         await signInWithPasswordAuthService(formData);
-      } catch (error) {
-        errorHandler(error);
-      }
-    } else {
-      try {
+      } else {
         await signUpAuthService(formData);
-      } catch (error) {
-        errorHandler(error);
       }
+    } catch (error) {
+      errorHandler(error);
+    } finally {
       setIsLoading(false);
+      form.reset();
     }
-
-    form.reset();
   };
 
   const handleGithub = async () => {
@@ -67,7 +63,7 @@ export const AccountForm = (props: { type: string }) => {
         </FormWrapper>
       </div>
       <div className="text-center">
-        <Button onClick={handleGithub}>{props.type === "register" ? "Githubで登録" : "Githubでログイン"}</Button>
+        <Button onClick={handleGithub}>{props.type === 'register' ? 'Githubで登録' : 'Githubでログイン'}</Button>
       </div>
     </div>
   );

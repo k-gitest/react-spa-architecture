@@ -23,6 +23,8 @@ import {
 import { errorHandler } from '@/errors/error-handler';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MemoTagManager, MemoCategoryManager } from '@/features/memo/components/memo-item-manager';
+import { Button } from '@/components/ui/button';
+import { MemoManagerUI } from '@/features/memo/components/memo-manager-ui';
 
 interface CategoryOption {
   id: number;
@@ -103,24 +105,30 @@ export const MemoManager = () => {
   }, []);
 
   // カテゴリを追加
-  const addCategory = useCallback(async ({ name, user_id }: { name: string; user_id: string }) => {
-    try {
-      await addCategoryService({ name, user_id });
-      await fetchCategories();
-    } catch (err) {
-      errorHandler(err);
-    }
-  }, [fetchCategories]);
+  const addCategory = useCallback(
+    async ({ name, user_id }: { name: string; user_id: string }) => {
+      try {
+        await addCategoryService({ name, user_id });
+        await fetchCategories();
+      } catch (err) {
+        errorHandler(err);
+      }
+    },
+    [fetchCategories],
+  );
 
   // タグを追加
-  const addTag = useCallback(async ({ name, user_id }: { name: string; user_id: string }) => {
-    try {
-      await addTagService({ name, user_id });
-      await fetchTags();
-    } catch (err) {
-      errorHandler(err);
-    }
-  }, [fetchTags]);
+  const addTag = useCallback(
+    async ({ name, user_id }: { name: string; user_id: string }) => {
+      try {
+        await addTagService({ name, user_id });
+        await fetchTags();
+      } catch (err) {
+        errorHandler(err);
+      }
+    },
+    [fetchTags],
+  );
 
   // カテゴリを取得（カスタムフック）
   const useGetCategory = (id: number | null) => {
@@ -128,9 +136,7 @@ export const MemoManager = () => {
 
     useEffect(() => {
       if (id) {
-        getCategoryService(id)
-          .then(setData)
-          .catch(errorHandler);
+        getCategoryService(id).then(setData).catch(errorHandler);
       }
     }, [id]);
 
@@ -143,9 +149,7 @@ export const MemoManager = () => {
 
     useEffect(() => {
       if (id) {
-        getTagService(id)
-          .then(setData)
-          .catch(errorHandler);
+        getTagService(id).then(setData).catch(errorHandler);
       }
     }, [id]);
 
@@ -153,44 +157,56 @@ export const MemoManager = () => {
   };
 
   // カテゴリを更新
-  const updateCategory = useCallback(async (data: { id: number; name: string }) => {
-    try {
-      await updateCategoryService(data);
-      await fetchCategories();
-    } catch (err) {
-      errorHandler(err);
-    }
-  }, [fetchCategories]);
+  const updateCategory = useCallback(
+    async (data: { id: number; name: string }) => {
+      try {
+        await updateCategoryService(data);
+        await fetchCategories();
+      } catch (err) {
+        errorHandler(err);
+      }
+    },
+    [fetchCategories],
+  );
 
   // タグを更新
-  const updateTag = useCallback(async (data: { id: number; name: string }) => {
-    try {
-      await updateTagService(data);
-      await fetchTags();
-    } catch (err) {
-      errorHandler(err);
-    }
-  }, [fetchTags]);
+  const updateTag = useCallback(
+    async (data: { id: number; name: string }) => {
+      try {
+        await updateTagService(data);
+        await fetchTags();
+      } catch (err) {
+        errorHandler(err);
+      }
+    },
+    [fetchTags],
+  );
 
   // カテゴリを削除
-  const deleteCategory = useCallback(async (id: number) => {
-    try {
-      await deleteCategoryService(id);
-      await fetchCategories();
-    } catch (err) {
-      errorHandler(err);
-    }
-  }, [fetchCategories]);
+  const deleteCategory = useCallback(
+    async (id: number) => {
+      try {
+        await deleteCategoryService(id);
+        await fetchCategories();
+      } catch (err) {
+        errorHandler(err);
+      }
+    },
+    [fetchCategories],
+  );
 
   // タグを削除
-  const deleteTag = useCallback(async (id: number) => {
-    try {
-      await deleteTagService(id);
-      await fetchTags();
-    } catch (err) {
-      errorHandler(err);
-    }
-  }, [fetchTags]);
+  const deleteTag = useCallback(
+    async (id: number) => {
+      try {
+        await deleteTagService(id);
+        await fetchTags();
+      } catch (err) {
+        errorHandler(err);
+      }
+    },
+    [fetchTags],
+  );
 
   // タグ操作オブジェクト
   const tagOperations = {
@@ -283,11 +299,14 @@ export const MemoManager = () => {
   );
 
   // 編集クリックを処理
-  const handleEditClick = useCallback(async (index: string) => {
-    setEditIndex(index);
-    await memoFetcher(index);
-    setTabValue('addMemo');
-  }, [memoFetcher]);
+  const handleEditClick = useCallback(
+    async (index: string) => {
+      setEditIndex(index);
+      await memoFetcher(index);
+      setTabValue('addMemo');
+    },
+    [memoFetcher],
+  );
 
   // 削除クリックを処理
   const handleDeleteClick = useCallback(
@@ -305,17 +324,17 @@ export const MemoManager = () => {
   // フォーム用のカテゴリ・タグデータを準備
   const formattedCategories = useMemo(() => {
     if (!categories) return null;
-    return categories.map(cat => ({
+    return categories.map((cat) => ({
       label: cat.name,
-      value: String(cat.id)
+      value: String(cat.id),
     }));
   }, [categories]);
 
   const formattedTags = useMemo(() => {
     if (!tags) return null;
-    return tags.map(tag => ({
+    return tags.map((tag) => ({
       label: tag.name,
-      id: String(tag.id)
+      id: String(tag.id),
     }));
   }, [tags]);
 
@@ -331,6 +350,7 @@ export const MemoManager = () => {
 
   return (
     <div>
+      {/*
       <Tabs value={tabValue} onValueChange={setTabValue} className="w-full">
         <div className="flex flex-raw justify-center mb-10">
           <TabsList>
@@ -341,10 +361,25 @@ export const MemoManager = () => {
           </TabsList>
         </div>
         <TabsContent value="memoList">
-          {memoList && memoList.length > 0 ? (
+          <div className="flex flex-col items-center gap-2">
+            {!Array.isArray(memoList) && <p>データがありませんでした。</p>}
+            {Array.isArray(memoList) && memoList.length === 0 && (
+              <>
+                <p>メモはまだありません</p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setTabValue('addMemo');
+                  }}
+                >
+                  メモ追加
+                </Button>
+              </>
+            )}
+          </div>
+
+          {Array.isArray(memoList) && memoList.length > 0 && (
             <MemoList memoData={memoList} onEdit={handleEditClick} onDelete={handleDeleteClick} />
-          ) : (
-            <p>データがありませんでした。</p>
           )}
         </TabsContent>
         <TabsContent value="addMemo">
@@ -372,6 +407,33 @@ export const MemoManager = () => {
           <MemoTagManager operations={tagOperations} />
         </TabsContent>
       </Tabs>
+      */}
+
+      <MemoManagerUI
+        tabValue={tabValue}
+        setTabValue={setTabValue}
+        memoList={memoList}
+        handleEditClick={handleEditClick}
+        handleDeleteClick={handleDeleteClick}
+        formProps={{
+          onSubmit: handleFormSubmit,
+          initialValues: editMemo,
+          categories: formattedCategories,
+          tags: formattedTags,
+          category,
+          setCategory,
+          tag,
+          setTag,
+          handleCategorySubmit,
+          handleTagSubmit,
+          categoryOpen: addCategoryDialogOpen,
+          setCategoryOpen: setAddCategoryDialogOpen,
+          tagOpen: addTagDialogOpen,
+          setTagOpen: setAddTagDialogOpen,
+        }}
+        categoryOperations={categoryOperations}
+        tagOperations={tagOperations}
+      />
     </div>
   );
 };

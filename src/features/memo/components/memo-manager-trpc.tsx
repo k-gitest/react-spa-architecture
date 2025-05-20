@@ -9,6 +9,8 @@ import { FormSchema } from '@/features/memo/schemas/memo-form-schema';
 import { TRPCClientError } from '@trpc/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MemoTagManager, MemoCategoryManager } from '@/features/memo/components/memo-item-manager';
+import { Button } from '@/components/ui/button';
+import { MemoManagerUI } from '@/features/memo/components/memo-manager-ui';
 
 type FlattenFormatted = z.inferFlattenedErrors<typeof FormSchema>;
 
@@ -27,7 +29,7 @@ export const MemoManagerTrpc = () => {
   const session = useSessionStore((state) => state.session);
   const [editIndex, setEditIndex] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState('memoList');
-  
+
   const [category, setCategory] = useState('');
   const [categories, setCategories] = useState<CategoryOptions[] | null>(null);
   const [tag, setTag] = useState('');
@@ -183,6 +185,7 @@ export const MemoManagerTrpc = () => {
 
   return (
     <div>
+      {/* 
       <Tabs value={tabValue} onValueChange={setTabValue} className="w-full">
         <div className="flex flex-raw justify-center mb-10">
           <TabsList>
@@ -193,8 +196,26 @@ export const MemoManagerTrpc = () => {
           </TabsList>
         </div>
         <TabsContent value="memoList">
-          {memoList && <MemoList memoData={memoList} onEdit={handleEditClick} onDelete={handleDeleteClick} />}
-          {!memoList && <p>データがありませんでした。</p>}
+          <div className="flex flex-col items-center gap-2">
+            {!Array.isArray(memoList) && <p>データがありませんでした。</p>}
+            {Array.isArray(memoList) && memoList.length === 0 && (
+              <>
+                <p>メモはまだありません</p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setTabValue('addMemo');
+                  }}
+                >
+                  メモ追加
+                </Button>
+              </>
+            )}
+          </div>
+
+          {Array.isArray(memoList) && memoList.length > 0 && (
+            <MemoList memoData={memoList} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+          )}
         </TabsContent>
         <TabsContent value="addMemo">
           <MemoForm
@@ -222,6 +243,34 @@ export const MemoManagerTrpc = () => {
           <MemoTagManager operations={tagOperations} />
         </TabsContent>
       </Tabs>
+      */}
+
+      <MemoManagerUI
+        tabValue={tabValue}
+        setTabValue={setTabValue}
+        memoList={memoList ?? []}
+        handleEditClick={handleEditClick}
+        handleDeleteClick={handleDeleteClick}
+        formProps={{
+          onSubmit: handleFormSubmit,
+          initialValues: editMemoData,
+          externalZodError: zodError, // tRPC版特有
+          categories,
+          tags,
+          category,
+          setCategory,
+          tag,
+          setTag,
+          handleCategorySubmit,
+          handleTagSubmit,
+          categoryOpen: addCategoryDialogOpen,
+          setCategoryOpen: setAddCategoryDialogOpen,
+          tagOpen: addTagDialogOpen,
+          setTagOpen: setAddTagDialogOpen,
+        }}
+        categoryOperations={categoryOperations}
+        tagOperations={tagOperations}
+      />
     </div>
   );
 };

@@ -104,21 +104,29 @@ export const MemoItemManager = ({
 
   return (
     <div>
-      {fetchData.data && (
-        <>
-          <MemoItemAddDialog
-            buttonTitle={buttonTitle}
-            dialogTitle={dialogTitle}
-            dialogDescription={dialogDescription}
-            placeholder={itemPlaceholder}
-            value={itemValue}
-            setValue={setItemValue}
-            onSubmit={handleItemSubmit}
-            open={addDialogOpen}
-            setOpen={setAddDialogOpen}
-          />
-          <MemoItemList itemList={fetchData.data} onEdit={handleEditClick} onDelete={handleDeleteClick} />
-        </>
+      {!Array.isArray(fetchData.data) && (
+        <div className="flex flex-col items-center mb-2">
+          <p>データがありません</p>
+        </div>
+      )}
+      {Array.isArray(fetchData.data) && fetchData.data.length === 0 && (
+        <div className="flex flex-col items-center mb-2">
+          <p>{itemLabel}はまだありません</p>
+        </div>
+      )}
+      <MemoItemAddDialog
+        buttonTitle={buttonTitle}
+        dialogTitle={dialogTitle}
+        dialogDescription={dialogDescription}
+        placeholder={itemPlaceholder}
+        value={itemValue}
+        setValue={setItemValue}
+        onSubmit={handleItemSubmit}
+        open={addDialogOpen}
+        setOpen={setAddDialogOpen}
+      />
+      {Array.isArray(fetchData.data) && fetchData.data.length > 0 && (
+        <MemoItemList itemList={fetchData.data} onEdit={handleEditClick} onDelete={handleDeleteClick} />
       )}
       {open && (
         <ResponsiveDialog
