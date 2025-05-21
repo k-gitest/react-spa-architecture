@@ -7,6 +7,7 @@ import { ResponsiveDialog } from '@/components/responsive-dialog';
 import { useForm } from 'react-hook-form';
 import { FormWrapper, FormInput } from '@/components/form/form-parts';
 import { AccountUpdate } from '@/features/account/types/account-types';
+import { formatToJST } from '@/lib/utils';
 
 export const AccountManager = () => {
   const session = useSessionStore((state) => state.session);
@@ -111,7 +112,7 @@ export const AccountManager = () => {
             </ResponsiveDialog>
           )}
 
-          <p>最終ログイン：{userData?.updated_at}</p>
+          <p>最終ログイン：{userData?.updated_at ? formatToJST(userData?.updated_at) : ''}</p>
 
           <div className="text-center">
             <Button className="bg-red-700 hover:bg-red-800" type="button" onClick={handleDeleteUserAccountSubmit}>

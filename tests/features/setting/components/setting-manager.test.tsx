@@ -146,7 +146,7 @@ describe('SettingManager', () => {
     fireEvent.click(accountButton);
 
     // アカウントコンテンツが表示されることを確認（data-testidで特定）
-    const accountContent = await screen.findByTestId('account-manager-tanstack');
+    const accountContent = await screen.findByTestId('account-manager');
     expect(accountContent).toBeInTheDocument();
     
     // プロフィールが非表示になっていることを確認
@@ -167,7 +167,7 @@ describe('SettingManager', () => {
     fireEvent.click(accountButton);
 
     // アカウントコンポーネントが表示されるのを待つ
-    const accountManager = await screen.findByTestId('account-manager-tanstack');
+    const accountManager = await screen.findByTestId('account-manager');
     expect(accountManager).toBeInTheDocument();
 
     // プロフィールボタンをクリック

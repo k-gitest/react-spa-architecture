@@ -12,6 +12,7 @@ import {
   deleteAccountService,
 } from '@/features/account/services/accountService';
 import { errorHandler } from '@/errors/error-handler';
+import { formatToJST } from '@/lib/utils';
 
 export const AccountManager = () => {
   const session = useSessionStore((state) => state.session);
@@ -25,41 +26,32 @@ export const AccountManager = () => {
     defaultValues: { email: '', password: '' },
   });
 
-  const handleEmailChangeSubmit = useCallback(
-    async (data: AccountUpdate) => {
-      try {
-        await updateAccountService(data);
-        setOpen(false);
-      } catch (error) {
-        errorHandler(error);
-      }
-    },
-    [],
-  );
+  const handleEmailChangeSubmit = useCallback(async (data: AccountUpdate) => {
+    try {
+      await updateAccountService(data);
+      setOpen(false);
+    } catch (error) {
+      errorHandler(error);
+    }
+  }, []);
 
-  const handlePasswordChangeMailSubmit = useCallback(
-    async (data: AccountUpdate) => {
-      try {
-        await resetPasswordForEmailAccountService(data);
-        setOpen(false);
-      } catch (error) {
-        errorHandler(error);
-      }
-    },
-    [],
-  );
+  const handlePasswordChangeMailSubmit = useCallback(async (data: AccountUpdate) => {
+    try {
+      await resetPasswordForEmailAccountService(data);
+      setOpen(false);
+    } catch (error) {
+      errorHandler(error);
+    }
+  }, []);
 
-  const handleNewPasswordSubmit = useCallback(
-    async (data: AccountUpdate) => {
-      try {
-        await updateAccountService(data);
-        setOpen(false);
-      } catch (error) {
-        errorHandler(error);
-      }
-    },
-    [],
-  );
+  const handleNewPasswordSubmit = useCallback(async (data: AccountUpdate) => {
+    try {
+      await updateAccountService(data);
+      setOpen(false);
+    } catch (error) {
+      errorHandler(error);
+    }
+  }, []);
 
   const handleDeleteUserAccountSubmit = useCallback(async () => {
     if (session?.user?.id) {
@@ -131,7 +123,7 @@ export const AccountManager = () => {
             </ResponsiveDialog>
           )}
 
-          <p>最終ログイン：{userData?.updated_at}</p>
+          <p>最終ログイン：{userData?.updated_at ? formatToJST(userData?.updated_at) : ''}</p>
 
           <div className="text-center">
             <Button className="bg-red-700 hover:bg-red-800" type="button" onClick={handleDeleteUserAccountSubmit}>

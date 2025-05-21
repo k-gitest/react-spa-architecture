@@ -126,3 +126,46 @@ export const convertFileToBase64 = (file: File): Promise<string> => {
     reader.readAsDataURL(file);
   });
 };
+
+// タイムスタンプ変換
+export const formatToJST = (
+  datetime: string | Date,
+  format: 'slash' | 'jp' = 'slash',
+  locale: 'en' | 'ja' = 'ja',
+): string => {
+  console.log('formatToJST: ', datetime, format, locale);
+  if (!datetime) return '';
+  const date = new Date(datetime);
+  const timeZone = 'Asia/Tokyo';
+
+  if (format === 'jp') {
+    // 日本語 年月日時分秒
+    const base = date.toLocaleString('ja-JP', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
+    // "2025/05/22 01:02:20" → "2025年05月22日 01時02分20秒"
+    return base
+      .replace(/^(\d{4})\/(\d{2})\/(\d{2})/, '$1年$2月$3日')
+      .replace(/(\d{2}):(\d{2}):(\d{2})$/, '$1時$2分$3秒');
+  } else {
+    // スラッシュ形式（ロケールに従う）
+    const localeStr = locale === 'ja' ? 'ja-JP' : 'en-US';
+    return date.toLocaleString(localeStr, {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
+  }
+};

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AccountManager } from '@/features/account/components/account-manager-tanstack';
+import { AccountManager } from '@/features/account/components/account-manager';
 import { ProfileManager } from '@/features/profile/components/profile-manager';
 import { AccountManager as AccountManagerTanstack } from '@/features/account/components/account-manager-tanstack';
 import { ProfileManager as ProfileManagerTanstack } from '@/features/profile/components/profile-manager-tanstack';
