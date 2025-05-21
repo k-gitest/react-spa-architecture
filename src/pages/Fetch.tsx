@@ -21,6 +21,13 @@ const fetchTodo = async (): Promise<Todo[]> => {
   return http.get<Todo[]>('/todos');
 };
 
+type ZodErrorData = {
+  zodError?: {
+    formErrors?: string[];
+    fieldErrors?: Record<string, string[]>;
+  };
+};
+
 interface Todo {
   userId: number;
   id: number;
@@ -54,7 +61,7 @@ const Fetch = () => {
         console.error(e);
       }
     },
-    [session?.access_token] 
+    [session?.access_token],
   );
 
   const fetchData = useCallback(async () => {
@@ -92,10 +99,10 @@ const Fetch = () => {
   }, [getMemosQuery.error]);
 
   useEffect(() => {
-    if (greetQuery.error?.data?.zodError) {
-      console.log(greetQuery.error?.data.zodError);
+    if ((greetQuery.error?.data as ZodErrorData | undefined)?.zodError) {
+      console.log((greetQuery.error?.data as ZodErrorData | undefined)?.zodError);
     }
-  }, [greetQuery.error?.data?.zodError]);
+  }, [greetQuery.error?.data]);
 
   const invalidateMemoKey = useCallback(() => {
     return queryClient.invalidateQueries({ queryKey: memosKey });
@@ -103,6 +110,8 @@ const Fetch = () => {
 
   if (isLoading) return <p>Loading users...</p>;
   if (isError) return <p>Error fetching users: {error?.message}</p>;
+
+  const zodError = (greetQuery.error?.data as ZodErrorData | undefined)?.zodError;
 
   return (
     <MainWrapper>
@@ -113,8 +122,9 @@ const Fetch = () => {
       <h2>tRPCによるフェッチ</h2>
       <p>{helloQuery.data?.message}</p>
       <p>{greetQuery.data?.greeting}</p>
-      <p>{greetQuery.error?.data?.zodError && <div>{greetQuery.error.data?.zodError?.formErrors}</div>}</p>
-      <p>{greetQuery.error?.data?.zodError && <div>{greetQuery.error.data?.zodError?.fieldErrors.title}</div>}</p>
+
+      <p>{zodError?.formErrors && <div>{zodError.formErrors.join(', ')}</div>}</p>
+      <p>{zodError?.fieldErrors?.title && <div>{zodError.fieldErrors.title.join(', ')}</div>}</p>
       <div>
         {getMemosQuery.isLoading && <p>Loading...</p>}
         {getMemosQuery.isError && <p className="color-red-600">{getMemosQuery.error.message}</p>}

@@ -49,7 +49,7 @@ export const ProfileManager = () => {
         }
       }
     },
-    [updateProfileService, userId],
+    [userId],
   );
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

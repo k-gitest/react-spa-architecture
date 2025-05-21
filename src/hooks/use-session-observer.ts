@@ -13,19 +13,19 @@ export const useSessionObserver = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setGlobalSession(session);
-      setLoading(true);
+      setLoading(false);
       setInitialized(true);
     });
 
     const { data } = supabase.auth.onAuthStateChange((_, session) => {
       setSession(session);
       setGlobalSession(session);
-      setLoading(true);
+      setLoading(false);
       setInitialized(true);
     });
 
     return () => data.subscription.unsubscribe();
-  }, [setGlobalSession]);
+  }, [setGlobalSession, setInitialized]);
 
   return { session, loading };
 };

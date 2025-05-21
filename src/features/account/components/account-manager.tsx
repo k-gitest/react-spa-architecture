@@ -34,7 +34,7 @@ export const AccountManager = () => {
         errorHandler(error);
       }
     },
-    [updateAccountService],
+    [],
   );
 
   const handlePasswordChangeMailSubmit = useCallback(
@@ -46,7 +46,7 @@ export const AccountManager = () => {
         errorHandler(error);
       }
     },
-    [resetPasswordForEmailAccountService],
+    [],
   );
 
   const handleNewPasswordSubmit = useCallback(
@@ -58,7 +58,7 @@ export const AccountManager = () => {
         errorHandler(error);
       }
     },
-    [updateAccountService],
+    [],
   );
 
   const handleDeleteUserAccountSubmit = useCallback(async () => {
@@ -69,7 +69,7 @@ export const AccountManager = () => {
         errorHandler(error);
       }
     }
-  }, [session?.user?.id, deleteAccountService]);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     if (session?.user.identities && session?.user?.identities[0]?.provider === 'email') {

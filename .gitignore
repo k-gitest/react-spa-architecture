@@ -130,4 +130,4 @@ dist
 .pnp.*
 
 # prisma
-generated
+./generated

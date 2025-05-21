@@ -73,7 +73,7 @@ describe('useProfile', () => {
     expect(mockMutateAsync).toHaveBeenCalledWith({
       id: 'user-id',
       user_name: 'new name',
-      avatar: null,
+      avatar: undefined,
     });
   });
 

@@ -181,14 +181,14 @@ export const useMemos = () => {
     async (data: Category & { id: number }) => {
       await updateCategoryMutation.mutateAsync(data);
     },
-    [addCategoryMutation],
+    [updateCategoryMutation],
   );
 
   const deleteCategory = useCallback(
     async (id: number) => {
       await deleteCategoryMutation.mutateAsync(id);
     },
-    [addCategoryMutation],
+    [deleteCategoryMutation],
   );
 
   const addTag = useCallback(

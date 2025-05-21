@@ -146,15 +146,15 @@ export const useMemos = () => {
   };
 
   const addTag = async (data: Tag & { user_id: string }) => {
-    return addTagMutation.mutateAsync(data);
+    await addTagMutation.mutateAsync(data);
   };
 
   const updateTag = async (data: Tag & { id: number }) => {
-    return updateTagMutation.mutateAsync(data);
+    await updateTagMutation.mutateAsync(data);
   };
 
   const deleteTag = async (id: number) => {
-    return deleteTagMutation.mutateAsync(id);
+    await deleteTagMutation.mutateAsync(id);
   };
 
   return {

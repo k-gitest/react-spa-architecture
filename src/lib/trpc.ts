@@ -2,6 +2,7 @@ import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query';
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 import { queryClient } from '@/lib/queryClient';
 import type { AppRouter } from '../../supabase/functions/trpc/router';
+//import type { AppRouter } from '../../shared/trpc.types.d.ts';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/constants';
 import { UseFormReturn, FieldPath, FieldValues } from 'react-hook-form';

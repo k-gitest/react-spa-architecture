@@ -66,7 +66,7 @@ describe('useSessionObserver (modified)', () => {
 
     expect(mockSetSession).toHaveBeenCalledWith(mockSession);
     expect(mockSetInitialized).toHaveBeenCalledWith(true);
-    expect(getByText('Loading...')).toBeTruthy(); // loading は true のまま
+    expect(getByText('Done')).toBeTruthy();
   });
 
   it('認証状態の変更が反映される（SIGNED_IN）', async () => {

@@ -81,7 +81,7 @@ export const getMemoService = async (id: string) => {
 
   const formatted = {
     ...data,
-    category: String(data.category?.[0]?.category?.id) ?? '',
+    category: String(data.category?.[0]?.category?.id),
     tags: data.tags?.map((t) => String(t.tag.id)) ?? [],
   };
   return formatted;

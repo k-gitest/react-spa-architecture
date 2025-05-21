@@ -25,6 +25,7 @@ export default [
       'react/jsx-no-undef': 'error',
       'react/jsx-pascal-case': 'error',
       'react/jsx-curly-brace-presence': ['warn', { props: 'never', children: 'never' }],
+      "react/prop-types": "off",
     },
     settings: {
       react: {

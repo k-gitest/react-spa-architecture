@@ -20,7 +20,9 @@ export const useProfile = () => {
 
   const uploadAvatarMutationOptions = trpc.profile.uploadAvatar.mutationOptions({
     onSuccess: (data, variables) => {
-      updateProfile(variables.folderName, { avatar: data.path, user_name: null });
+      if (variables.folderName) {
+        updateProfile(variables.folderName, { avatar: data.path, user_name: null });
+      }
     },
   });
   const uploadAvatarMutation = useApiMutation(uploadAvatarMutationOptions);
@@ -30,7 +32,11 @@ export const useProfile = () => {
 
   // メソッド実装
   const updateProfile = async (id: string, data: Profile) => {
-    await updateProfileMutation.mutateAsync({ id, ...data });
+    await updateProfileMutation.mutateAsync({
+      id,
+      avatar: data.avatar ?? undefined,
+      user_name: data.user_name ?? undefined,
+    });
   };
 
   const uploadAvatar = async (file: string, folderName: string, extention: string, currentUrl: string | null) => {
@@ -51,6 +57,6 @@ export const useProfile = () => {
     uploadAvatarMutation,
     uploadAvatar,
     updateProfile,
-    deleteAvatar
+    deleteAvatar,
   };
 };
