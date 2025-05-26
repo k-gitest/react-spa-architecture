@@ -6,7 +6,7 @@ import { ProfileManager as ProfileManagerTanstack } from '@/features/profile/com
 import { ProfileManager as ProfileManagerTRPC } from '@/features/profile/components/profile-manager-trpc';
 import { AccountManager as AccountManagerTRPC } from '@/features/account/components/account-manager-trpc';
 import { Button } from '@/components/ui/button';
-import { withBehaviorVariant } from '@/components/withBehaviorVariant';
+import { withBehaviorVariant } from '@/components/with-behavior-variant';
 
 const ProfileComponents = withBehaviorVariant({
   default: ProfileManager,

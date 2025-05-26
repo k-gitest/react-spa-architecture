@@ -42,14 +42,16 @@ export const addMemoService = async (props: MemoFormData & { user_id: string }) 
   if (error) throw error;
 };
 
-export const addMemoRPC = async (props: MemoFormData & { user_id: string }) => {
+export const addMemoRPC = async (props: MemoFormData & { user_id: string, image_ids?: string[] }) => {
   const formatted = {
     p_title: props.title,
     p_content: props.content,
     p_importance: props.importance,
     p_category_id: Number(props.category),
     p_tag_ids: props.tags.map((t) => Number(t)),
+    p_image_ids: props.image_ids,
   };
+  console.log(props.image_ids)
   const { error } = await supabase.rpc('save_memo_rpc', formatted);
   if (error) throw error;
 };
@@ -98,7 +100,7 @@ export const updateMemoService = async (id: string, updates: MemoFormData) => {
   if (error) throw error;
 };
 
-export const updateMemoRPC = async (id: string, updates: MemoFormData) => {
+export const updateMemoRPC = async (id: string, updates: MemoFormData & {image_ids: string[]}) => {
   const formatted = {
     p_id: id,
     p_title: updates.title,
@@ -106,6 +108,7 @@ export const updateMemoRPC = async (id: string, updates: MemoFormData) => {
     p_importance: updates.importance,
     p_category_id: Number(updates.category),
     p_tag_ids: updates.tags.map((t) => Number(t)),
+    p_image_ids: updates.image_ids,
   };
   const { error } = await supabase.rpc('update_memo_rpc', formatted);
   if (error) throw error;

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { withBehaviorVariant } from '@/components/withBehaviorVariant';
+import { withBehaviorVariant } from '@/components/with-behavior-variant';
 
 // フックのモック
 vi.mock('@/hooks/use-behavior-variant', () => ({

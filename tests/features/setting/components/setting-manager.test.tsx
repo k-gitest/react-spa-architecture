@@ -66,7 +66,7 @@ vi.mock('@/features/account/components/account-manager', () => ({
 
 // withBehaviorVariantは実際の実装をそのまま使用
 vi.mock('@/components/withBehaviorVariant', async () => {
-  const actual = await vi.importActual<typeof import('@/components/withBehaviorVariant')>(
+  const actual = await vi.importActual<typeof import('@/components/with-behavior-variant')>(
     '@/components/withBehaviorVariant'
   );
   return actual;

@@ -13,7 +13,7 @@ export type MemoFormData = z.infer<typeof FormSchema>;
 export type Memo = z.infer<typeof MemoSchema>;
 
 export interface MemoFormProps {
-  onSubmit: (data: MemoFormData) => void;
+  onSubmit: (data: MemoFormData, files?: File[]) => void;
   initialValues?: MemoFormData;
   categories: CategoryOption[] | null;
   tags: TagOption[] | null;
@@ -28,6 +28,12 @@ export interface MemoFormProps {
   tagOpen: boolean;
   setTagOpen: (open: boolean) => void;
   externalZodError?: FlattenFormatted | null;
+  // ファイル関連props
+  files?: File[];
+  onFileChange?: (files: File[]) => void;
+  onFileUpload?: (files: File[]) => Promise<string[]>;
+  onFileDelete?: (index: number) => void;
+  imageError?: string | null;
 }
 
 export type Category = z.infer<typeof MemoCategorySchema>;
@@ -54,3 +60,13 @@ export interface TagOption {
 }
 
 export type FlattenFormatted = z.inferFlattenedErrors<typeof FormSchema>;
+
+export interface MemoFormFileProps {
+  files: File[];
+  onFileChange: (files: File[]) => void;
+  onFileUpload: (files: File[]) => Promise<void>;
+  onFileDelete: (index: number) => void;
+  imageError?: string | null;
+}
+
+export type MemoFormAllProps = MemoFormProps & Partial<MemoFormFileProps>;

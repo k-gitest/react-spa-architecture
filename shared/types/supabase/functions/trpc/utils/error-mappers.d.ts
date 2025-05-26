@@ -1,0 +1,1 @@
+export declare const mapPostgrestErrorCodeToTRPCErrorCode: (code: string) => "BAD_REQUEST" | "INTERNAL_SERVER_ERROR" | "BAD_GATEWAY" | "SERVICE_UNAVAILABLE" | "GATEWAY_TIMEOUT" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND";

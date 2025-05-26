@@ -1,25 +1,37 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Memo, MemoFormData } from '@/features/memo/types/memo-form-data';
-import { useSessionStore } from '@/hooks/use-session-store';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Memo, MemoFormData } from "@/features/memo/types/memo-form-data";
+import { useSessionStore } from "@/hooks/use-session-store";
 import {
-  fetchMemosService,
-  addMemoRPC,
-  getMemoService,
-  updateMemoRPC,
-  deleteMemoService,
-  fetchCategoryService,
-  fetchTagsService,
   addCategoryService,
+  addMemoRPC,
   addTagService,
+  deleteCategoryService,
+  deleteMemoService,
+  deleteTagService,
+  fetchCategoryService,
+  fetchMemosService,
+  fetchTagsService,
   getCategoryService,
+  getMemoService,
   getTagService,
   updateCategoryService,
+  updateMemoRPC,
   updateTagService,
-  deleteCategoryService,
-  deleteTagService,
-} from '@/features/memo/services/memoService';
-import { errorHandler } from '@/errors/error-handler';
-import { MemoManagerUI } from '@/features/memo/components/memo-manager-ui';
+} from "@/features/memo/services/memoService";
+import { errorHandler } from "@/errors/error-handler";
+import { MemoManagerUI } from "@/features/memo/components/memo-manager-ui";
+import {
+  deleteImageService,
+  fetchImagesService,
+  uploadImageStorageService,
+} from "@/services/ImageService";
+import { getExtensionIfAllowed } from "@/lib/utils";
+import { FileUploader } from "@/components/file-uploader";
+import { getImageUrl } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { FileThumbnail } from "@/components/file-thumbnail";
+import { FileList } from "@/components/file-list";
+import { debug } from "console";
 
 interface CategoryOption {
   id: number;
@@ -37,20 +49,105 @@ interface TagOption {
   updated_at: string;
 }
 
+interface Image {
+  created_at: string;
+  file_name: string;
+  file_path: string;
+  file_size: number | null;
+  id: string;
+  mime_type: string | null;
+  storage_object_id: string | null;
+  updated_at: string;
+  user_id: string;
+}
+
 export const MemoManager = () => {
   const session = useSessionStore((state) => state.session);
 
   const [memoList, setMemoList] = useState<Memo[]>([]);
   const [editIndex, setEditIndex] = useState<string | null>(null);
   const [editMemo, setEditMemo] = useState<Memo | undefined>(undefined);
-  const [tabValue, setTabValue] = useState('memoList');
+  const [tabValue, setTabValue] = useState("memoList");
 
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState("");
   const [categories, setCategories] = useState<CategoryOption[] | null>(null);
-  const [tag, setTag] = useState('');
+  const [tag, setTag] = useState("");
   const [tags, setTags] = useState<TagOption[] | null>(null);
   const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
   const [addTagDialogOpen, setAddTagDialogOpen] = useState(false);
+
+  const [files, setFiles] = useState<File[]>([]);
+  const [images, setImages] = useState<Image[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  // 画像データ取得
+  const fetchImages = useCallback(async () => {
+    if (!session?.user?.id) return;
+    try {
+      const images = await fetchImagesService(session.user.id);
+      setImages(images);
+    } catch (error) {
+      console.error("Error fetching images:", error);
+    }
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    fetchImages();
+  }, [fetchImages]);
+
+  // ファイル選択ハンドラー
+  const handleFileChange = (newFiles: File[]) => {
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+  };
+
+  // 画像削除ハンドラー
+  const handleDeleteImage = useCallback(
+    async (id: string, file_path: string, file_name: string) => {
+      if (!session?.user?.id) return;
+      try {
+        await deleteImageService(id, session?.user?.id, file_path, file_name);
+        fetchImages();
+      } catch (error) {
+        console.error("Error deleting image:", error);
+      }
+    },
+    [session?.user?.id],
+  );
+
+  // サムネイル削除ハンドラー
+  const handleDeleteFileClick = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // ファイルアップロードハンドラー
+  const handleFileUpload = async (files: File[]) => {
+    const imageIds: string[] = [];
+    try {
+      for (const file of files) {
+        const folderName = session?.user.id || "default_folder";
+        const extension = await getExtensionIfAllowed(file);
+
+        if (extension) {
+          const imageId = await uploadImageStorageService(
+            file,
+            file.size,
+            file.type,
+            session?.user.id || "unknown",
+            folderName,
+            extension,
+          );
+          imageIds.push(imageId);
+        }
+      }
+      setFiles([]);
+      fetchImages();
+      console.log("Uploaded image IDs:", imageIds);
+      return imageIds;
+    } catch (error) {
+      setImageError("画像のアップロードに失敗しました");
+      return [];
+    }
+  };
 
   // メモリストを取得
   const memoListFetcher = useCallback(async () => {
@@ -234,7 +331,7 @@ export const MemoManager = () => {
   const handleCategorySubmit = useCallback(() => {
     if (session?.user?.id && category.trim()) {
       addCategory({ name: category.trim(), user_id: session.user.id });
-      setCategory('');
+      setCategory("");
       setAddCategoryDialogOpen(false);
       setAddTagDialogOpen(false);
     }
@@ -244,7 +341,7 @@ export const MemoManager = () => {
   const handleTagSubmit = useCallback(() => {
     if (session?.user?.id && tag.trim()) {
       addTag({ name: tag.trim(), user_id: session.user.id });
-      setTag('');
+      setTag("");
       setAddCategoryDialogOpen(false);
       setAddTagDialogOpen(false);
     }
@@ -252,7 +349,7 @@ export const MemoManager = () => {
 
   // メモ追加を処理
   const handleAddSubmit = useCallback(
-    async (data: MemoFormData) => {
+    async (data: MemoFormData & { image_ids?: string[] }) => {
       try {
         if (session?.user?.id) {
           await addMemoRPC({ ...data, user_id: session.user.id });
@@ -267,7 +364,7 @@ export const MemoManager = () => {
 
   // メモ更新を処理
   const handleUpdateSubmit = useCallback(
-    async (editIndex: string, data: MemoFormData) => {
+    async (editIndex: string, data: MemoFormData & { image_ids: string[] }) => {
       try {
         await updateMemoRPC(editIndex, data);
         await memoListFetcher();
@@ -280,15 +377,22 @@ export const MemoManager = () => {
 
   // フォーム送信を処理
   const handleFormSubmit = useCallback(
-    async (data: MemoFormData) => {
+    async (data: MemoFormData, files?: File[]) => {
+      console.log(data, files);
+      //debugger;
+      let imageIds: string[] = [];
+      if (files && files.length > 0) {
+        imageIds = await handleFileUpload(files) ?? [];
+        console.log("Uploaded image IDs:", imageIds);
+      }
       if (!editIndex && session?.user?.id) {
-        await handleAddSubmit(data);
+        await handleAddSubmit({ ...data, image_ids: imageIds });
       }
       if (editIndex) {
-        await handleUpdateSubmit(editIndex, data);
+        await handleUpdateSubmit(editIndex, { ...data, image_ids: imageIds });
       }
       setEditIndex(null);
-      setTabValue('memoList');
+      setTabValue("memoList");
     },
     [editIndex, session?.user?.id, handleAddSubmit, handleUpdateSubmit],
   );
@@ -298,7 +402,7 @@ export const MemoManager = () => {
     async (index: string) => {
       setEditIndex(index);
       await memoFetcher(index);
-      setTabValue('addMemo');
+      setTabValue("addMemo");
     },
     [memoFetcher],
   );
@@ -335,7 +439,7 @@ export const MemoManager = () => {
 
   // タブ切り替え時に編集インデックスをリセット
   useEffect(() => {
-    if (tabValue !== 'addMemo') {
+    if (tabValue !== "addMemo") {
       setEditIndex(null);
       setEditMemo(undefined);
     }
@@ -366,10 +470,24 @@ export const MemoManager = () => {
           setCategoryOpen: setAddCategoryDialogOpen,
           tagOpen: addTagDialogOpen,
           setTagOpen: setAddTagDialogOpen,
+          // ファイル関連propsを追加
+          files,
+          onFileChange: handleFileChange,
+          onFileUpload: handleFileUpload,
+          onFileDelete: handleDeleteFileClick,
+          imageError,
         }}
         categoryOperations={categoryOperations}
         tagOperations={tagOperations}
       />
+
+      {
+        /* <h2>ファイルアップローダー</h2>
+      <FileUploader files={files} onChange={handleFileChange} onUpload={handleFileUpload} onError={imageError} />
+      <FileThumbnail files={files} onDelete={handleDeleteFileClick} /> */
+      }
+      <h2>Images</h2>
+      <FileList images={images} handleDeleteImage={handleDeleteImage} />
     </div>
   );
 };

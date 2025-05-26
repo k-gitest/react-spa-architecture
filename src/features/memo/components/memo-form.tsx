@@ -14,6 +14,8 @@ import {
 } from '@/components/form/form-parts';
 import { syncZodErrors } from '@/lib/trpc';
 import { MemoItemAddDialog } from '@/features/memo/components/memo-item-add-dialog';
+import { FileUploader } from '@/components/file-uploader';
+import { FileThumbnail } from '@/components/file-thumbnail';
 
 const importances = [
   { value: 'high', label: '大' },
@@ -28,6 +30,14 @@ const defaultMemoFormData = {
   category: '',
   tags: [],
 };
+
+export interface MemoFormFileProps {
+  files: File[];
+  onFileChange: (files: File[]) => void;
+  onFileUpload: (files: File[]) => Promise<string[]>;
+  onFileDelete: (index: number) => void;
+  imageError?: string | null;
+}
 
 export const MemoForm = ({
   onSubmit,
@@ -45,7 +55,13 @@ export const MemoForm = ({
   setCategoryOpen,
   tagOpen,
   setTagOpen,
-}: MemoFormProps) => {
+  // ファイル関連props
+  files,
+  onFileChange,
+  onFileUpload,
+  onFileDelete,
+  imageError,
+}: MemoFormProps & Partial<MemoFormFileProps>) => {
   const form = useForm<MemoFormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: initialValues || defaultMemoFormData,
@@ -53,9 +69,9 @@ export const MemoForm = ({
 
   const handleSubmit = useCallback(
     (data: MemoFormData) => {
-      onSubmit(data);
+      onSubmit(data, files);
     },
-    [onSubmit],
+    [onSubmit, files],
   );
 
   useEffect(() => {
@@ -100,6 +116,14 @@ export const MemoForm = ({
           open={tagOpen}
           setOpen={setTagOpen}
         />
+        {/* ファイルアップロード・サムネイル */}
+        {files && onFileChange && onFileUpload && onFileDelete && (
+          <div className="my-4">
+            <label className="block font-bold mb-2">画像アップロード</label>
+            <FileUploader files={files} onChange={onFileChange} onUpload={onFileUpload} onError={imageError} />
+            <FileThumbnail files={files} onDelete={onFileDelete} />
+          </div>
+        )}
         {form.formState.errors?.root && <p className="text-sm text-red-500">{form.formState.errors.root?.message}</p>}
         <div className="flex justify-center">
           <Button type="submit" className="w-32">

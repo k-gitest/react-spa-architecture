@@ -16,6 +16,7 @@ model User {
   profile Profile?
   categories Category[]
   tags    Tag[]
+  images  Image[]
 
   @@map("users")
 }
@@ -40,6 +41,7 @@ model Memo {
   importance String
   category   MemoCategory[]
   tags       MemoTag[]
+  images     MemoImage[]
   created_at DateTime @default(now()) @db.Timestamptz(3)
   updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
   user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -91,4 +93,49 @@ model MemoTag {
 
   @@id([memo_id, tag_id])
   @@map("memo_tags")
+}
+
+model Image {
+  id String @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  user_id String @db.Uuid
+  storage_object_id String? @db.Uuid
+  file_path String
+  file_name String
+  file_size Int?
+  mime_type String?
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  memo_images MemoImage[]
+  
+  @@map("images")
+}
+
+model MemoImage {
+  memo_id String @db.Uuid
+  image_id String @db.Uuid
+  order Int @default(0)
+  alt_text String?
+  description String?
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+  
+  memo Memo @relation(fields: [memo_id], references: [id], onDelete: Cascade)
+  image Image @relation(fields: [image_id], references: [id], onDelete: Cascade)
+  
+  @@id([memo_id, image_id])
+  @@map("memo_images")
+}
+
+model CleanupDeleteImage {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  filePath     String    @map("file_path")
+  fileName     String    @map("file_name")
+  userId       String    @map("user_id")
+  errorMessage String?   @map("error_message")
+  resolved     Boolean   @default(false)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("cleanup_delete_images")
 }

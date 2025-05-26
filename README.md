@@ -243,6 +243,21 @@ import { ModeToggle } from "@/components/mode-toggle";
 
 ```
 
+## トーストコンポーネントの使い方
+ui/toasterからToastコンポーネントを取得し、上階層に配置します。  
+useToastからtoastを取得し、コンテンツを渡すとトーストが表示されます。  
+
+```typescript
+toast({title: "トーストが表示されました"})
+```
+Appはクライアント・プロバイダー、ルートはrouterに分離してあり、ToastはUIという事でlayoutに配置しています。  
+apiの状態は全てトースト表示をしています。
+
+## エラーハンドリング
+- apiエラーはerrors/error-handlerで管理しています。
+- TRPCはエラーフォーマッターで整形してから返しています。
+- TRPCのZodエラーに関してはUI側で取得しRHFのformState.errorsに渡して表示しています。
+
 ## Fetch API クライアント
 APIとの通信を行うためのカスタムクライアントです。
 

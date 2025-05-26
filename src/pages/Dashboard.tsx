@@ -2,7 +2,7 @@ import { MemoManager } from '@/features/memo/components/memo-manager';
 import { MemoManagerTrpc } from '@/features/memo/components/memo-manager-trpc';
 import { MemoManagerTanstack } from '@/features/memo/components/memo-manager-tanstack';
 import { Helmet } from 'react-helmet-async';
-import { withBehaviorVariant } from '@/components/withBehaviorVariant';
+import { withBehaviorVariant } from '@/components/with-behavior-variant';
 
 const MemoComponents = withBehaviorVariant({
   default: MemoManager,

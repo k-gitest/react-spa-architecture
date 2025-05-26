@@ -47,7 +47,7 @@ export const ProfileManager = () => {
       const folderName = userId;
       const extention = await getExtensionIfAllowed(e.target.files[0]);
       if (extention && data) {
-        // ファイルをBase64に変換
+        // ファイルをBase64に変換 サーバー側のtrpcでFileを受け取れないためbase64 stringに変換して送信
         const base64Data = await convertFileToBase64(e.target.files[0]);
         await uploadAvatar(base64Data, folderName, extention, data.avatar);
       } else {

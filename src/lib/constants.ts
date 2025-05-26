@@ -5,3 +5,4 @@ export const SUPABASE_URL: string = import.meta.env.VITE_SUPABASE_URL ?? 'http:/
 export const SUPABASE_ANON_KEY: string = import.meta.env.VITE_SUPABASE_ANON_KEY ?? 'dummy-anon-key';
 export const PROJECT_ID: string = import.meta.env.VITE_PROJECT_ID ?? '12345abcd';
 export const EDGE_REST_URI: string = import.meta.env.VITE_EDGE_REST_URI ?? 'localhost';
+export const BUCKET_IMAGES: string = import.meta.env.VITE_BUCKET_IMAGES ?? 'images';

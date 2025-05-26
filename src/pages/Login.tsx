@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { MainWrapper } from '@/components/layout/main-wrapper';
 import { Helmet } from 'react-helmet-async';
-import { withBehaviorVariant } from '@/components/withBehaviorVariant';
+import { withBehaviorVariant } from '@/components/with-behavior-variant';
 
 const AuthFormComponents = withBehaviorVariant({
   default: AccountForm,
