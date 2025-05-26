@@ -51,7 +51,6 @@ export const addMemoRPC = async (props: MemoFormData & { user_id: string, image_
     p_tag_ids: props.tags.map((t) => Number(t)),
     p_image_ids: props.image_ids,
   };
-  console.log(props.image_ids)
   const { error } = await supabase.rpc('save_memo_rpc', formatted);
   if (error) throw error;
 };

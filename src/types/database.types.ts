@@ -376,24 +376,43 @@ export type Database = {
     }
     Functions: {
       save_memo_rpc: {
-        Args: {
-          p_title: string
-          p_content: string
-          p_importance: string
-          p_category_id: number
-          p_tag_ids: number[]
-        }
+        Args:
+          | {
+              p_title: string
+              p_content: string
+              p_importance: string
+              p_category_id: number
+              p_tag_ids: number[]
+            }
+          | {
+              p_title: string
+              p_content: string
+              p_importance: string
+              p_category_id: number
+              p_tag_ids: number[]
+              p_image_ids: string[]
+            }
         Returns: undefined
       }
       update_memo_rpc: {
-        Args: {
-          p_id: string
-          p_title: string
-          p_content: string
-          p_importance: string
-          p_category_id: number
-          p_tag_ids: number[]
-        }
+        Args:
+          | {
+              p_id: string
+              p_title: string
+              p_content: string
+              p_importance: string
+              p_category_id: number
+              p_tag_ids: number[]
+            }
+          | {
+              p_id: string
+              p_title: string
+              p_content: string
+              p_importance: string
+              p_category_id: number
+              p_tag_ids: number[]
+              p_image_ids: string[]
+            }
         Returns: undefined
       }
     }

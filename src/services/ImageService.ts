@@ -31,11 +31,9 @@ export const uploadImageStorageService = async (
     upsert: false,
   });
   if (error) throw error;
-  console.log('Image uploaded to storage:', data);
 
   try {
     const imageData = await addImageService(user_id, data.path, file.name, file_size, mime_type, data.id);
-    console.log('Image metadata added to images table:', imageData);
     return imageData.id;
   } catch (error) {
     const errorMessage =

@@ -31,7 +31,6 @@ import { getImageUrl } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { FileThumbnail } from "@/components/file-thumbnail";
 import { FileList } from "@/components/file-list";
-import { debug } from "console";
 
 interface CategoryOption {
   id: number;
@@ -141,7 +140,6 @@ export const MemoManager = () => {
       }
       setFiles([]);
       fetchImages();
-      console.log("Uploaded image IDs:", imageIds);
       return imageIds;
     } catch (error) {
       setImageError("画像のアップロードに失敗しました");
@@ -378,12 +376,9 @@ export const MemoManager = () => {
   // フォーム送信を処理
   const handleFormSubmit = useCallback(
     async (data: MemoFormData, files?: File[]) => {
-      console.log(data, files);
-      //debugger;
       let imageIds: string[] = [];
       if (files && files.length > 0) {
         imageIds = await handleFileUpload(files) ?? [];
-        console.log("Uploaded image IDs:", imageIds);
       }
       if (!editIndex && session?.user?.id) {
         await handleAddSubmit({ ...data, image_ids: imageIds });
