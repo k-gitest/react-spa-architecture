@@ -153,8 +153,8 @@ erDiagram
   Profile {
     UUID id PK
     UUID user_id FK
-    String? avatar
-    String? user_name UNIQUE
+    String avatar
+    String user_name
     DateTime created_at
     DateTime updated_at
   }
@@ -185,7 +185,7 @@ erDiagram
   Tag {
     int id PK
     UUID user_id FK
-    String name UNIQUE
+    String name
     DateTime created_at
     DateTime updated_at
   }
@@ -198,11 +198,11 @@ erDiagram
   Image {
     UUID id PK
     UUID user_id FK
-    UUID? storage_object_id
+    UUID storage_object_id
     String file_path
     String file_name
-    Int? file_size
-    String? mime_type
+    Int file_size
+    String mime_type
     DateTime created_at
     DateTime updated_at
   }
@@ -211,8 +211,8 @@ erDiagram
     UUID memo_id FK
     UUID image_id FK
     Int order
-    String? alt_text
-    String? description
+    String alt_text
+    String description
     DateTime created_at
     DateTime updated_at
   }
@@ -222,10 +222,11 @@ erDiagram
     String filePath
     String fileName
     UUID userId
-    String? errorMessage
+    String errorMessage
     Boolean resolved
     DateTime createdAt
   }
+
 
 ```
 
