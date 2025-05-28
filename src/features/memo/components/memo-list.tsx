@@ -2,6 +2,7 @@ import React from 'react';
 import { Memo } from '@/features/memo/types/memo-form-data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { getImageUrl } from '@/lib/supabase';
 
 interface MemoListProps {
   memoData: Memo[];
@@ -15,6 +16,15 @@ export const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProp
       {memoData?.map((memo, index) => (
         <Card key={index}>
           <CardHeader>
+            {memo.images && memo?.images?.length > 0 && (
+              <div className="mb-2">
+                <img
+                  src={getImageUrl(memo.images[0].file_path)}
+                  alt={memo.images[0].alt_text || 'Memo Image'}
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            )}
             <CardTitle className="break-words">{memo.title}</CardTitle>
             <CardDescription>{memo.category}</CardDescription>
             <CardDescription>{memo.importance}</CardDescription>

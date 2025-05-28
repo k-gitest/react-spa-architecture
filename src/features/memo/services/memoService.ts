@@ -18,6 +18,19 @@ export const fetchMemosService = async () => {
         id,
         name
       )
+    ),
+    images:memo_images (
+      image_id,
+      order,
+      alt_text,
+      description,
+      image:images (
+        id,
+        file_name,
+        file_path,
+        mime_type,
+        file_size
+      )
     )
   `,
     )
@@ -28,6 +41,14 @@ export const fetchMemosService = async () => {
     ...memo,
     category: memo.category?.[0]?.category?.name ?? '',
     tags: memo.tags?.map((t) => t.tag.name) ?? [],
+    images: memo.images.map((img) => ({
+      file_path: img.image.file_path,
+      file_name: img.image.file_name,
+      image_id: img.image_id,
+      order: img.order,
+      alt_text: img.alt_text ?? undefined,
+      description: img.description ?? undefined,
+    })),
   }));
   return formatted;
 };
@@ -42,7 +63,7 @@ export const addMemoService = async (props: MemoFormData & { user_id: string }) 
   if (error) throw error;
 };
 
-export const addMemoRPC = async (props: MemoFormData & { user_id: string, image_ids?: string[] }) => {
+export const addMemoRPC = async (props: MemoFormData & { user_id: string; image_ids?: string[] }) => {
   const formatted = {
     p_title: props.title,
     p_content: props.content,
@@ -72,6 +93,19 @@ export const getMemoService = async (id: string) => {
         id,
         name
       )
+    ),
+    images:memo_images (
+      image_id,
+      order,
+      alt_text,
+      description,
+      image:images (
+        id,
+        file_name,
+        file_path,
+        mime_type,
+        file_size
+      )
     )
   `,
     )
@@ -84,6 +118,14 @@ export const getMemoService = async (id: string) => {
     ...data,
     category: String(data.category?.[0]?.category?.id),
     tags: data.tags?.map((t) => String(t.tag.id)) ?? [],
+    images: data.images.map((img) => ({
+      file_path: img.image.file_path,
+      file_name: img.image.file_name,
+      image_id: img.image_id,
+      order: img.order,
+      alt_text: img.alt_text ?? "",
+      description: img.description ?? "",
+    })),
   };
   return formatted;
 };
@@ -99,7 +141,8 @@ export const updateMemoService = async (id: string, updates: MemoFormData) => {
   if (error) throw error;
 };
 
-export const updateMemoRPC = async (id: string, updates: MemoFormData & {image_ids: string[]}) => {
+export const updateMemoRPC = async (id: string, updates: MemoFormData & { image_ids: string[] }) => {
+  console.log('updateMemoRPC', id, updates);
   const formatted = {
     p_id: id,
     p_title: updates.title,
@@ -108,6 +151,7 @@ export const updateMemoRPC = async (id: string, updates: MemoFormData & {image_i
     p_category_id: Number(updates.category),
     p_tag_ids: updates.tags.map((t) => Number(t)),
     p_image_ids: updates.image_ids,
+    p_image_metadatas: updates.images,
   };
   const { error } = await supabase.rpc('update_memo_rpc', formatted);
   if (error) throw error;

@@ -70,3 +70,24 @@ export interface MemoFormFileProps {
 }
 
 export type MemoFormAllProps = MemoFormProps & Partial<MemoFormFileProps>;
+
+export interface Image {
+  created_at: string;
+  file_name: string;
+  file_path: string;
+  file_size: number | null;
+  id: string;
+  mime_type: string | null;
+  storage_object_id: string | null;
+  updated_at: string;
+  user_id: string;
+}
+
+export interface MemoImage {
+  image_id: string;
+  order: number;
+  alt_text: string | null;
+  description: string | null;
+  file_name: string | null;
+  file_path: string;
+}

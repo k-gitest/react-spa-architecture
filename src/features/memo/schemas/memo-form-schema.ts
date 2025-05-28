@@ -9,6 +9,14 @@ export const FormSchema = z.object({
   category: z
     .string({ message: '有効なカテゴリを選択してください' }),
   tags: z.array(z.string()).min(1, { message: 'タグは必須です' }),
+  images: z.array(z.object({
+    file_path: z.string(),
+    file_name: z.string(),
+    image_id: z.string(),
+    order: z.number(),
+    alt_text: z.string().optional(),
+    description: z.string().optional(),
+  })).optional(),
 });
 
 export const MemoSchema = FormSchema.extend({

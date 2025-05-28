@@ -1,5 +1,5 @@
 import { ReactNode, InputHTMLAttributes, TextareaHTMLAttributes, SelectHTMLAttributes } from 'react';
-import { UseFormReturn, SubmitHandler } from 'react-hook-form';
+import { UseFormReturn, SubmitHandler, useWatch } from 'react-hook-form';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,20 +27,24 @@ export const FormInput = ({
   label,
   name,
   ...props
-}: { label: string; name: string } & InputHTMLAttributes<HTMLInputElement>) => (
-  <FormField
-    name={name}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>{label}</FormLabel>
-        <FormControl>
-          <Input {...field} {...props} />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-);
+}: { label: string; name: string } & InputHTMLAttributes<HTMLInputElement>) => {
+  const fieldValue = useWatch({ name });
+  
+  return (
+    <FormField
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{label}</FormLabel>
+          <FormControl>
+            <Input {...field} {...props} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+};
 
 export const FormTextArea = ({
   label,

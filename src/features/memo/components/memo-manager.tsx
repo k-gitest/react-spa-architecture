@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Memo, MemoFormData } from "@/features/memo/types/memo-form-data";
-import { useSessionStore } from "@/hooks/use-session-store";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Memo, MemoFormData } from '@/features/memo/types/memo-form-data';
+import { useSessionStore } from '@/hooks/use-session-store';
 import {
   addCategoryService,
   addMemoRPC,
@@ -17,20 +17,16 @@ import {
   updateCategoryService,
   updateMemoRPC,
   updateTagService,
-} from "@/features/memo/services/memoService";
-import { errorHandler } from "@/errors/error-handler";
-import { MemoManagerUI } from "@/features/memo/components/memo-manager-ui";
-import {
-  deleteImageService,
-  fetchImagesService,
-  uploadImageStorageService,
-} from "@/services/ImageService";
-import { getExtensionIfAllowed } from "@/lib/utils";
-import { FileUploader } from "@/components/file-uploader";
-import { getImageUrl } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { FileThumbnail } from "@/components/file-thumbnail";
-import { FileList } from "@/components/file-list";
+} from '@/features/memo/services/memoService';
+import { errorHandler } from '@/errors/error-handler';
+import { MemoManagerUI } from '@/features/memo/components/memo-manager-ui';
+import { deleteImageService, fetchImagesService, uploadImageStorageService } from '@/services/ImageService';
+import { getExtensionIfAllowed } from '@/lib/utils';
+import { FileUploader } from '@/components/file-uploader';
+import { getImageUrl } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { FileThumbnail } from '@/components/file-thumbnail';
+import { FileList } from '@/components/file-list';
 
 interface CategoryOption {
   id: number;
@@ -66,11 +62,11 @@ export const MemoManager = () => {
   const [memoList, setMemoList] = useState<Memo[]>([]);
   const [editIndex, setEditIndex] = useState<string | null>(null);
   const [editMemo, setEditMemo] = useState<Memo | undefined>(undefined);
-  const [tabValue, setTabValue] = useState("memoList");
+  const [tabValue, setTabValue] = useState('memoList');
 
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState('');
   const [categories, setCategories] = useState<CategoryOption[] | null>(null);
-  const [tag, setTag] = useState("");
+  const [tag, setTag] = useState('');
   const [tags, setTags] = useState<TagOption[] | null>(null);
   const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
   const [addTagDialogOpen, setAddTagDialogOpen] = useState(false);
@@ -86,7 +82,7 @@ export const MemoManager = () => {
       const images = await fetchImagesService(session.user.id);
       setImages(images);
     } catch (error) {
-      console.error("Error fetching images:", error);
+      console.error('Error fetching images:', error);
     }
   }, [session?.user?.id]);
 
@@ -107,7 +103,7 @@ export const MemoManager = () => {
         await deleteImageService(id, session?.user?.id, file_path, file_name);
         fetchImages();
       } catch (error) {
-        console.error("Error deleting image:", error);
+        console.error('Error deleting image:', error);
       }
     },
     [session?.user?.id],
@@ -123,7 +119,7 @@ export const MemoManager = () => {
     const imageIds: string[] = [];
     try {
       for (const file of files) {
-        const folderName = session?.user.id || "default_folder";
+        const folderName = session?.user.id || 'default_folder';
         const extension = await getExtensionIfAllowed(file);
 
         if (extension) {
@@ -131,7 +127,7 @@ export const MemoManager = () => {
             file,
             file.size,
             file.type,
-            session?.user.id || "unknown",
+            session?.user.id || 'unknown',
             folderName,
             extension,
           );
@@ -142,7 +138,7 @@ export const MemoManager = () => {
       fetchImages();
       return imageIds;
     } catch (error) {
-      setImageError("画像のアップロードに失敗しました");
+      setImageError('画像のアップロードに失敗しました');
       return [];
     }
   };
@@ -151,6 +147,7 @@ export const MemoManager = () => {
   const memoListFetcher = useCallback(async () => {
     try {
       const data = await fetchMemosService();
+      console.log(data);
       setMemoList(data);
     } catch (err) {
       errorHandler(err);
@@ -329,7 +326,7 @@ export const MemoManager = () => {
   const handleCategorySubmit = useCallback(() => {
     if (session?.user?.id && category.trim()) {
       addCategory({ name: category.trim(), user_id: session.user.id });
-      setCategory("");
+      setCategory('');
       setAddCategoryDialogOpen(false);
       setAddTagDialogOpen(false);
     }
@@ -339,7 +336,7 @@ export const MemoManager = () => {
   const handleTagSubmit = useCallback(() => {
     if (session?.user?.id && tag.trim()) {
       addTag({ name: tag.trim(), user_id: session.user.id });
-      setTag("");
+      setTag('');
       setAddCategoryDialogOpen(false);
       setAddTagDialogOpen(false);
     }
@@ -347,10 +344,14 @@ export const MemoManager = () => {
 
   // メモ追加を処理
   const handleAddSubmit = useCallback(
-    async (data: MemoFormData & { image_ids?: string[] }) => {
+    async (data: MemoFormData & { files?: File[] }) => {
       try {
+        let imageIds: string[] = [];
+        if (data.files && data.files.length > 0) {
+          imageIds = (await handleFileUpload(data.files)) ?? [];
+        }
         if (session?.user?.id) {
-          await addMemoRPC({ ...data, user_id: session.user.id });
+          await addMemoRPC({ ...data, image_ids: imageIds, user_id: session.user.id });
           await memoListFetcher();
         }
       } catch (err) {
@@ -362,9 +363,18 @@ export const MemoManager = () => {
 
   // メモ更新を処理
   const handleUpdateSubmit = useCallback(
-    async (editIndex: string, data: MemoFormData & { image_ids: string[] }) => {
+    async (editIndex: string, data: MemoFormData & { files?: File[] }) => {
+      console.log('handleUpdateSubmit data: ', data);
       try {
-        await updateMemoRPC(editIndex, data);
+        let imageIds: string[] = (data.images ?? []).map((image) => image.image_id);
+        if (data.files && data.files.length > 0) {
+          const uploadImageIds = (await handleFileUpload(data.files)) ?? [];
+          imageIds = [...imageIds, ...uploadImageIds];
+        }
+        await updateMemoRPC(editIndex, {
+          ...data,
+          image_ids: imageIds,
+        });
         await memoListFetcher();
       } catch (err) {
         errorHandler(err);
@@ -376,18 +386,16 @@ export const MemoManager = () => {
   // フォーム送信を処理
   const handleFormSubmit = useCallback(
     async (data: MemoFormData, files?: File[]) => {
-      let imageIds: string[] = [];
-      if (files && files.length > 0) {
-        imageIds = await handleFileUpload(files) ?? [];
-      }
+      console.log('data: ', data);
+
       if (!editIndex && session?.user?.id) {
-        await handleAddSubmit({ ...data, image_ids: imageIds });
+        await handleAddSubmit({ ...data, files });
       }
       if (editIndex) {
-        await handleUpdateSubmit(editIndex, { ...data, image_ids: imageIds });
+        await handleUpdateSubmit(editIndex, { ...data, files });
       }
       setEditIndex(null);
-      setTabValue("memoList");
+      setTabValue('memoList');
     },
     [editIndex, session?.user?.id, handleAddSubmit, handleUpdateSubmit],
   );
@@ -397,7 +405,7 @@ export const MemoManager = () => {
     async (index: string) => {
       setEditIndex(index);
       await memoFetcher(index);
-      setTabValue("addMemo");
+      setTabValue('addMemo');
     },
     [memoFetcher],
   );
@@ -434,7 +442,7 @@ export const MemoManager = () => {
 
   // タブ切り替え時に編集インデックスをリセット
   useEffect(() => {
-    if (tabValue !== "addMemo") {
+    if (tabValue !== 'addMemo') {
       setEditIndex(null);
       setEditMemo(undefined);
     }
@@ -476,11 +484,9 @@ export const MemoManager = () => {
         tagOperations={tagOperations}
       />
 
-      {
-        /* <h2>ファイルアップローダー</h2>
+      {/* <h2>ファイルアップローダー</h2>
       <FileUploader files={files} onChange={handleFileChange} onUpload={handleFileUpload} onError={imageError} />
-      <FileThumbnail files={files} onDelete={handleDeleteFileClick} /> */
-      }
+      <FileThumbnail files={files} onDelete={handleDeleteFileClick} /> */}
       <h2>Images</h2>
       <FileList images={images} handleDeleteImage={handleDeleteImage} />
     </div>

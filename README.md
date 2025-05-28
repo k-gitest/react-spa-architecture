@@ -136,15 +136,11 @@ erDiagram
   User ||--|| Profile : has
   User ||--o{ Category : has
   User ||--o{ Tag : has
-  User ||--o{ Image : has
 
   Memo ||--o{ MemoCategory : has
   Memo ||--o{ MemoTag : has
-  Memo ||--o{ MemoImage : has
-
   Category ||--o{ MemoCategory : has
   Tag ||--o{ MemoTag : has
-  Image ||--o{ MemoImage : has
 
   User {
     UUID id PK
@@ -155,8 +151,6 @@ erDiagram
     UUID user_id FK
     String avatar
     String user_name
-    DateTime created_at
-    DateTime updated_at
   }
 
   Memo {
@@ -164,17 +158,18 @@ erDiagram
     UUID user_id FK
     String title
     String content
-    String importance
-    DateTime created_at
-    DateTime updated_at
   }
 
   Category {
     int id PK
     UUID user_id FK
     String name
-    DateTime created_at
-    DateTime updated_at
+  }
+
+  Tag {
+    int id PK
+    UUID user_id FK
+    String name
   }
 
   MemoCategory {
@@ -182,52 +177,10 @@ erDiagram
     int category_id FK
   }
 
-  Tag {
-    int id PK
-    UUID user_id FK
-    String name
-    DateTime created_at
-    DateTime updated_at
-  }
-
   MemoTag {
     UUID memo_id FK
     int tag_id FK
   }
-
-  Image {
-    UUID id PK
-    UUID user_id FK
-    UUID storage_object_id
-    String file_path
-    String file_name
-    Int file_size
-    String mime_type
-    DateTime created_at
-    DateTime updated_at
-  }
-
-  MemoImage {
-    UUID memo_id FK
-    UUID image_id FK
-    Int order
-    String alt_text
-    String description
-    DateTime created_at
-    DateTime updated_at
-  }
-
-  CleanupDeleteImage {
-    UUID id PK
-    String filePath
-    String fileName
-    UUID userId
-    String errorMessage
-    Boolean resolved
-    DateTime createdAt
-  }
-
-
 ```
 
 
@@ -372,6 +325,28 @@ const { isPending, data } = useApiMutation({
    })
 ```
 
+## React Hook Form 使い分けガイド
+
+### 基本方針
+- **配列操作**: `useFieldArray` で追加・削除・並び替え
+- **バリデーション制御**: `mode` オプションで全体制御
+- **レンダリング制御**: 監視範囲と更新タイミングで使い分け
+
+### バリデーションモード
+- **リアルタイム**: `mode: "onChange"`
+- **入力完了時**: `mode: "onBlur"`
+- **送信時のみ**: `mode: "onSubmit"`
+
+### 値の監視・取得
+- **親で全体監視**: `form.watch()` （再レンダリング頻発に注意）
+- **子で部分監視**: `useWatch({ name })` （該当コンポーネントのみ再レンダリング）
+- **UI更新不要**: `getValues()` （送信時、ログ、API呼び出し）
+
+### パフォーマンス考慮
+- フォーム全体の再レンダリングを避ける → `useWatch` を子コンポーネントで使用
+- 入力中の頻繁な更新を避ける → `mode: "onBlur"`
+- 配列操作の効率化 → `useFieldArray` の `fields`, `append`, `remove`
+
 ## まとめ
 - shadcn/uiのFormコンポーネントはzodとreact-hook-formと連携しているのでインストールする必要がある
 - shadcn/uiのメディアクエリ別ドロワー/ダイアログはwindow幅を取得する関数が必要、今回はコードを記述しているが、他のライブラリでも可能
@@ -411,3 +386,5 @@ const { isPending, data } = useApiMutation({
 - plpg内のfunction内では例外発生で自動的にロールバックする。raise exceptionでEXCEPTIONブロックでもロールバックできる。
 - plpg内のprocedure内でトランザクションコマンドは使用できるが、制限が多く基本的には使用不可。自動ロールバックで行う必要がある。
 - trpcクライアントでedge側のAppRouter型を使用しているのでviteでbuild時にdenoのエラーがでる。対応策としてbuild前にtrpcの型だけ共通ディレクトリに生成してtrpcクライアントのAppRouterとして使用すればbuild自体はできる。多少の型エラーがでる場合は修正するかts-ignoreする
+- rhfに渡した配列を加工する場合はuseFiledArray、レンダリング制御する場合はwatch, useWatch, onBlur、getValuesを検討する
+- 同期的なバリデーションを親でwatch、子のみはuseWatch、フォーカスでonBlurと分ける、UI関係なく値取得はgetValuesなど

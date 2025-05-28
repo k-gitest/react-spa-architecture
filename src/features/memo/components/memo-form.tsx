@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormSchema } from '@/features/memo/schemas/memo-form-schema';
 import { MemoFormData, MemoFormProps } from '@/features/memo/types/memo-form-data';
@@ -16,6 +16,7 @@ import { syncZodErrors } from '@/lib/trpc';
 import { MemoItemAddDialog } from '@/features/memo/components/memo-item-add-dialog';
 import { FileUploader } from '@/components/file-uploader';
 import { FileThumbnail } from '@/components/file-thumbnail';
+import { getImageUrl } from '@/lib/supabase';
 
 const importances = [
   { value: 'high', label: '大' },
@@ -55,7 +56,6 @@ export const MemoForm = ({
   setCategoryOpen,
   tagOpen,
   setTagOpen,
-  // ファイル関連props
   files,
   onFileChange,
   onFileUpload,
@@ -84,6 +84,23 @@ export const MemoForm = ({
   useEffect(() => {
     syncZodErrors(form, externalZodError);
   }, [externalZodError, form]);
+
+  //const images = form.watch('images');
+  /*
+  const handleImageDelete = (indexToDelete: number) => {
+    const currentImages = form.getValues('images') || [];
+    const newImages = currentImages.filter((_, index) => index !== indexToDelete);
+    form.setValue('images', newImages);
+  };
+  */
+
+  const { fields, remove } = useFieldArray({
+    control: form.control,
+    name: 'images',
+  });
+  const handleImageDelete = (index: number) => {
+    remove(index);
+  };
 
   return (
     <div className="flex justify-center">
@@ -124,6 +141,87 @@ export const MemoForm = ({
             <FileThumbnail files={files} onDelete={onFileDelete} />
           </div>
         )}
+
+        {fields.length > 0 && (
+          <div className="my-4">
+            <label className="block font-bold mb-2">アップロード済み画像</label>
+            <div className="grid grid-cols-1 gap-4">
+              {fields.map((field, index) => (
+                <div className="flex gap-4" key={field.id}>
+                  {' '}
+                  {/* field.idを使用 */}
+                  <div className="relative w-[100px] h-[100px]">
+                    <img
+                      src={getImageUrl(field.file_path)}
+                      alt={field.alt_text || 'Uploaded Image'}
+                      className="w-[100px] h-[100px] object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleImageDelete(index)}
+                      className="absolute top-0 right-0 bg-black text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="w-full">
+                    <FormInput
+                      name={`images.${index}.alt_text`}
+                      label="Alt Text"
+                      placeholder="画像の代替テキストを入力"
+                      className="mt-2"
+                    />
+                    <FormInput
+                      name={`images.${index}.description`}
+                      label="説明"
+                      placeholder="画像の説明を入力"
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {/*images && images.length > 0 && (
+          <div className="my-4">
+            <label className="block font-bold mb-2">アップロード済み画像</label>
+            <div className="grid grid-cols-1 gap-4">
+              {images.map((image, index) => (
+                <div className="flex gap-4" key={index}>
+                  <div className="relative w-[100px] h-[100px]">
+                    <img
+                      src={getImageUrl(image.file_path)}
+                      alt={image.alt_text || 'Uploaded Image'}
+                      className="w-[100px] h-[100px] object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleImageDelete(index)}
+                      className="absolute top-0 right-0 bg-black text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="w-full">
+                    <FormInput
+                      name={`images.${index}.alt_text`}
+                      label="Alt Text"
+                      placeholder="画像の代替テキストを入力"
+                      className="mt-2"
+                    />
+                    <FormInput
+                      name={`images.${index}.description`}
+                      label="説明"
+                      placeholder="画像の説明を入力"
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )*/}
         {form.formState.errors?.root && <p className="text-sm text-red-500">{form.formState.errors.root?.message}</p>}
         <div className="flex justify-center">
           <Button type="submit" className="w-32">
