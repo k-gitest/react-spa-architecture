@@ -22,10 +22,6 @@ import { errorHandler } from '@/errors/error-handler';
 import { MemoManagerUI } from '@/features/memo/components/memo-manager-ui';
 import { deleteImageService, fetchImagesService, uploadImageStorageService } from '@/services/ImageService';
 import { getExtensionIfAllowed } from '@/lib/utils';
-import { FileUploader } from '@/components/file-uploader';
-import { getImageUrl } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
-import { FileThumbnail } from '@/components/file-thumbnail';
 import { FileList } from '@/components/file-list';
 
 interface CategoryOption {
@@ -106,42 +102,46 @@ export const MemoManager = () => {
         console.error('Error deleting image:', error);
       }
     },
-    [session?.user?.id],
+    [session?.user?.id, fetchImages],
   );
 
   // サムネイル削除ハンドラー
-  const handleDeleteFileClick = (index: number) => {
+  const handleDeleteFileClick = useCallback((index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
-  };
+  }, []);
 
   // ファイルアップロードハンドラー
-  const handleFileUpload = async (files: File[]) => {
-    const imageIds: string[] = [];
-    try {
-      for (const file of files) {
-        const folderName = session?.user.id || 'default_folder';
-        const extension = await getExtensionIfAllowed(file);
+  const handleFileUpload = useCallback(
+    async (files: File[]) => {
+      const imageIds: string[] = [];
+      try {
+        for (const file of files) {
+          const folderName = session?.user.id || 'default_folder';
+          const extension = await getExtensionIfAllowed(file);
 
-        if (extension) {
-          const imageId = await uploadImageStorageService(
-            file,
-            file.size,
-            file.type,
-            session?.user.id || 'unknown',
-            folderName,
-            extension,
-          );
-          imageIds.push(imageId);
+          if (extension) {
+            const imageId = await uploadImageStorageService(
+              file,
+              file.size,
+              file.type,
+              session?.user.id || 'unknown',
+              folderName,
+              extension,
+            );
+            imageIds.push(imageId);
+          }
         }
+        setFiles([]);
+        fetchImages();
+        return imageIds;
+      } catch (_error) {
+        console.error('Error uploading images:', _error);
+        setImageError('画像のアップロードに失敗しました');
+        return [];
       }
-      setFiles([]);
-      fetchImages();
-      return imageIds;
-    } catch (error) {
-      setImageError('画像のアップロードに失敗しました');
-      return [];
-    }
-  };
+    },
+    [session?.user.id, fetchImages],
+  );
 
   // メモリストを取得
   const memoListFetcher = useCallback(async () => {
@@ -350,15 +350,26 @@ export const MemoManager = () => {
         if (data.files && data.files.length > 0) {
           imageIds = (await handleFileUpload(data.files)) ?? [];
         }
+        // fileMetadataにimage_id,order,file_name,file_pathを追加
+        let imageMetadatas;
+        if (data.fileMetadata && imageIds.length > 0) {
+          imageMetadatas = data.fileMetadata.map((metadata, index) => ({
+            ...metadata,
+            image_id: imageIds[index],
+            order: index,
+            file_name: '',
+            file_path: '',
+          }));
+        }
         if (session?.user?.id) {
-          await addMemoRPC({ ...data, image_ids: imageIds, user_id: session.user.id });
+          await addMemoRPC({ ...data, image_ids: imageIds, images: imageMetadatas, user_id: session.user.id });
           await memoListFetcher();
         }
       } catch (err) {
         errorHandler(err);
       }
     },
-    [session?.user?.id, memoListFetcher],
+    [session?.user?.id, memoListFetcher, handleFileUpload],
   );
 
   // メモ更新を処理
@@ -367,27 +378,42 @@ export const MemoManager = () => {
       console.log('handleUpdateSubmit data: ', data);
       try {
         let imageIds: string[] = (data.images ?? []).map((image) => image.image_id);
+        let updatedImages = [...(data.images ?? [])]; // 既存の画像情報をコピー
+
         if (data.files && data.files.length > 0) {
           const uploadImageIds = (await handleFileUpload(data.files)) ?? [];
           imageIds = [...imageIds, ...uploadImageIds];
+
+          // 新規アップロードファイルのメタデータをimages配列に追加
+          if (data.fileMetadata && uploadImageIds.length > 0) {
+            const newImageMetadatas = data.fileMetadata.map((metadata, index) => ({
+              ...metadata,
+              image_id: uploadImageIds[index],
+              order: imageIds.length - uploadImageIds.length + index, // 既存画像の後に続く順序
+              file_name: "", 
+              file_path: '',
+            }));
+
+            // 既存の画像情報に新規アップロード画像情報を追加
+            updatedImages = [...updatedImages, ...newImageMetadatas];
+          }
         }
         await updateMemoRPC(editIndex, {
           ...data,
           image_ids: imageIds,
+          images: updatedImages,
         });
         await memoListFetcher();
       } catch (err) {
         errorHandler(err);
       }
     },
-    [memoListFetcher],
+    [memoListFetcher, handleFileUpload],
   );
 
   // フォーム送信を処理
   const handleFormSubmit = useCallback(
     async (data: MemoFormData, files?: File[]) => {
-      console.log('data: ', data);
-
       if (!editIndex && session?.user?.id) {
         await handleAddSubmit({ ...data, files });
       }

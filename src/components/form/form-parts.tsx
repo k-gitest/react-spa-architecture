@@ -28,7 +28,6 @@ export const FormInput = ({
   name,
   ...props
 }: { label: string; name: string } & InputHTMLAttributes<HTMLInputElement>) => {
-  const fieldValue = useWatch({ name });
   
   return (
     <FormField

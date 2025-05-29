@@ -69,6 +69,7 @@ export const MemoForm = ({
 
   const handleSubmit = useCallback(
     (data: MemoFormData) => {
+      console.log(data)
       onSubmit(data, files);
     },
     [onSubmit, files],
@@ -101,6 +102,7 @@ export const MemoForm = ({
   const handleImageDelete = (index: number) => {
     remove(index);
   };
+  console.log("レンダリング")
 
   return (
     <div className="flex justify-center">

@@ -6,17 +6,28 @@ export const FormSchema = z.object({
   importance: z
     .string()
     .refine((value) => ['high', 'medium', 'low'].includes(value), { message: '有効な重要度を選択してください' }),
-  category: z
-    .string({ message: '有効なカテゴリを選択してください' }),
+  category: z.string({ message: '有効なカテゴリを選択してください' }),
   tags: z.array(z.string()).min(1, { message: 'タグは必須です' }),
-  images: z.array(z.object({
-    file_path: z.string(),
-    file_name: z.string(),
-    image_id: z.string(),
-    order: z.number(),
-    alt_text: z.string().optional(),
-    description: z.string().optional(),
-  })).optional(),
+  images: z
+    .array(
+      z.object({
+        file_path: z.string(),
+        file_name: z.string(),
+        image_id: z.string(),
+        order: z.number(),
+        alt_text: z.string().optional(),
+        description: z.string().optional(),
+      }),
+    )
+    .optional(),
+  fileMetadata: z
+    .array(
+      z.object({
+        alt_text: z.string().optional(),
+        description: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 
 export const MemoSchema = FormSchema.extend({
@@ -35,7 +46,7 @@ export const CategorySchema = MemoCategorySchema.extend({
   user_id: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
-})
+});
 
 export const MemoTagSchema = z.object({
   name: z.string(),
@@ -46,4 +57,4 @@ export const TagSchema = MemoTagSchema.extend({
   user_id: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
-})
+});

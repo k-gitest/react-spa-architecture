@@ -5,22 +5,23 @@ import { trpc as trpcClient } from '@/lib/trpc';
 import { MainWrapper } from '@/components/layout/main-wrapper';
 import { Helmet } from 'react-helmet-async';
 import { TRPCClientError } from '@trpc/client';
-import { SUPABASE_ANON_KEY } from '@/lib/constants';
+//import { SUPABASE_ANON_KEY } from '@/lib/constants';
 import { useSessionStore } from '@/hooks/use-session-store';
-import { EDGE_REST_URI } from '@/lib/constants';
+//import { EDGE_REST_URI } from '@/lib/constants';
 import { FileUploader } from '@/components/file-uploader';
 import { fetchImagesService, deleteImageService, uploadImageStorageService } from '@/services/ImageService';
 import { getImageUrl } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
-import { getExtensionIfAllowed, convertFileToBase64 } from '@/lib/utils';
+import { getExtensionIfAllowed } from '@/lib/utils';
 
 const http = new FetchClient();
+/*
 const edge = new FetchClient({
   baseUrl: EDGE_REST_URI,
   timeout: 5000,
   maxRetry: 2,
 });
-
+*/
 const fetchTodo = async (): Promise<Todo[]> => {
   console.log('fetch!!');
   return http.get<Todo[]>('/todos');
@@ -162,7 +163,7 @@ const Fetch = () => {
         console.error('Error deleting image:', error);
       }
     },
-    [session?.user?.id],
+    [session?.user?.id, fetchImages],
   );
 
   const handleDeleteClick = (index: number) => {
@@ -188,12 +189,14 @@ const Fetch = () => {
       }
       setFiles([]);
       fetchImages();
-    } catch (error) {
+    } catch (_error) {
+      console.error('Error uploading images:', _error);
       setImageError('画像のアップロードに失敗しました');
     }
   };
 
   // Base64用のアップロード処理
+  /*
   const handleBase64Upload = async (files: File[]) => {
     for (const file of files) {
       const extension = await getExtensionIfAllowed(file);
@@ -207,6 +210,7 @@ const Fetch = () => {
       }
     }
   };
+  */
 
   if (isLoading) return <p>Loading users...</p>;
   if (isError) return <p>Error fetching users: {error?.message}</p>;

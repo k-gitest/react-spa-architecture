@@ -1,4 +1,5 @@
 import React from 'react';
+import { FormInput } from '@/components/form/form-parts';
 
 interface FileThumbnailProps {
   files: File[];
@@ -12,8 +13,9 @@ export const FileThumbnail: React.FC<FileThumbnailProps> = ({ files, onDelete })
 
   return (
     <div className="flex gap-2 flex-wrap">
+      <h2>選択ファイル</h2>
       {files.map((file, index) => (
-        <div key={index}>
+        <div key={index} className="flex gap-2 w-full">
           <div className="relative w-[100px] h-[100px]">
             <button
               onClick={() => handleDeleteFileClick(index)}
@@ -27,9 +29,25 @@ export const FileThumbnail: React.FC<FileThumbnailProps> = ({ files, onDelete })
               alt={file.name}
               style={{ width: 100, height: 100, objectFit: 'cover' }}
             />
+            <p className="text-xs mt-1 truncate">{file.name}</p>
+            <p className="text-xs">{file.size} bytes</p>
           </div>
-          <p className="text-xs mt-1 truncate">{file.name}</p>
-          <p className="text-xs">{file.size} bytes</p>
+          <div className="flex-1">
+            <div className="w-full">
+              <FormInput
+                name={`fileMetadata.${index}.alt_text`}
+                label="Alt Text"
+                placeholder="画像の代替テキストを入力"
+                className="text-sm"
+              />
+              <FormInput
+                name={`fileMetadata.${index}.description`}
+                label="説明"
+                placeholder="画像の説明を入力"
+                className="text-sm"
+              />
+            </div>
+          </div>
         </div>
       ))}
     </div>
