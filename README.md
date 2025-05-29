@@ -136,11 +136,15 @@ erDiagram
   User ||--|| Profile : has
   User ||--o{ Category : has
   User ||--o{ Tag : has
+  User ||--o{ Image : has
 
   Memo ||--o{ MemoCategory : has
   Memo ||--o{ MemoTag : has
+  Memo ||--o{ MemoImage : has
+
   Category ||--o{ MemoCategory : has
   Tag ||--o{ MemoTag : has
+  Image ||--o{ MemoImage : has
 
   User {
     UUID id PK
@@ -151,6 +155,10 @@ erDiagram
     UUID user_id FK
     String avatar
     String user_name
+    String avatar
+    String user_name
+    DateTime created_at
+    DateTime updated_at
   }
 
   Memo {
@@ -158,18 +166,17 @@ erDiagram
     UUID user_id FK
     String title
     String content
+    String importance
+    DateTime created_at
+    DateTime updated_at
   }
 
   Category {
     int id PK
     UUID user_id FK
     String name
-  }
-
-  Tag {
-    int id PK
-    UUID user_id FK
-    String name
+    DateTime created_at
+    DateTime updated_at
   }
 
   MemoCategory {
@@ -177,12 +184,58 @@ erDiagram
     int category_id FK
   }
 
+  Tag {
+    int id PK
+    UUID user_id FK
+    String name
+    String name
+    DateTime created_at
+    DateTime updated_at
+  }
+
   MemoTag {
     UUID memo_id FK
     int tag_id FK
   }
-```
 
+  Image {
+    UUID id PK
+    UUID user_id FK
+    UUID storage_object_id
+    UUID storage_object_id
+    String file_path
+    String file_name
+    Int file_size
+    String mime_type
+    Int file_size
+    String mime_type
+    DateTime created_at
+    DateTime updated_at
+  }
+
+  MemoImage {
+    UUID memo_id FK
+    UUID image_id FK
+    Int order
+    String alt_text
+    String description
+    String alt_text
+    String description
+    DateTime created_at
+    DateTime updated_at
+  }
+
+  CleanupDeleteImage {
+    UUID id PK
+    String filePath
+    String fileName
+    UUID userId
+    String errorMessage
+    String errorMessage
+    Boolean resolved
+    DateTime createdAt
+  }
+```
 
 ## メモ機能
 - メモにはタイトル、カテゴリー、コンテンツ、重要度、タグを入力できます
