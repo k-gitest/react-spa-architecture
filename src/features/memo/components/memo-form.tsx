@@ -69,7 +69,6 @@ export const MemoForm = ({
 
   const handleSubmit = useCallback(
     (data: MemoFormData) => {
-      console.log(data)
       onSubmit(data, files);
     },
     [onSubmit, files],
@@ -102,7 +101,7 @@ export const MemoForm = ({
   const handleImageDelete = (index: number) => {
     remove(index);
   };
-  console.log("レンダリング")
+  console.log('レンダリング');
 
   return (
     <div className="flex justify-center">
@@ -154,7 +153,7 @@ export const MemoForm = ({
                   {/* field.idを使用 */}
                   <div className="relative w-[100px] h-[100px]">
                     <img
-                      src={getImageUrl(field.file_path)}
+                      src={field.file_path ? getImageUrl(field.file_path) : ''}
                       alt={field.alt_text || 'Uploaded Image'}
                       className="w-[100px] h-[100px] object-cover"
                     />

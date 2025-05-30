@@ -88,6 +88,7 @@ export const MemoManager = () => {
 
   // ファイル選択ハンドラー
   const handleFileChange = (newFiles: File[]) => {
+    setImageError(null);
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   };
 
@@ -350,15 +351,13 @@ export const MemoManager = () => {
         if (data.files && data.files.length > 0) {
           imageIds = (await handleFileUpload(data.files)) ?? [];
         }
-        // fileMetadataにimage_id,order,file_name,file_pathを追加
+        // fileMetadataにimage_id,orderを追加
         let imageMetadatas;
         if (data.fileMetadata && imageIds.length > 0) {
           imageMetadatas = data.fileMetadata.map((metadata, index) => ({
             ...metadata,
             image_id: imageIds[index],
             order: index,
-            file_name: '',
-            file_path: '',
           }));
         }
         if (session?.user?.id) {
@@ -390,8 +389,6 @@ export const MemoManager = () => {
               ...metadata,
               image_id: uploadImageIds[index],
               order: imageIds.length - uploadImageIds.length + index, // 既存画像の後に続く順序
-              file_name: "", 
-              file_path: '',
             }));
 
             // 既存の画像情報に新規アップロード画像情報を追加
@@ -514,7 +511,8 @@ export const MemoManager = () => {
       <FileUploader files={files} onChange={handleFileChange} onUpload={handleFileUpload} onError={imageError} />
       <FileThumbnail files={files} onDelete={handleDeleteFileClick} /> */}
       <h2>Images</h2>
-      <FileList images={images} handleDeleteImage={handleDeleteImage} />
+      {images.length > 0 && <FileList images={images} handleDeleteImage={handleDeleteImage} />}
+      {images.length === 0 && <p>ファイルはアップロードされていません</p>}
     </div>
   );
 };

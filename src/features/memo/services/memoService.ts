@@ -70,8 +70,8 @@ export const addMemoRPC = async (props: MemoFormData & { user_id: string; image_
     p_importance: props.importance,
     p_category_id: Number(props.category),
     p_tag_ids: props.tags.map((t) => Number(t)),
-    p_image_ids: props.image_ids,
-    p_image_metadatas: props.images,
+    p_image_ids: props.image_ids ?? [],
+    p_image_metadatas: props.images ?? [],
   };
   const { error } = await supabase.rpc('save_memo_rpc', formatted);
   if (error) throw error;
@@ -151,8 +151,8 @@ export const updateMemoRPC = async (id: string, updates: MemoFormData & { image_
     p_importance: updates.importance,
     p_category_id: Number(updates.category),
     p_tag_ids: updates.tags.map((t) => Number(t)),
-    p_image_ids: updates.image_ids,
-    p_image_metadatas: updates.images,
+    p_image_ids: updates.image_ids ?? [],
+    p_image_metadatas: updates.images ?? [],
   };
   const { error } = await supabase.rpc('update_memo_rpc', formatted);
   if (error) throw error;
