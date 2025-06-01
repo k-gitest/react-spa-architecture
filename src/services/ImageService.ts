@@ -4,6 +4,7 @@ import { BUCKET_IMAGES } from '@/lib/constants';
 import { nanoid } from 'nanoid';
 
 export const fetchImagesService = async (user_id: string) => {
+  // 画像一覧を取得するサービス
   const { data, error } = await supabase
     .from('images')
     .select('*')

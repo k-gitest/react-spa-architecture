@@ -374,7 +374,6 @@ export const MemoManager = () => {
   // メモ更新を処理
   const handleUpdateSubmit = useCallback(
     async (editIndex: string, data: MemoFormData & { files?: File[] }) => {
-      console.log('handleUpdateSubmit data: ', data);
       try {
         let imageIds: string[] = (data.images ?? []).map((image) => image.image_id);
         let updatedImages = [...(data.images ?? [])]; // 既存の画像情報をコピー

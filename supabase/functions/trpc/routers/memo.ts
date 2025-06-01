@@ -8,27 +8,39 @@ export const memoRouter = router({
   // 全メモの取得
   getMemos: procedure.query(async ({ ctx }) => {
     //const { data, error } = await ctx.supabase.from('memos').select('*').order('created_at', { ascending: false });
-    const { data, error } = await ctx.supabase.from('memos').select(`
-      id,
-      title,
-      content,
-      importance,
-      user_id,
-      created_at,
-      updated_at,
-      category:memo_categories (
-        category:categories (
-          id,
-          name
-        )
-      ),
-      tags:memo_tags (
-        tag:tags (
-          id,
-          name
-        )
+    const { data, error } = await ctx.supabase
+      .from('memos')
+      .select(
+        `
+    *,
+    category:memo_categories (
+      category:categories (
+        id,
+        name
       )
-    `);
+    ),
+    tags:memo_tags (
+      tag:tags (
+        id,
+        name
+      )
+    ),
+    images:memo_images (
+      image_id,
+      order,
+      alt_text,
+      description,
+      image:images (
+        id,
+        file_name,
+        file_path,
+        mime_type,
+        file_size
+      )
+    )
+  `,
+      )
+      .order('updated_at', { ascending: false });
     if (error) {
       // PostgrestErrorをTRPCErrorとしてラップしてスローする場合
       /* TRPCErrorの型
@@ -46,15 +58,17 @@ export const memoRouter = router({
     }
 
     const formatted = data.map((memo) => ({
-      id: memo.id,
-      title: memo.title,
-      content: memo.content,
-      importance: memo.importance,
-      created_at: memo.created_at,
-      updated_at: memo.updated_at,
-      user_id: memo.user_id,
+      ...memo,
       category: memo.category?.[0]?.category?.name ?? '',
       tags: memo.tags?.map((t) => t.tag?.name ?? '') ?? [],
+      images: memo.images.map((img) => ({
+        file_path: img.image.file_path,
+        file_name: img.image.file_name,
+        image_id: img.image_id,
+        order: img.order,
+        alt_text: img.alt_text ?? undefined,
+        description: img.description ?? undefined,
+      })),
     }));
 
     return formatted;
@@ -67,14 +81,8 @@ export const memoRouter = router({
     const { data, error } = await ctx.supabase
       .from('memos')
       .select(
-        `
-    id,
-    title,
-    content,
-    importance,
-    user_id,
-    created_at,
-    updated_at,
+        `    
+    *,
     category:memo_categories (
       category:categories (
         id,
@@ -86,6 +94,19 @@ export const memoRouter = router({
         id,
         name
       )
+    ),
+    images:memo_images (
+      image_id,
+      order,
+      alt_text,
+      description,
+      image:images (
+        id,
+        file_name,
+        file_path,
+        mime_type,
+        file_size
+      )
     )
   `,
       )
@@ -95,15 +116,17 @@ export const memoRouter = router({
     if (error) throw error;
 
     const formatted = {
-      id: data.id,
-      title: data.title,
-      content: data.content,
-      importance: data.importance,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
-      user_id: data.user_id,
+      ...data,
       category: String(data.category?.[0]?.category?.id) ?? '',
       tags: data.tags?.map((t) => String(t.tag?.id)) ?? [],
+      images: data.images.map((img) => ({
+        file_path: img.image.file_path,
+        file_name: img.image.file_name,
+        image_id: img.image_id,
+        order: img.order,
+        alt_text: img.alt_text ?? '',
+        description: img.description ?? '',
+      })),
     };
     return formatted;
   }),
@@ -133,6 +156,14 @@ export const memoRouter = router({
               tags: {
                 create: input.tags.map((tagId) => ({
                   tag_id: Number(tagId),
+                })),
+              },
+              images: {
+                create: (input.images ?? []).map((img) => ({
+                  image_id: img.image_id,
+                  order: img.order,
+                  alt_text: img.alt_text,
+                  description: img.description,
                 })),
               },
             },
@@ -175,6 +206,14 @@ export const memoRouter = router({
               tags: {
                 deleteMany: {},
                 create: input.data.tags.map((tagId) => ({ tag_id: Number(tagId) })),
+              },
+              images: {
+                create: (input.data.images ?? []).map((img) => ({
+                  image_id: img.image_id,
+                  order: img.order,
+                  alt_text: img.alt_text,
+                  description: img.description,
+                })),
               },
             },
           });
@@ -260,5 +299,4 @@ export const memoRouter = router({
     const { error } = await ctx.supabase.from('tags').delete().eq('id', input).single();
     if (error) throw error;
   }),
-
 });

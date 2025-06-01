@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch';
-import { Database } from '../_shared/database.types.ts';
+//import { Database } from '../_shared/database.types.ts';
+import { Database } from '../../../src//types/database.types.ts';
 import { PrismaClient } from '../../../generated/client/deno/edge.ts';
 
 export interface Context {

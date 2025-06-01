@@ -52,7 +52,11 @@ export const useMemos = () => {
   });
 
   // メモ更新用
-  const updateMemoMutation = useApiMutation<void, Error, { id: string; updates: MemoFormData }>({
+  const updateMemoMutation = useApiMutation<
+    void,
+    Error,
+    { id: string; updates: MemoFormData }
+  >({
     mutationFn: ({ id, updates }) => updateMemoService(id, updates),
     onSuccess: () => {
       toast({ title: `メモを更新しました` });
@@ -150,14 +154,14 @@ export const useMemos = () => {
 
   // 各メソッドの実装
   const addMemo = useCallback(
-    async (data: MemoFormData & { user_id: string }) => {
+    async (data: MemoFormData & { user_id: string; }) => {
       await addMemoMutation.mutateAsync(data);
     },
     [addMemoMutation],
   );
 
   const updateMemo = useCallback(
-    async (id: string, updates: MemoFormData) => {
+    async (id: string, updates: MemoFormData ) => {
       await updateMemoMutation.mutateAsync({ id, updates });
     },
     [updateMemoMutation],

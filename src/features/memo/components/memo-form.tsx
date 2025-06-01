@@ -85,15 +85,6 @@ export const MemoForm = ({
     syncZodErrors(form, externalZodError);
   }, [externalZodError, form]);
 
-  //const images = form.watch('images');
-  /*
-  const handleImageDelete = (indexToDelete: number) => {
-    const currentImages = form.getValues('images') || [];
-    const newImages = currentImages.filter((_, index) => index !== indexToDelete);
-    form.setValue('images', newImages);
-  };
-  */
-
   const { fields, remove } = useFieldArray({
     control: form.control,
     name: 'images',
@@ -101,6 +92,16 @@ export const MemoForm = ({
   const handleImageDelete = (index: number) => {
     remove(index);
   };
+
+  // filesの変化に合わせてfileMetadataを初期化・同期
+  useEffect(() => {
+    if (files) {
+      form.setValue(
+        'fileMetadata',
+        files.map(() => ({ alt_text: '', description: '' }))
+      );
+    }
+  }, [files, form]);
   console.log('レンダリング');
 
   return (

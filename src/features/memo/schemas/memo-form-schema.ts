@@ -8,6 +8,8 @@ export const FormSchema = z.object({
     .refine((value) => ['high', 'medium', 'low'].includes(value), { message: '有効な重要度を選択してください' }),
   category: z.string({ message: '有効なカテゴリを選択してください' }),
   tags: z.array(z.string()).min(1, { message: 'タグは必須です' }),
+  // 新規アップロード画像のID配列
+  image_ids: z.array(z.string()).optional(),
   // 既存のアップロード済み画像（編集・表示用）
   images: z
     .array(

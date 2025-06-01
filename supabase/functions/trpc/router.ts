@@ -4,6 +4,7 @@ import { authRouter } from './routers/auth.ts';
 import { utilRouter } from './routers/util.ts';
 import { profileRouter } from './routers/profile.ts';
 import { accontRouter } from "./routers/account.ts";
+import { imageRouter } from "./routers/image.ts";
 
 // 各サブルーターをまとめたメインルーター
 export const appRouter = router({
@@ -12,6 +13,7 @@ export const appRouter = router({
   util: utilRouter,
   profile: profileRouter,
   account: accontRouter,
+  image: imageRouter,
 });
 
 export type AppRouter = typeof appRouter;

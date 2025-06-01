@@ -8,6 +8,31 @@ export const memoFormSchema = z.object({
     .refine((value) => ['high', 'medium', 'low'].includes(value), { message: '有効な重要度を選択してください' }),
   category: z.string({ message: '有効なカテゴリを選択してください' }),
   tags: z.array(z.string()).min(1, { message: 'タグは必須です' }),
+  // 新規アップロード画像のID配列
+  image_ids: z.array(z.string()).optional(),
+  // 既存のアップロード済み画像（編集・表示用）
+  images: z
+    .array(
+      z.object({
+        file_path: z.string().optional(),
+        file_name: z.string().optional(),
+        image_id: z.string(),
+        order: z.number(),
+        alt_text: z.string().optional(),
+        description: z.string().optional(),
+      }),
+    )
+    .optional(),
+  // 新規アップロード画像のメタ情報（alt_text, descriptionのみ）
+  // files: File[]とindexで対応
+  fileMetadata: z
+    .array(
+      z.object({
+        alt_text: z.string().optional(),
+        description: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 
 export const memoSchema = memoFormSchema.extend({

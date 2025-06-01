@@ -59,11 +59,11 @@ export const addMemoService = async (props: MemoFormData & { user_id: string }) 
     category: Number(props.category),
     tags: props.tags.map((t) => Number(t)),
   };
-  const { error } = await supabase.functions.invoke('save-memo', { body: formatted, method: 'POST' });
+  const { error } = await supabase.functions.invoke('save-memo/drizzle', { body: formatted, method: 'POST' });
   if (error) throw error;
 };
 
-export const addMemoRPC = async (props: MemoFormData & { user_id: string; image_ids?: string[] }) => {
+export const addMemoRPC = async (props: MemoFormData & { user_id: string }) => {
   const formatted = {
     p_title: props.title,
     p_content: props.content,
@@ -124,8 +124,8 @@ export const getMemoService = async (id: string) => {
       file_name: img.image.file_name,
       image_id: img.image_id,
       order: img.order,
-      alt_text: img.alt_text ?? "",
-      description: img.description ?? "",
+      alt_text: img.alt_text ?? '',
+      description: img.description ?? '',
     })),
   };
   return formatted;
@@ -142,7 +142,7 @@ export const updateMemoService = async (id: string, updates: MemoFormData) => {
   if (error) throw error;
 };
 
-export const updateMemoRPC = async (id: string, updates: MemoFormData & { image_ids: string[] }) => {
+export const updateMemoRPC = async (id: string, updates: MemoFormData) => {
   console.log('updateMemoRPC', id, updates);
   const formatted = {
     p_id: id,

@@ -107,10 +107,51 @@ export const memoTags = table(
   (table) => [t.primaryKey({ columns: [table.memoId, table.tagId] })],
 );
 
+export const images = table('images', {
+  id: t.uuid('id').defaultRandom().primaryKey(),
+  userId: t
+    .uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  storageObjectId: t.uuid('storage_object_id'),
+  filePath: t.varchar('file_path', { length: 255 }).notNull(),
+  fileName: t.varchar('file_name', { length: 255 }).notNull(),
+  fileSize: t.integer('file_size'),
+  mimeType: t.varchar('mime_type', { length: 50 }),
+  createdAt: t.timestamp('created_at', { withTimezone: true, precision: 3 }).defaultNow(),
+  updatedAt: t
+    .timestamp('updated_at', { withTimezone: true, precision: 3 })
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const memoImages = table(
+  'memo_images',
+  {
+    memoId: t
+      .uuid('memo_id')
+      .notNull()
+      .references(() => memos.id, { onDelete: 'cascade' }),
+    imageId: t
+      .uuid('image_id')
+      .notNull()
+      .references(() => images.id, { onDelete: 'cascade' }),
+    order: t.integer('order').default(0).notNull(),
+    altText: t.varchar('alt_text', { length: 255 }),
+    description: t.text('description'),
+    createdAt: t.timestamp('created_at', { withTimezone: true, precision: 3 }).defaultNow(),
+    updatedAt: t
+      .timestamp('updated_at', { withTimezone: true, precision: 3 })
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [t.primaryKey({ columns: [table.memoId, table.imageId] }), t.unique().on(table.memoId, table.order)],
+);
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, GET, PUT, OPTIONS',
   'Content-Type': 'application/json',
 };
 
@@ -128,6 +169,14 @@ type MemoFormData = {
   importance: string;
   category: number;
   tags: number[];
+  images?: MemoImage[] | undefined;
+};
+
+type MemoImage = {
+  image_id: string;
+  order: number;
+  alt_text?: string;
+  description?: string;
 };
 
 export const routeDrizzle = async (data: MemoFormData, userId: string, method: string) => {
@@ -163,6 +212,17 @@ export const routeDrizzle = async (data: MemoFormData, userId: string, method: s
             memoId: memo.id,
           })),
         );
+
+        await tx.insert(memoImages).values(
+          data.images?.map((image, index) => ({
+            memoId: memo.id,
+            imageId: image.image_id,
+            order: index,
+            altText: image.alt_text,
+            description: image.description,
+          })) ?? [],
+        );
+        
         return memo;
       });
     } else if (method === 'PUT') {
@@ -181,6 +241,7 @@ export const routeDrizzle = async (data: MemoFormData, userId: string, method: s
 
         await tx.delete(memoCategories).where(eq(memoCategories.memoId, memo.id));
         await tx.delete(memoTags).where(eq(memoTags.memoId, memo.id));
+        await tx.delete(memoImages).where(eq(memoImages.memoId, memo.id));
 
         await tx.insert(memoCategories).values({
           categoryId: data.category,
@@ -193,6 +254,17 @@ export const routeDrizzle = async (data: MemoFormData, userId: string, method: s
             memoId: memo.id,
           })),
         );
+
+        await tx.insert(memoImages).values(
+          data.images?.map((image, index) => ({
+            memoId: memo.id,
+            imageId: image.image_id,
+            order: index,
+            altText: image.alt_text,
+            description: image.description,
+          })) ?? [],
+        );
+
         return memo;
       });
     }
@@ -206,7 +278,7 @@ export const routeDrizzle = async (data: MemoFormData, userId: string, method: s
     console.log('drizzle成功：', result, tagsData);
     */
 
-    return new Response(JSON.stringify(result));
+    return new Response(JSON.stringify(result), { headers: corsHeaders });
   } catch (error) {
     console.error('drizzleのエラー：', error);
     return new Response(

@@ -5,6 +5,8 @@ import { useMemos } from '@/features/memo/hooks/use-memo-queries-trpc';
 import { FlattenFormatted, CategoryOption, TagOption } from '@/features/memo/types/memo-form-data';
 import { TRPCClientError } from '@trpc/client';
 import { MemoManagerUI } from '@/features/memo/components/memo-manager-ui';
+import { useImagesTRPC } from '@/hooks/use-image-upload-trpc';
+import { FileList } from '@/components/file-list';
 
 export const MemoManagerTrpc = () => {
   const [zodError, setZodError] = useState<FlattenFormatted | null>(null);
@@ -18,6 +20,44 @@ export const MemoManagerTrpc = () => {
   const [tags, setTags] = useState<TagOption[] | null>(null);
   const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
   const [addTagDialogOpen, setAddTagDialogOpen] = useState(false);
+
+  const [files, setFiles] = useState<File[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  const { images, isImagesLoading, uploadImages, deleteImage, refetchImages } = useImagesTRPC(session?.user?.id);
+
+  // ファイル選択ハンドラー
+  const handleFileChange = (newFiles: File[]) => {
+    setImageError(null);
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+  };
+  // サムネイル削除ハンドラー
+  const handleDeleteFileClick = useCallback((index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  // 画像削除ハンドラー
+  const handleDeleteImage = useCallback(
+    async (id: string, file_path: string, file_name: string) => {
+      await deleteImage({ id, file_path, file_name });
+    },
+    [session?.user?.id],
+  );
+
+  // ファイルアップロードハンドラー
+  const handleFileUpload = useCallback(
+    async (files: File[]) => {
+      try {
+        const imageIds = await uploadImages(files);
+        setFiles([]);
+        return imageIds;
+      } catch (e) {
+        setImageError('画像のアップロードに失敗しました');
+        return [];
+      }
+    },
+    [uploadImages],
+  );
 
   const {
     memos: memoList,
@@ -99,10 +139,23 @@ export const MemoManagerTrpc = () => {
   }, [tagsData]);
 
   const handleAddSubmit = useCallback(
-    async (data: MemoFormData) => {
+    async (data: MemoFormData & { files?: File[] }) => {
+      let imageIds: string[] = [];
+      if (data.files && data.files.length > 0) {
+        imageIds = (await handleFileUpload(data.files)) ?? [];
+      }
+      // fileMetadataにimage_id,orderを追加
+      let imageMetadatas;
+      if (data.fileMetadata && imageIds.length > 0) {
+        imageMetadatas = data.fileMetadata.map((metadata, index) => ({
+          ...metadata,
+          image_id: imageIds[index],
+          order: index,
+        }));
+      }
       if (session?.user?.id) {
         try {
-          await addMemo(data, session.user.id);
+          await addMemo({ ...data, image_ids: imageIds, images: imageMetadatas }, session.user.id);
           setZodError(null);
           setTabValue('memoList');
         } catch (err) {
@@ -116,9 +169,27 @@ export const MemoManagerTrpc = () => {
   );
 
   const handleUpdateSubmit = useCallback(
-    async (data: MemoFormData, editIndex: string) => {
+    async (editIndex: string, data: MemoFormData & { files?: File[] }) => {
+      let imageIds: string[] = (data.images ?? []).map((image) => image.image_id);
+      let updatedImages = [...(data.images ?? [])]; // 既存の画像情報をコピー
+      if (data.files && data.files.length > 0) {
+        const uploadImageIds = (await handleFileUpload(data.files)) ?? [];
+        imageIds = [...imageIds, ...uploadImageIds];
+
+        // 新規アップロードファイルのメタデータをimages配列に追加
+        if (data.fileMetadata && uploadImageIds.length > 0) {
+          const newImageMetadatas = data.fileMetadata.map((metadata, index) => ({
+            ...metadata,
+            image_id: uploadImageIds[index],
+            order: imageIds.length - uploadImageIds.length + index, // 既存画像の後に続く順序
+          }));
+
+          // 既存の画像情報に新規アップロード画像情報を追加
+          updatedImages = [...updatedImages, ...newImageMetadatas];
+        }
+      }
       try {
-        await updateMemo(editIndex, data);
+        await updateMemo(editIndex, { ...data, image_ids: imageIds, images: updatedImages });
         setZodError(null);
         setTabValue('memoList');
       } catch (err) {
@@ -131,12 +202,12 @@ export const MemoManagerTrpc = () => {
   );
 
   const handleFormSubmit = useCallback(
-    async (data: MemoFormData) => {
+    async (data: MemoFormData, files?: File[]) => {
       if (!editIndex && session?.user?.id) {
-        await handleAddSubmit(data);
+        await handleAddSubmit({ ...data, files });
       }
       if (editIndex) {
-        await handleUpdateSubmit(data, editIndex);
+        await handleUpdateSubmit(editIndex, { ...data, files });
       }
     },
     [editIndex, session?.user?.id, handleAddSubmit, handleUpdateSubmit],
@@ -189,10 +260,20 @@ export const MemoManagerTrpc = () => {
           setCategoryOpen: setAddCategoryDialogOpen,
           tagOpen: addTagDialogOpen,
           setTagOpen: setAddTagDialogOpen,
+          // ファイルアップロード関連のプロパティ
+          files,
+          onFileChange: handleFileChange,
+          onFileUpload: handleFileUpload,
+          onFileDelete: handleDeleteFileClick,
+          imageError,
         }}
         categoryOperations={categoryOperations}
         tagOperations={tagOperations}
       />
+
+      <h2>Images</h2>
+      {images && images.length > 0 && <FileList images={images} handleDeleteImage={handleDeleteImage} />}
+      {!images && <p>ファイルはアップロードされていません</p>}
     </div>
   );
 };

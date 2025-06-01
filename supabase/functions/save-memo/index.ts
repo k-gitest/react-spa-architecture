@@ -29,7 +29,7 @@ Deno.serve(async (req: Request) => {
 
     const url = new URL(req.url);
 
-    if (req.method === 'POST' && url.pathname.endsWith('/drizzle')) {
+    if (req.method === 'POST' || req.method === 'PUT' && url.pathname.endsWith('/drizzle')) {
       return routeDrizzle(saveData, data.user.id, req.method);
     }
 
