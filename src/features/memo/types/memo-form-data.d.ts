@@ -83,6 +83,15 @@ export interface Image {
   user_id: string;
 }
 
+export interface ImageMetadata {
+  image_id: string;
+  order: number;
+  file_path?: string | undefined;
+  file_name?: string | undefined;
+  alt_text?: string | undefined;
+  description?: string | undefined;
+}
+
 export interface MemoImage {
   image_id: string;
   order: number;

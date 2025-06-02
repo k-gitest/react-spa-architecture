@@ -1,10 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { MemoForm } from '@/features/memo/components/memo-form';
 import { MemoList } from '@/features/memo/components/memo-list';
 import { MemoTagManager, MemoCategoryManager } from '@/features/memo/components/memo-item-manager';
 import { Memo } from '@/features/memo/types/memo-form-data';
-import { MemoOperations, MemoFormProps } from '@/features/memo/types/memo-form-data';
+import { MemoOperations } from '@/features/memo/types/memo-form-data';
 
 interface MemoManagerUIProps {
   tabValue: string;
@@ -12,9 +11,9 @@ interface MemoManagerUIProps {
   memoList: Memo[];
   handleEditClick: (index: string) => void;
   handleDeleteClick: (index: string) => void;
-  formProps: MemoFormProps;
   categoryOperations: MemoOperations;
   tagOperations: MemoOperations;
+  children: React.ReactNode;
 }
 
 export const MemoManagerUI: React.FC<MemoManagerUIProps> = ({
@@ -23,9 +22,9 @@ export const MemoManagerUI: React.FC<MemoManagerUIProps> = ({
   memoList,
   handleEditClick,
   handleDeleteClick,
-  formProps,
   categoryOperations,
   tagOperations,
+  children,
 }) => {
   return (
     <div>
@@ -61,7 +60,7 @@ export const MemoManagerUI: React.FC<MemoManagerUIProps> = ({
           )}
         </TabsContent>
         <TabsContent value="addMemo">
-          <MemoForm {...formProps} />
+          {children}
         </TabsContent>
         <TabsContent value="categorySetting">
           <MemoCategoryManager operations={categoryOperations} />

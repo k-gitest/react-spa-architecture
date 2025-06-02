@@ -186,9 +186,6 @@ export const memoRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      //const { error } = await ctx.supabase.from('memos').update(input.data).eq('id', input.id);
-      //if (error) throw error;
-
       try {
         const result = await ctx.prisma.$transaction(async (tx) => {
           const updateMmemo = await tx.memo.update({
@@ -208,6 +205,7 @@ export const memoRouter = router({
                 create: input.data.tags.map((tagId) => ({ tag_id: Number(tagId) })),
               },
               images: {
+                deleteMany: {},
                 create: (input.data.images ?? []).map((img) => ({
                   image_id: img.image_id,
                   order: img.order,
