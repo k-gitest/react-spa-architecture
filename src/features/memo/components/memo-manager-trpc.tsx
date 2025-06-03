@@ -225,6 +225,7 @@ export const MemoManagerTrpc = () => {
     onFileUpload: handleFileUpload,
     onFileDelete: handleDeleteFileClick,
     imageError,
+    images,
   };
 
   if (!session) return <p className="text-center">メモ機能は会員限定です</p>;

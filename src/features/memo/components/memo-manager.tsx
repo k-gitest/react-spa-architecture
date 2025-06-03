@@ -379,6 +379,7 @@ export const MemoManager = () => {
   // フォーム送信を処理
   const handleFormSubmit = useCallback(
     async (data: MemoFormData, files?: File[]) => {
+      console.log('Form submitted:', data, files);
       if (!editIndex && session?.user?.id) {
         await handleAddSubmit({ ...data, files });
       }
@@ -460,6 +461,7 @@ export const MemoManager = () => {
     onFileUpload: handleFileUpload,
     onFileDelete: handleDeleteFileClick,
     imageError,
+    images,
   };
 
   if (!session) return <p className="text-center">メモ機能は会員限定です</p>;

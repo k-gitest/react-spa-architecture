@@ -31,6 +31,7 @@ export const ResponsiveDialog = React.memo(
     className,
     children,
     hasOverflow,
+    hasFooter,
   }: {
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
@@ -41,6 +42,7 @@ export const ResponsiveDialog = React.memo(
     className?: string;
     children: ReactNode;
     hasOverflow?: boolean;
+    hasFooter?: boolean;
   }) => {
     const overflowClass = hasOverflow ? 'overflow-y-auto' : '';
 
@@ -77,12 +79,14 @@ export const ResponsiveDialog = React.memo(
             <DrawerTitle>{dialogTitle}</DrawerTitle>
             <DrawerDescription>{dialogDescription}</DrawerDescription>
           </DrawerHeader>
-          <div className="max-h-[60vh] overflow-y-auto">{children}</div>
-          <DrawerFooter className="pt-2">
-            <DrawerClose asChild>
-              <Button variant="outline">キャンセル</Button>
-            </DrawerClose>
-          </DrawerFooter>
+          <div className="max-h-[80vh] overflow-y-auto p-2">{children}</div>
+          {hasFooter && (
+            <DrawerFooter className="pt-2">
+              <DrawerClose asChild>
+                <Button variant="outline">キャンセル</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          )}
         </DrawerContent>
       </Drawer>
     );

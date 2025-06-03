@@ -1,8 +1,8 @@
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface FileUploaderProps {
-  type?: "base64";
+  type?: 'base64';
   files: File[];
   onChange?: (files: File[]) => void;
   onUpload?: (files: File[]) => Promise<void | string[]>;
@@ -28,7 +28,7 @@ export const FileUploader = (props: FileUploaderProps) => {
     <div className="flex flex-col items-center gap-4">
       <Input type="file" multiple onChange={handleFileChange} />
       {props.onError && <p className="text-red-500">{props.onError}</p>}
-      <Button onClick={handleUploadClick}>送信</Button>
+      {props.onUpload && <Button onClick={handleUploadClick}>送信</Button>}
     </div>
   );
 };

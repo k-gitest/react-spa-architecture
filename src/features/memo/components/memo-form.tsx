@@ -1,8 +1,8 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormSchema } from '@/features/memo/schemas/memo-form-schema';
-import { MemoFormData, MemoFormProps } from '@/features/memo/types/memo-form-data';
+import { MemoFormData, MemoFormProps, Image, ImageMetadata } from '@/features/memo/types/memo-form-data';
 import { Button } from '@/components/ui/button';
 import {
   FormWrapper,
@@ -17,6 +17,7 @@ import { MemoItemAddDialog } from '@/features/memo/components/memo-item-add-dial
 import { FileUploader } from '@/components/file-uploader';
 import { FileThumbnail } from '@/components/file-thumbnail';
 import { getImageUrl } from '@/lib/supabase';
+import { MemoImageAddDialog } from '@/features/memo/components/memo-image-add-dialog';
 
 const importances = [
   { value: 'high', label: '大' },
@@ -38,6 +39,7 @@ export interface MemoFormFileProps {
   onFileUpload: (files: File[]) => Promise<string[]>;
   onFileDelete: (index: number) => void;
   imageError?: string | null;
+  images: Image[];
 }
 
 export const MemoForm = ({
@@ -58,9 +60,10 @@ export const MemoForm = ({
   setTagOpen,
   files,
   onFileChange,
-  onFileUpload,
+  //onFileUpload,
   onFileDelete,
   imageError,
+  images: uploadedImages,
 }: MemoFormProps & Partial<MemoFormFileProps>) => {
   const form = useForm<MemoFormData>({
     resolver: zodResolver(FormSchema),
@@ -69,6 +72,7 @@ export const MemoForm = ({
 
   const handleSubmit = useCallback(
     (data: MemoFormData) => {
+      console.log('Form submitted with data:', data);
       onSubmit(data, files);
     },
     [onSubmit, files],
@@ -85,7 +89,7 @@ export const MemoForm = ({
     syncZodErrors(form, externalZodError);
   }, [externalZodError, form]);
 
-  const { fields, remove } = useFieldArray({
+  const { fields, remove, append } = useFieldArray({
     control: form.control,
     name: 'images',
   });
@@ -98,10 +102,36 @@ export const MemoForm = ({
     if (files) {
       form.setValue(
         'fileMetadata',
-        files.map(() => ({ alt_text: '', description: '' }))
+        files.map(() => ({ alt_text: '', description: '' })),
       );
     }
   }, [files, form]);
+
+  const [selectDialogOpen, setSelectDialogOpen] = useState(false);
+
+  // imagesフィールドに画像を追加
+  const handleSelectImages = (imgs: Image[]) => {
+    let added = false;
+    imgs.forEach((img) => {
+      const exists = fields.some((field) => field.image_id === img.id);
+      if (!exists) {
+        append({
+          image_id: img.id,
+          order: fields.length,
+          file_path: img.file_path,
+          file_name: img.file_name,
+          alt_text: '',
+          description: '',
+        });
+        added = true;
+      }
+    });
+    if (!added) {
+      alert('すでに追加済みの画像のみが選択されました');
+    }
+    setSelectDialogOpen(false);
+  };
+
   console.log('レンダリング');
 
   return (
@@ -136,13 +166,28 @@ export const MemoForm = ({
           setOpen={setTagOpen}
         />
         {/* ファイルアップロード・サムネイル */}
-        {files && onFileChange && onFileUpload && onFileDelete && (
+        {files && onFileChange && onFileDelete && (
           <div className="my-4">
             <label className="block font-bold mb-2">画像アップロード</label>
-            <FileUploader files={files} onChange={onFileChange} onUpload={onFileUpload} onError={imageError} />
-            <FileThumbnail files={files} onDelete={onFileDelete} />
+            <FileUploader files={files} onChange={onFileChange} onError={imageError} />
+            {files.length > 0 && <FileThumbnail files={files} onDelete={onFileDelete} />}
           </div>
         )}
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setSelectDialogOpen(true)}
+          className='w-full'
+        >
+          アップロード済み画像から選択
+        </Button>
+        <MemoImageAddDialog
+          open={selectDialogOpen}
+          images={(uploadedImages || []).filter((img) => !fields.some((field) => field.image_id === img.id))}
+          onSelect={handleSelectImages}
+          onClose={() => setSelectDialogOpen(false)}
+        />
 
         {fields.length > 0 && (
           <div className="my-4">
