@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormSchema } from '@/features/memo/schemas/memo-form-schema';
-import { MemoFormData, MemoFormProps, Image, ImageMetadata } from '@/features/memo/types/memo-form-data';
+import { MemoFormData, MemoFormProps, Image } from '@/features/memo/types/memo-form-data';
 import { Button } from '@/components/ui/button';
 import {
   FormWrapper,
@@ -31,6 +31,7 @@ const defaultMemoFormData = {
   importance: 'high',
   category: '',
   tags: [],
+  fileMetadata: [{ alt_text: '', description: '' }],
 };
 
 export interface MemoFormFileProps {
@@ -72,7 +73,6 @@ export const MemoForm = ({
 
   const handleSubmit = useCallback(
     (data: MemoFormData) => {
-      console.log('Form submitted with data:', data);
       onSubmit(data, files);
     },
     [onSubmit, files],
@@ -80,7 +80,6 @@ export const MemoForm = ({
 
   useEffect(() => {
     if (initialValues && !externalZodError) {
-      console.log(initialValues);
       form.reset(initialValues);
     }
   }, [initialValues, externalZodError, form]);
@@ -97,6 +96,16 @@ export const MemoForm = ({
     remove(index);
   };
 
+  const {
+    fields: fileMetadataFields,
+    append: appendFileMetadata,
+    remove: removeFileMetadata,
+    replace: replaceFileMetadata,
+  } = useFieldArray({
+    control: form.control,
+    name: 'fileMetadata',
+  });
+
   // filesの変化に合わせてfileMetadataを初期化・同期
   useEffect(() => {
     if (files) {
@@ -104,8 +113,10 @@ export const MemoForm = ({
         'fileMetadata',
         files.map(() => ({ alt_text: '', description: '' })),
       );
+      //files.map(()=> appendFileMetadata({ alt_text: '', description: '' }));
+      console.log("files.length: ", files.length, "filemetada: ", form.getValues('fileMetadata'));
     }
-  }, [files, form]);
+  }, [files, form ]);
 
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
 
@@ -174,12 +185,7 @@ export const MemoForm = ({
           </div>
         )}
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setSelectDialogOpen(true)}
-          className='w-full'
-        >
+        <Button type="button" variant="outline" onClick={() => setSelectDialogOpen(true)} className="w-full">
           アップロード済み画像から選択
         </Button>
         <MemoImageAddDialog

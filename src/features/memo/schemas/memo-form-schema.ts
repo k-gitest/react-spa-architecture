@@ -28,14 +28,14 @@ export const FormSchema = z.object({
   fileMetadata: z
     .array(
       z.object({
-        alt_text: z.string().optional(),
-        description: z.string().optional(),
+        alt_text: z.string().default(''),
+        description: z.string().default(''),
       }),
     )
-    .optional(),
+    .default([{ alt_text: '', description: '' }]),
 });
 
-export const MemoSchema = FormSchema.extend({
+export const MemoSchema = FormSchema.omit({ fileMetadata: true }).extend({
   id: z.string(),
   user_id: z.string(),
   created_at: z.string(),

@@ -63,7 +63,7 @@ export const MemoManagerTanstack = () => {
 
   const { files, setFiles, setImageError, imageError, handleFileChange, handleDeleteFileClick } = useLocalFileManager();
 
-  const { images, isImagesLoading, uploadImages, deleteImage, refetchImages } = useImagesTanstack(session?.user?.id);
+  const { images, uploadImages, deleteImage } = useImagesTanstack(session?.user?.id);
 
   const {
     category,
@@ -82,7 +82,7 @@ export const MemoManagerTanstack = () => {
     async (id: string, file_path: string, file_name: string) => {
       await deleteImage({ id, file_path, file_name });
     },
-    [session?.user?.id],
+    [deleteImage],
   );
 
   // ファイルアップロードハンドラー
@@ -93,11 +93,12 @@ export const MemoManagerTanstack = () => {
         setFiles([]);
         return imageIds;
       } catch (e) {
+        console.error(e);
         setImageError('画像のアップロードに失敗しました');
         return [];
       }
     },
-    [uploadImages],
+    [uploadImages, setFiles, setImageError],
   );
 
   const handleCategorySubmit = useCallback(() => {
@@ -105,14 +106,14 @@ export const MemoManagerTanstack = () => {
       addCategory({ name: category.trim(), user_id: session.user.id });
       resetItemForm();
     }
-  }, [addCategory, session?.user?.id, category]);
+  }, [addCategory, session?.user?.id, category, resetItemForm]);
 
   const handleTagSubmit = useCallback(() => {
     if (session?.user?.id && tag.trim()) {
       addTag({ name: tag.trim(), user_id: session?.user?.id });
       resetItemForm();
     }
-  }, [addTag, session?.user?.id, tag]);
+  }, [addTag, session?.user?.id, tag, resetItemForm]);
 
   useEffect(() => {
     if (categoryData) {
@@ -192,7 +193,7 @@ export const MemoManagerTanstack = () => {
 
   const memoFormProps = {
     onSubmit: handleFormSubmit,
-    initialValues: editMemoData,
+    initialValues: editMemoData ? { ...editMemoData, fileMetadata: [{ alt_text: '', description: '' }] } : undefined,
     categories,
     tags,
     category,

@@ -1,7 +1,6 @@
 import { trpc } from '@/lib/trpc';
 import { queryClient } from '@/lib/queryClient';
 import { useApiMutation, useApiQuery } from '@/hooks/use-tanstack-query';
-import { fetchImagesService, uploadImageStorageService, deleteImageService } from '@/services/ImageService';
 import { getExtensionIfAllowed } from '@/lib/utils';
 import { skipToken } from '@tanstack/react-query';
 import { convertFileToBase64 } from '@/lib/utils';
@@ -77,7 +76,30 @@ export const useImagesTRPC = (userId: string | undefined) => {
   });
   const addImageMutation = useApiMutation(addImageMutationOptions);
 
+  const addImage = async (data: {
+    user_id: string;
+    file_path: string;
+    file_name: string;
+    file_size: number;
+    mime_type: string;
+    storage_object_id: string;
+  }) => {
+    await addImageMutation.mutateAsync(data);
+  };
+
   // 画像削除
+  const deleteImageMutationOptions = trpc.image.deleteImage.mutationOptions({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: imagesKey });
+    },
+  });
+  const deleteImageMutation = useApiMutation(deleteImageMutationOptions);
+
+  const deleteImage = async (data: { id: string; user_id: string; file_path: string; file_name: string }) => {
+    await deleteImageMutation.mutateAsync(data);
+  };
+
+  /*
   const deleteMutation = useApiMutation<void, Error, { id: string; file_path: string; file_name: string }>({
     mutationFn: async ({ id, file_path, file_name }) => {
       if (!userId) return;
@@ -87,6 +109,7 @@ export const useImagesTRPC = (userId: string | undefined) => {
       imagesQuery.refetch?.();
     },
   });
+  */
 
   return {
     images: imagesQuery.data,
@@ -96,7 +119,8 @@ export const useImagesTRPC = (userId: string | undefined) => {
     refetchImages: imagesQuery.refetch,
     uploadImages: uploadImage,
     isUploading: uploadImageMutation.isPending,
-    deleteImage: deleteMutation.mutateAsync,
-    isDeleting: deleteMutation.isPending,
+    addImage: addImage,
+    deleteImage: deleteImage,
+    isDeleting: deleteImageMutation.isPending,
   };
 };

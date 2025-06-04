@@ -142,7 +142,7 @@ export const MemoManager = () => {
         return [];
       }
     },
-    [session?.user.id, fetchImages],
+    [session?.user.id, fetchImages, setFiles, setImageError],
   );
 
   // メモリストを取得
@@ -330,7 +330,7 @@ export const MemoManager = () => {
       addCategory({ name: category.trim(), user_id: session.user.id });
       resetItemForm();
     }
-  }, [addCategory, session?.user?.id, category]);
+  }, [addCategory, session?.user?.id, category, resetItemForm]);
 
   // タグ送信を処理
   const handleTagSubmit = useCallback(() => {
@@ -338,7 +338,7 @@ export const MemoManager = () => {
       addTag({ name: tag.trim(), user_id: session.user.id });
       resetItemForm();
     }
-  }, [addTag, session?.user?.id, tag]);
+  }, [addTag, session?.user?.id, tag, resetItemForm]);
 
   const { prepareMemoImages } = useMemoImagePreparation(handleFileUpload);
 
@@ -355,7 +355,7 @@ export const MemoManager = () => {
         errorHandler(err);
       }
     },
-    [session?.user?.id, memoListFetcher, handleFileUpload, prepareMemoImages],
+    [session?.user?.id, memoListFetcher, prepareMemoImages],
   );
 
   // メモ更新を処理
@@ -373,7 +373,7 @@ export const MemoManager = () => {
         errorHandler(err);
       }
     },
-    [memoListFetcher, handleFileUpload, prepareMemoImages],
+    [memoListFetcher, prepareMemoImages],
   );
 
   // フォーム送信を処理
@@ -437,12 +437,13 @@ export const MemoManager = () => {
     if (tabValue !== 'addMemo') {
       setEditIndex(null);
       setEditMemo(undefined);
+      setFiles([])
     }
   }, [tabValue]);
 
   const memoFormProps = {
     onSubmit: handleFormSubmit,
-    initialValues: editMemo,
+    initialValues: editMemo ? {...editMemo, fileMetadata: [{ alt_text: '', description: '' }]} : undefined,
     categories: formattedCategories,
     tags: formattedTags,
     category,

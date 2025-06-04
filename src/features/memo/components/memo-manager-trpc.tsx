@@ -23,7 +23,7 @@ export const MemoManagerTrpc = () => {
 
   const { files, setFiles, setImageError, imageError, handleFileChange, handleDeleteFileClick } = useLocalFileManager();
 
-  const { images, isImagesLoading, uploadImages, deleteImage, refetchImages } = useImagesTRPC(session?.user?.id);
+  const { images, uploadImages, deleteImage } = useImagesTRPC(session?.user?.id);
 
   const {
     category,
@@ -40,9 +40,10 @@ export const MemoManagerTrpc = () => {
   // 画像削除ハンドラー
   const handleDeleteImage = useCallback(
     async (id: string, file_path: string, file_name: string) => {
-      await deleteImage({ id, file_path, file_name });
+      if (!session?.user?.id) return;
+      await deleteImage({ id, user_id: session?.user?.id, file_path, file_name });
     },
-    [session?.user?.id],
+    [session?.user?.id, deleteImage],
   );
 
   // ファイルアップロードハンドラー
@@ -53,11 +54,12 @@ export const MemoManagerTrpc = () => {
         setFiles([]);
         return imageIds;
       } catch (e) {
+        console.error(e);
         setImageError('画像のアップロードに失敗しました');
         return [];
       }
     },
-    [uploadImages],
+    [uploadImages, setFiles, setImageError],
   );
 
   const {
@@ -108,14 +110,14 @@ export const MemoManagerTrpc = () => {
       addCategory({ name: category.trim(), user_id: session.user.id });
       resetItemForm();
     }
-  }, [addCategory, session?.user?.id, category]);
+  }, [addCategory, session?.user?.id, category, resetItemForm]);
 
   const handleTagSubmit = useCallback(() => {
     if (session?.user?.id && tag.trim()) {
       addTag({ name: tag.trim(), user_id: session?.user?.id });
       resetItemForm();
     }
-  }, [addTag, session?.user?.id, tag]);
+  }, [addTag, session?.user?.id, tag, resetItemForm]);
 
   useEffect(() => {
     if (categoryData) {
@@ -205,7 +207,7 @@ export const MemoManagerTrpc = () => {
 
   const memoFormProps = {
     onSubmit: handleFormSubmit,
-    initialValues: editMemoData,
+    initialValues: editMemoData ? { ...editMemoData, fileMetadata: [{ alt_text: '', description: '' }] } : undefined,
     externalZodError: zodError, // tRPC版特有
     categories,
     tags,
