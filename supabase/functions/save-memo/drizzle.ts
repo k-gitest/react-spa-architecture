@@ -206,23 +206,27 @@ export const routeDrizzle = async (data: MemoFormData, userId: string, method: s
           memoId: memo.id,
         });
 
-        await tx.insert(memoTags).values(
-          data.tags.map((t) => ({
-            tagId: t,
-            memoId: memo.id,
-          })),
-        );
+        if (data.tags && data.tags.length > 0) {
+          await tx.insert(memoTags).values(
+            data.tags.map((t) => ({
+              tagId: t,
+              memoId: memo.id,
+            })),
+          );
+        }
 
-        await tx.insert(memoImages).values(
-          data.images?.map((image, index) => ({
-            memoId: memo.id,
-            imageId: image.image_id,
-            order: index,
-            altText: image.alt_text,
-            description: image.description,
-          })) ?? [],
-        );
-        
+        if (data.images && data.images.length > 0) {
+          await tx.insert(memoImages).values(
+            data.images.map((image, index) => ({
+              memoId: memo.id,
+              imageId: image.image_id,
+              order: index,
+              altText: image.alt_text,
+              description: image.description,
+            })),
+          );
+        }
+
         return memo;
       });
     } else if (method === 'PUT') {
@@ -248,22 +252,26 @@ export const routeDrizzle = async (data: MemoFormData, userId: string, method: s
           memoId: memo.id,
         });
 
-        await tx.insert(memoTags).values(
-          data.tags.map((t) => ({
-            tagId: t,
-            memoId: memo.id,
-          })),
-        );
+        if (data.tags && data.tags.length > 0) {
+          await tx.insert(memoTags).values(
+            data.tags.map((t) => ({
+              tagId: t,
+              memoId: memo.id,
+            })),
+          );
+        }
 
-        await tx.insert(memoImages).values(
-          data.images?.map((image, index) => ({
-            memoId: memo.id,
-            imageId: image.image_id,
-            order: index,
-            altText: image.alt_text,
-            description: image.description,
-          })) ?? [],
-        );
+        if (data.images && data.images.length > 0) {
+          await tx.insert(memoImages).values(
+            data.images?.map((image, index) => ({
+              memoId: memo.id,
+              imageId: image.image_id,
+              order: index,
+              altText: image.alt_text,
+              description: image.description,
+            })) ?? [],
+          );
+        }
 
         return memo;
       });

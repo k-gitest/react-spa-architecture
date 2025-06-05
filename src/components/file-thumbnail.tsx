@@ -4,20 +4,23 @@ import { FormInput } from '@/components/form/form-parts';
 interface FileThumbnailProps {
   files: File[];
   onDelete: (index: number) => void;
+  onRemove: (index: number) => void;
 }
 
-export const FileThumbnail: React.FC<FileThumbnailProps> = ({ files, onDelete }) => {
+export const FileThumbnail: React.FC<FileThumbnailProps> = ({ files, onDelete, onRemove }) => {
   const handleDeleteFileClick = (index: number) => {
     onDelete(index);
+    onRemove(index);
   };
 
   return (
     <div className="flex gap-2 flex-wrap">
       <h2>選択ファイル</h2>
       {files.map((file, index) => (
-        <div key={index} className="flex gap-2 w-full">
+        <div key={file.name + file.lastModified} className="flex gap-2 w-full">
           <div className="relative w-[100px] h-[100px]">
             <button
+              type="button"
               onClick={() => handleDeleteFileClick(index)}
               className="absolute top-0 right-0 bg-black text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
               aria-label="削除"

@@ -193,7 +193,7 @@ export const MemoManagerTanstack = () => {
 
   const memoFormProps = {
     onSubmit: handleFormSubmit,
-    initialValues: editMemoData ? { ...editMemoData, fileMetadata: [{ alt_text: '', description: '' }] } : undefined,
+    initialValues: editMemoData,
     categories,
     tags,
     category,

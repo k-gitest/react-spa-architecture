@@ -80,6 +80,7 @@ export const MemoForm = ({
 
   useEffect(() => {
     if (initialValues && !externalZodError) {
+      initialValues.fileMetadata = initialValues.fileMetadata || [{ alt_text: '', description: '' }];
       form.reset(initialValues);
     }
   }, [initialValues, externalZodError, form]);
@@ -100,7 +101,6 @@ export const MemoForm = ({
     fields: fileMetadataFields,
     append: appendFileMetadata,
     remove: removeFileMetadata,
-    replace: replaceFileMetadata,
   } = useFieldArray({
     control: form.control,
     name: 'fileMetadata',
@@ -108,15 +108,11 @@ export const MemoForm = ({
 
   // filesの変化に合わせてfileMetadataを初期化・同期
   useEffect(() => {
-    if (files) {
-      form.setValue(
-        'fileMetadata',
-        files.map(() => ({ alt_text: '', description: '' })),
-      );
-      //files.map(()=> appendFileMetadata({ alt_text: '', description: '' }));
-      console.log("files.length: ", files.length, "filemetada: ", form.getValues('fileMetadata'));
+    // filesの数が多い場合は追加
+    if (files && files.length > fileMetadataFields.length) {
+      appendFileMetadata({ alt_text: '', description: '' });
     }
-  }, [files, form ]);
+  }, [files, appendFileMetadata, fileMetadataFields, fileMetadataFields.length]);
 
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
 
@@ -181,7 +177,7 @@ export const MemoForm = ({
           <div className="my-4">
             <label className="block font-bold mb-2">画像アップロード</label>
             <FileUploader files={files} onChange={onFileChange} onError={imageError} />
-            {files.length > 0 && <FileThumbnail files={files} onDelete={onFileDelete} />}
+            {files.length > 0 && <FileThumbnail files={files} onDelete={onFileDelete} onRemove={removeFileMetadata} />}
           </div>
         )}
 
@@ -236,45 +232,7 @@ export const MemoForm = ({
             </div>
           </div>
         )}
-        {/*images && images.length > 0 && (
-          <div className="my-4">
-            <label className="block font-bold mb-2">アップロード済み画像</label>
-            <div className="grid grid-cols-1 gap-4">
-              {images.map((image, index) => (
-                <div className="flex gap-4" key={index}>
-                  <div className="relative w-[100px] h-[100px]">
-                    <img
-                      src={getImageUrl(image.file_path)}
-                      alt={image.alt_text || 'Uploaded Image'}
-                      className="w-[100px] h-[100px] object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleImageDelete(index)}
-                      className="absolute top-0 right-0 bg-black text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <div className="w-full">
-                    <FormInput
-                      name={`images.${index}.alt_text`}
-                      label="Alt Text"
-                      placeholder="画像の代替テキストを入力"
-                      className="mt-2"
-                    />
-                    <FormInput
-                      name={`images.${index}.description`}
-                      label="説明"
-                      placeholder="画像の説明を入力"
-                      className="mt-2"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )*/}
+        
         {form.formState.errors?.root && <p className="text-sm text-red-500">{form.formState.errors.root?.message}</p>}
         <div className="flex justify-center">
           <Button type="submit" className="w-32">

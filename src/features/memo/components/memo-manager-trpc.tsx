@@ -207,7 +207,7 @@ export const MemoManagerTrpc = () => {
 
   const memoFormProps = {
     onSubmit: handleFormSubmit,
-    initialValues: editMemoData ? { ...editMemoData, fileMetadata: [{ alt_text: '', description: '' }] } : undefined,
+    initialValues: editMemoData,
     externalZodError: zodError, // tRPC版特有
     categories,
     tags,

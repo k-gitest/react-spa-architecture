@@ -439,11 +439,11 @@ export const MemoManager = () => {
       setEditMemo(undefined);
       setFiles([])
     }
-  }, [tabValue]);
+  }, [tabValue, setFiles]);
 
   const memoFormProps = {
     onSubmit: handleFormSubmit,
-    initialValues: editMemo ? {...editMemo, fileMetadata: [{ alt_text: '', description: '' }]} : undefined,
+    initialValues: editMemo,
     categories: formattedCategories,
     tags: formattedTags,
     category,

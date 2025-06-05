@@ -6,7 +6,6 @@ import {
   MemoTagSchema,
   CategorySchema,
   TagSchema,
-  MemoFormPorpsSchema,
 } from '@/features/memo/schemas/memo-form-schema';
 
 //export interface MemoListSchema extends z.infer<typeof FormSchema> {}
