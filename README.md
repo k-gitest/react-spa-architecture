@@ -9,6 +9,7 @@
 - supabaseをバックエンドとして使用する（auth・database postgres・edge functions）
 - prismaをデータベース管理として使用する（DBスキーマ・マイグレーション）
 - edgeのORMにprisma・drizzleを使用する（トランザクション・リレーション）
+- 複数api通信とedge環境でのORMによるパフォーマンス比較検証、部分的な分離によるアーキテクチャ設計の検証
 
 ## 開発環境  
 - react 18.2.0
@@ -41,6 +42,10 @@
 │    │    ├── layout ...レイアウトコンポーネント
 │    │    ├── ui ...shadcn/uiコンポーネント
 │    │    ├── mode-toggle.tsx ...テーマ切替
+│    │    ├── file-thumbnail.tsx ...選択ファイルサムネイル表示
+│    │    ├── file-uploader.tsx ...ファイル選択
+│    │    ├── variant-toggle.tsx ...api通信切替
+│    │    ├── with-behavior-variant.tsx ...コンポーネント切替
 │    │    └── responsive-dialog.tsx ...ドロワー/ダイアログ
 │    ├── features ...機能別ディレクトリ
 │    │    ├── auth
@@ -68,6 +73,10 @@
 │    │    ├── use-session-observer ...ユーザー認証状態
 │    │    ├── use-session-store ...ユーザー認証状態管理
 │    │    ├── use-tanstack-query ...tanstack query共通フック
+│    │    ├── use-behavior-variant ...コンポーネント状態管理
+│    │    ├── use-image-upload-tanstack 
+│    │    ├── use-image-upload-trpc 
+│    │    ├── use-local-file-manager ...選択ファイル状態管理
 │    │    ├── use-toast ...toastUI状態管理
 │    │    └── use-media-query ...メディアクエリ判別
 │    ├── services ...共通サービス
@@ -79,6 +88,7 @@
 ├── prisma ...prismaスキーマ・マイグレーション
 ├── supabase/functions ...エッジファンクション
 │    ├── _shared ...cors設定など
+│    ├── cleanup-image-delete ...storageの定期削除
 │    ├── delete-user-account ...アカウント削除
 │    ├── sava-memo ...中間テーブルへの保存
 │    └── trpc ...tRPC
@@ -153,8 +163,6 @@ erDiagram
   Profile {
     UUID id PK
     UUID user_id FK
-    String avatar
-    String user_name
     String avatar
     String user_name
     DateTime created_at
@@ -249,6 +257,13 @@ erDiagram
 - supabaseClientクエリ + tanstack Query + edge functions prisma/ drizzle
 - supabaseClientクエリ + tRPC + edge functions prisma
 
+- 切替はcomponents/variant-toggle, with-behavior-variant, hooks/use-behavior-variantを使用して行っています。
+- useBehaviorVariantにzustandストア作成、withBehaviorVariantで値を取得しコンポーネントを返す。
+- VariantToggleでuseBehaiorVariantのapiのidを切替、ページコンポーネント内でwithBehaviorVariantからコンポーネントを受け取るという流れです。
+- VariantToggleをグローバルヘッダーなどに、withBehaviorVariantを切り替えたいコンポーネントがあるページコンポーネントなどに配置します。
+- zustandのpersistでローカルストレージに保存し永続化しています。
+- fetures以下の各managerコンポーネントを切替るだけで、manager以下のコンポーネントは機能内で共通化しています。
+
 ## フォームパーツコンポーネントの使い方
 shadcn/uiのFormコンポーネント内で使用できる  
 パーツコンポーネントを読み込みlabel, placeholder, name, optionsを渡す
@@ -267,6 +282,7 @@ import FormInput from "@/components/form/form-input";
 
 ## ドロワー/ダイアログコンポーネントの使い方
 - メディアクエリによるドロワーとダイアログの切替が行えます
+- hooks/useMediaQueryでwindowサイズを取得して、切り替えたい値を設定しています
 
 ```typescript
 import ResponsiveDialog from "@/components/responsive-dialog"
@@ -284,6 +300,9 @@ import useMediaQuery  from "@/hooks/use-media-query"
 
 ## テーマトグルコンポーネントの使い方
 - システム / ライト / ダークのテーマ切替が行えます
+hooks/use-theme-providerでclassListからテーマclassを取得しコンテキストを作成、プロバイダーを上位に設置する  
+グローバルヘッダーなどにcomponents/mode-toggleを設置して、useThemeフックを通じてテーマを渡して切り替えています  
+テーマはローカルストレージに保存して永続化しています
 
 ```typescript
 import { ModeToggle } from "@/components/mode-toggle";
@@ -306,6 +325,20 @@ toast({title: "トーストが表示されました"})
 Appはクライアント・プロバイダー、ルートはrouterに分離してあり、ToastはUIという事でlayoutに配置しています。  
 apiの状態は全てトースト表示をしています。
 
+## ファイルアップロードコンポーネントの使い方
+components/file-uploader からFileUploader、components/file-thumbnailから FileThumbnailを取得します。  
+FileUploaderコンポーネントがfile選択、FileThumbnailが選択ファイルのサムネイル表示を担当しています。  
+UIを分離する事でファイル選択とサムネイル表示の位置をカスタマイズする事が可能になります。  
+内部でFormInputを使用しているので、FormWrapper内で使用すればrhfの機能と連携もできます。  
+ファイルに対する入力はuseFieldArrayで管理をしています。  
+
+```typescript
+<FileUploader files={files} onChange={onFileChange} onError={imageError} />
+<FileThumbnail files={files} onDelete={onFileDelete} onRemove={removeFileMetadata} />
+```
+hooks/useLocalFileManagerで選択したファイルの管理を行います。
+上位コンポーネントでuseLocalFileManagerからfilesを取得し、FileUploaderやFileThumbnailに渡します。
+
 ## エラーハンドリング
 - apiエラーはerrors/error-handlerで管理しています。
 - TRPCはエラーフォーマッターで整形してから返しています。
@@ -322,7 +355,7 @@ lib/fetchClient.ts に実装されています。
 import { FetchClient } from "@/lib/fetchClient";
 
 const httpClient = new FetchClient({
-  baseUrl: "[https://your-api-endpoint.com](https://your-api-endpoint.com)", // ベースURL
+  baseUrl: "https://your-api-endpoint.com", // ベースURL
   timeout: 5000, // タイムアウト (ミリ秒)
   maxRetry: 3, // 最大リトライ回数
   // その他のオプション (retryDelay, baseBackoff, retryStatus, retryMethods)
@@ -378,66 +411,55 @@ const { isPending, data } = useApiMutation({
    })
 ```
 
-## React Hook Form 使い分けガイド
+## 注意点とまとめ
 
-### 基本方針
-- **配列操作**: `useFieldArray` で追加・削除・並び替え
-- **バリデーション制御**: `mode` オプションで全体制御
-- **レンダリング制御**: 監視範囲と更新タイミングで使い分け
-
-### バリデーションモード
-- **リアルタイム**: `mode: "onChange"`
-- **入力完了時**: `mode: "onBlur"`
-- **送信時のみ**: `mode: "onSubmit"`
-
-### 値の監視・取得
-- **親で全体監視**: `form.watch()` （再レンダリング頻発に注意）
-- **子で部分監視**: `useWatch({ name })` （該当コンポーネントのみ再レンダリング）
-- **UI更新不要**: `getValues()` （送信時、ログ、API呼び出し）
-
-### パフォーマンス考慮
-- フォーム全体の再レンダリングを避ける → `useWatch` を子コンポーネントで使用
-- 入力中の頻繁な更新を避ける → `mode: "onBlur"`
-- 配列操作の効率化 → `useFieldArray` の `fields`, `append`, `remove`
-
-## まとめ
+### shadcn/ui
 - shadcn/uiのFormコンポーネントはzodとreact-hook-formと連携しているのでインストールする必要がある
-- shadcn/uiのメディアクエリ別ドロワー/ダイアログはwindow幅を取得する関数が必要、今回はコードを記述しているが、他のライブラリでも可能
-- shadcn/uiのテーマ切替はドロップダウンなので三段階トグルに変更しアイコンで切替可能にしておく
-- FormのUIを構成するコンポーネントが多く、コードが長くなるのでパーツごとにコンポーネントにしておく
-- データをAPIで呼び出す事を想定しzodのスキーマをschemasに、スキーマの型をtypesに分けておく
-- ダイアログ/ドロワーはよく使用するので再利用可能な共有コンポーネントにしておく
-- Fetchは多くの場面で使用するので再利用可能なクラスにしておく
-- supabaseとprismaは型を出力してくれるので効率的な開発ができるようにしておく
-- apiでのCRUDはservicesで再利用可能なフックにしておく
+- FormとRHFを連係するとUIを構成するコンポーネントが多く、コードが長くなるのでパーツごとにコンポーネントにしておく
+- shadcn/uiのドロワーはVaulを使用しているので、気になるならドロワーだけ変更を検討する。
+
+### supabase/prisma/postgres
+- supabaseとprismaは型を出力できるが、DBの型はsupabase、入力はzod-prisma-typesなどライブラリを使用するなど区別すると分かりやすい
 - prismaのバグでuuid_generate_v4と@updateAtのスキーマが使えないので、gen_random_uuid()とdefault(now())とplpgトリガーで対応する必要がある
-- サーバーエラーはhook内でtoastで表示処理とするとUI側で行わなくて良い
-- supabaseClient/tanstack QueryとtRPC/tanstack Queryを個別に使用しているが、コード量としてはそこまで変わらない
-- denoとhonoの良さはedgeの様なリソースが限られたところで使えるということを感じる
-- tRPCはv9, v10, v11で書き方から使えるメソッドやプロパティも異なる
-- tRPCでのtanstack Queryも同様に統合前後で異なる、共通化処理の型が複雑
-- tRPCをsupabaseで使用するとエラーの型がことなるので合わせる必要がある
-- tRPCのエラーはTRPCErrorよりTRPCClientErrorにフォーマットで出力した方が扱いやすい
-- zodErrorをtrpcで他言語化する場合サーバーとクライアントの両方にmapperを置く必要がある
-- tanstack queryのuseQueryはv5でoptionsのコールバックが幾つか削除されており、自分で実装する必要がある
-- edge functionsの認証はtokenヘッダーをfunctions内でも使用する必要がある
+- 上記問題はprismaのgithubイシューでは修正されクローズされているが、未だに同イシューに報告が挙がっている
+- prismaでカラムを配列型にするとnot nullにならないので後でSQLで行う必要がある
 - supabaseからのコールバックはPKCEで自動処理されるのでパスクエリ判別はできないのでidentitiesなどから判別する必要がある
 - webhookからのコールバックでAppが再マウントするのでcallback用ページで受けてから遷移する必要がある
 - supabase storageは初期値でCDNでキャッシュされるため適宜ハッシュを付けておく
-- Fileをedge側に送信するとFileではなくなるのでbase64に変換して送信しedge側で戻す
-- react18ではtesting-library/react-hooksではなくtesting-library/reactを使用する
-- viteでrequireが使用できないということはvitestでも使用できない
-- shadcn/uiのフォームなどのDOM構造はボタン制御が多く、内部非同期も多いのでawait, waitFor, actの警告がでやすい
-- vitestでは複数の関数をモックする事はできないのでファイルを分割するか処理を分けるかなど対処が必要
-- 例えばある関数が成功したら別の関数が起動して処理を行うなどのモックのexpectは一つになる
 - supabase edgeでのprisma clientはdeno用のedgeを使用する必要がある
-- supabase edgeでprismaするにはdeno用adapterがないのでaccelerate経由でクエリを送信する必要がある
+- supabase edgeでprismaでpostgresにクエリ送信するにはdeno用adapterがないのでaccelerate経由でクエリを送信する必要がある
 - accelerateを使用しない場合、pgpl関数をRPCで呼ぶ、設計変える、drizzleに変えるなどがある
-- prismaでカラムを配列型にするとnot nullにならないので後でSQLで行う必要がある
-- supabase rpcで呼び出せるのはfunctionでprocedureではない
+- supabase rpcで呼び出せるのはfunctionでありprocedureではない
 - plpgのfunction内でトランザクションコマンドは使用できない。function内でprocedureを呼んでも使用不可。
 - plpg内のfunction内では例外発生で自動的にロールバックする。raise exceptionでEXCEPTIONブロックでもロールバックできる。
 - plpg内のprocedure内でトランザクションコマンドは使用できるが、制限が多く基本的には使用不可。自動ロールバックで行う必要がある。
+
+### vite/vitest
+- react18ではtesting-library/react-hooksではなくtesting-library/reactを使用する
+- viteでrequireが使用できないということはvitestでも使用できない
+- shadcn/uiのフォームなどのDOM構造はボタン制御が多く、内部非同期も多いのでvitestでのawait, waitFor, actの警告がでやすい
+- vitestでは複数の関数をモックする事はできないのでファイルを分割するか処理を分けるかなど対処が必要
+- 例えばある関数が成功したら別の関数が起動して処理を行うなどのモックのexpectは一つになる
+
+### tanstack Query/tRPC
+- tRPCはv9, v10, v11で書き方から使えるメソッドやプロパティも異なるが互換性はある
+- tRPCでのtanstack Queryも同様に統合前後で異なる、共通化処理の型が複雑
+- tRPCのエラーはTRPCErrorよりTRPCClientErrorにフォーマットで出力した方が扱いやすい
+- zodErrorをtrpcで他言語化する場合サーバーとクライアントの両方にmapperを置く必要がある
+- tanstack queryのuseQueryはv5でoptionsのコールバックが幾つか削除されており、自分で実装する必要がある
 - trpcクライアントでedge側のAppRouter型を使用しているのでviteでbuild時にdenoのエラーがでる。対応策としてbuild前にtrpcの型だけ共通ディレクトリに生成してtrpcクライアントのAppRouterとして使用すればbuild自体はできる。多少の型エラーがでる場合は修正するかts-ignoreする
-- rhfに渡した配列を加工する場合はuseFiledArray、レンダリング制御する場合はwatch, useWatch, onBlur、getValuesを検討する
-- 同期的なバリデーションを親でwatch、子のみはuseWatch、フォーカスでonBlurと分ける、UI関係なく値取得はgetValuesなど
+
+### 比較
+| 機能 | function内 | procedure内 | 備考 |
+|------|:----------:|:-----------:|------|
+| トランザクションコマンド | ❌ 使用不可 | ⚠️ 制限あり | 基本的には自動ロールバック推奨 |
+| 自動ロールバック | ✅ 例外発生時 | ✅ 例外発生時 | raise exceptionで制御可能 |
+| supabase RPC呼び出し | ✅ 可能 | ❌ 不可 | functionのみRPCで呼び出し可能 |
+
+<br>
+
+| 方式 | コード量 | 複雑性 | パフォーマンス |
+|------|:----------:|:-----------:|------|
+| supabaseClient + trigger functions | 普通 | 低 | 高 |
+| supabaseClient + tanstack Query + edge functions + drizzle | 中 | 中 | 中｜
+| supabaseClient + tRPC + edge functions + prisma | 多 | 高 | 中 |
