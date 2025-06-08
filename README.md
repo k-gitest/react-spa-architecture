@@ -461,5 +461,5 @@ const { isPending, data } = useApiMutation({
 | 方式 | コード量 | 複雑性 | パフォーマンス |
 |------|:----------:|:-----------:|------|
 | supabaseClient + trigger functions | 普通 | 低 | 高 |
-| supabaseClient + tanstack Query + edge functions + drizzle | 中 | 中 | 中｜
+| supabaseClient + tanstack Query + edge functions + drizzle | 中 | 中 | 中
 | supabaseClient + tRPC + edge functions + prisma | 多 | 高 | 中 |

@@ -18,15 +18,43 @@ export const imageRouter = router({
   // ストレージに画像アップロード後に、imagesテーブルにレコードを追加、エラー時にcleanup_delete_imagesテーブルへ追加
   uploadImage: procedure
     .input(
-      z.object({
-        file: z.string(),
-        file_name: z.string(),
-        file_size: z.number(),
-        mime_type: z.string(),
-        user_id: z.string(),
-        folderName: z.string(),
-        extention: z.string(),
-      }),
+      z
+        .object({
+          file: z.string().refine(
+            (val) => /^[A-Za-z0-9+/]+={0,2}$/.test(val), // base64形式
+            { message: 'fileはbase64形式の文字列である必要があります' },
+          ),
+          file_name: z.string(),
+          file_size: z.number().max(2 * 1024 * 1024, { message: 'ファイルサイズが2MBを超えています' }), // 2MB上限,
+          mime_type: z.string().refine(
+            (val) => ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(val),
+            { message: 'mime_typeはimage/jpeg, image/png, image/gif, image/webpのいずれかである必要があります' },
+          ),
+          user_id: z.string(),
+          folderName: z.string(),
+          extention: z.enum(['jpg', 'png', 'gif', 'webp']),
+        })
+        .refine(
+          (input) => {
+            // base64長さとfile_sizeの整合性（base64は4/3倍になる）
+            const expectedLength = Math.ceil((input.file_size * 4) / 3);
+            return input.file.length <= expectedLength + 4; // パディング分許容
+          },
+          { message: 'file_sizeとbase64長さが一致しません' },
+        )
+        .refine(
+          (input) => {
+            // mime_typeとextentionの整合性
+            const map: Record<string, string> = {
+              'image/jpeg': 'jpg',
+              'image/png': 'png',
+              'image/gif': 'gif',
+              'image/webp': 'webp',
+            };
+            return map[input.mime_type] === input.extention;
+          },
+          { message: 'mime_typeとextentionが一致しません' },
+        ),
     )
     .mutation(async ({ ctx, input }) => {
       const uniqueId = nanoid(12);
@@ -35,7 +63,7 @@ export const imageRouter = router({
       const bucket = Deno.env.get('BUCKET_IMAGES') || 'images';
       //atob() でBase64文字列をデコードしてバイナリ文字列に変換
       //c => c.charCodeAt(0) で、バイナリ文字列の各文字を文字コード（0〜255）に変換
-      const binary = Uint8Array.from(atob(input.file), c => c.charCodeAt(0));
+      const binary = Uint8Array.from(atob(input.file), (c) => c.charCodeAt(0));
       const { data, error } = await ctx.supabase.storage.from(bucket).upload(newUrl, binary, {
         cacheControl: '3600',
         upsert: false,

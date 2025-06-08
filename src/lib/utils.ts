@@ -102,9 +102,9 @@ export const isAllowedMimeType = (mimeType: string): string | null => {
 };
 
 // MIME-TYPE取得と判別のセット
-export const getExtensionIfAllowed = async (file: File): Promise<string | null> => {
+export const getExtensionIfAllowed = async (file: File): Promise<'jpg' | 'png' | 'gif' | 'webp' | null> => {
   const mimeType = await detectMimeTypeFromUint8Array(file);
-  return isAllowedMimeType(mimeType);
+  return isAllowedMimeType(mimeType) as 'jpg' | 'png' | 'gif' | 'webp' | null;;
 };
 
 // Base64へ変換
