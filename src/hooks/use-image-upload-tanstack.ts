@@ -6,7 +6,7 @@ export const useImagesTanstack = (userId: string | undefined) => {
   // 画像一覧取得
   const imagesQuery = useApiQuery({
     queryKey: ['images', userId],
-    queryFn: () => userId ? fetchImagesService(userId) : [],
+    queryFn: () => (userId ? fetchImagesService(userId) : []),
     enabled: !!userId,
   });
 
@@ -17,17 +17,19 @@ export const useImagesTanstack = (userId: string | undefined) => {
       for (const file of files) {
         const folderName = userId || 'default_folder';
         const extension = await getExtensionIfAllowed(file);
-        if (extension) {
-          const imageId = await uploadImageStorageService(
-            file,
-            file.size,
-            file.type,
-            userId || 'unknown',
-            folderName,
-            extension,
-          );
-          imageIds.push(imageId);
+        if (!extension) {
+          throw new Error(`許可されていないファイル形式です: ${file.name}`);
         }
+
+        const imageId = await uploadImageStorageService(
+          file,
+          file.size,
+          file.type,
+          userId || 'unknown',
+          folderName,
+          extension,
+        );
+        imageIds.push(imageId);
       }
       return imageIds;
     },

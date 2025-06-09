@@ -1,18 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { getImageUrl } from '@/lib/supabase';
-
-interface Image {
-  created_at: string;
-  file_name: string;
-  file_path: string;
-  file_size: number | null;
-  id: string;
-  mime_type: string | null;
-  storage_object_id: string | null;
-  updated_at: string;
-  user_id: string;
-}
+import { Image } from '@/features/memo/types/memo-form-data';
 
 interface FileListProps {
   images: Image[];

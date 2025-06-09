@@ -8,10 +8,14 @@ import {
   TagSchema,
 } from '@/features/memo/schemas/memo-form-schema';
 
-//export interface MemoListSchema extends z.infer<typeof FormSchema> {}
+// memo-formで使用するスキーマの型定義
 export type MemoFormData = z.infer<typeof FormSchema>;
+
+// memosテーブルから取得したデータで使用するスキーマの型定義
+// FormSchemmaをベースにid, user_id, created_at, updated_atを追加しfileMetadataを除外
 export type Memo = z.infer<typeof MemoSchema>;
 
+// memo-formのpropsで使用する型定義
 export interface MemoFormProps {
   onSubmit: (data: MemoFormData, files?: File[]) => void;
   initialValues?: MemoFormData;
@@ -36,8 +40,12 @@ export interface MemoFormProps {
   imageError?: string | null;
 }
 
+// memo-item-managerで使用するスキーマの型定義
 export type Category = z.infer<typeof MemoCategorySchema>;
 export type Tag = z.infer<typeof MemoTagSchema>;
+
+// categoriesテーブルから取得したデータで使用するスキーマの型定義
+// MemoCategorySchemaをベースにid, user_id, created_at, updated_atを追加
 export type CategoryOutput = z.infer<typeof CategorySchema>;
 export type TagOutput = z.infer<typeof TagSchema>;
 
@@ -50,6 +58,7 @@ export type MemoOperations = {
   useGetItem: (id: number | null) => { data?: CategoryOutput | TagOutput | null };
 };
 
+// categories, tagsテーブルから取得したデータから必要データのみに加工しstate格納する型定義
 export interface CategoryOption {
   label: string;
   value: string;
@@ -59,8 +68,10 @@ export interface TagOption {
   id: string;
 }
 
+// trpcでのzodエラーをフラット化した型定義
 export type FlattenFormatted = z.inferFlattenedErrors<typeof FormSchema>;
 
+// memo-formで使用するファイルアップロード関連のprops型定義
 export interface MemoFormFileProps {
   files: File[];
   onFileChange: (files: File[]) => void;
@@ -69,8 +80,7 @@ export interface MemoFormFileProps {
   imageError?: string | null;
 }
 
-export type MemoFormAllProps = MemoFormProps & Partial<MemoFormFileProps>;
-
+// imagesテーブルのデータ型定義
 export interface Image {
   created_at: string;
   file_name: string;
@@ -83,6 +93,7 @@ export interface Image {
   user_id: string;
 }
 
+// ファイルアップロード時の画像メタデータ型定義
 export interface ImageMetadata {
   image_id: string;
   order: number;
@@ -90,13 +101,4 @@ export interface ImageMetadata {
   file_name?: string | undefined;
   alt_text?: string | undefined;
   description?: string | undefined;
-}
-
-export interface MemoImage {
-  image_id: string;
-  order: number;
-  alt_text: string | null;
-  description: string | null;
-  file_name: string | null;
-  file_path: string;
 }

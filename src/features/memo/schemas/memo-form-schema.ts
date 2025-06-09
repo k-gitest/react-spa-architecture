@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+// memo-formで使用するスキーマ定義
 export const FormSchema = z.object({
   title: z.string().min(1, { message: 'タイトルは一文字以上にしてください' }),
   content: z.string().min(1, { message: '内容は一文字以上にしてください' }),
@@ -35,6 +36,7 @@ export const FormSchema = z.object({
     .optional(),
 });
 
+// memosテーブルから取得したデータで使用するスキーマ定義
 export const MemoSchema = FormSchema.omit({ fileMetadata: true }).extend({
   id: z.string(),
   user_id: z.string(),
@@ -42,10 +44,12 @@ export const MemoSchema = FormSchema.omit({ fileMetadata: true }).extend({
   updated_at: z.string(),
 });
 
+// memo-item-managerで使用するスキーマ定義
 export const MemoCategorySchema = z.object({
   name: z.string(),
 });
 
+// categoriesテーブルから取得したデータで使用するスキーマ定義
 export const CategorySchema = MemoCategorySchema.extend({
   id: z.number(),
   user_id: z.string(),
@@ -53,10 +57,12 @@ export const CategorySchema = MemoCategorySchema.extend({
   updated_at: z.string(),
 });
 
+// memo-item-managerで使用するスキーマ定義
 export const MemoTagSchema = z.object({
   name: z.string(),
 });
 
+// tagsテーブルから取得したデータで使用するスキーマ定義
 export const TagSchema = MemoTagSchema.extend({
   id: z.number(),
   user_id: z.string(),

@@ -13,6 +13,7 @@ import { fetchImagesService, deleteImageService, uploadImageStorageService } fro
 import { getImageUrl } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { getExtensionIfAllowed } from '@/lib/utils';
+import { Image } from '@/features/memo/types/memo-form-data';
 
 const http = new FetchClient();
 /*
@@ -39,18 +40,6 @@ interface Todo {
   id: number;
   title: string;
   completed: boolean;
-}
-
-interface Image {
-  created_at: string;
-  file_name: string;
-  file_path: string;
-  file_size: number | null;
-  id: string;
-  mime_type: string | null;
-  storage_object_id: string | null;
-  updated_at: string;
-  user_id: string;
 }
 
 const Fetch = () => {

@@ -19,7 +19,7 @@ export const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProp
             {memo.images && memo?.images?.length > 0 && (
               <div className="mb-2">
                 <img
-                  src={getImageUrl(memo.images[0].file_path)}
+                  src={getImageUrl(memo.images[0].file_path || '')}
                   alt={memo.images[0].alt_text || 'Memo Image'}
                   className="w-full h-auto object-cover"
                 />
@@ -33,11 +33,7 @@ export const MemoList = React.memo(({ memoData, onEdit, onDelete }: MemoListProp
             <p className="break-all">{memo.content}</p>
           </CardContent>
           <CardFooter>
-            <ul>
-              {memo?.tags?.map((tag, index) => (
-                <li key={index}>{tag}</li>
-              ))}
-            </ul>
+            <ul>{memo?.tags?.map((tag, index) => <li key={index}>{tag}</li>)}</ul>
           </CardFooter>
           <CardFooter>
             <div className="w-full flex gap-2 justify-end">

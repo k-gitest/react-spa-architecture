@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Memo, MemoFormData } from '@/features/memo/types/memo-form-data';
+import { Memo, MemoFormData, Image } from '@/features/memo/types/memo-form-data';
 import { useSessionStore } from '@/hooks/use-session-store';
 import {
   addCategoryService,
@@ -28,6 +28,7 @@ import { useLocalFileManager } from '@/hooks/use-local-file-manager';
 import { useItemFormManager } from '@/features/memo/hooks/use-item-form-manager';
 import { useMemoImagePreparation } from '@/features/memo/hooks/use-memo-image-preparation';
 
+// categoriesテーブルから取得したデータ型定義
 interface CategoryOption {
   id: number;
   name: string;
@@ -36,24 +37,13 @@ interface CategoryOption {
   updated_at: string;
 }
 
+// tagsテーブルから取得したデータ型定義
 interface TagOption {
   id: number;
   name: string;
   user_id: string;
   created_at: string;
   updated_at: string;
-}
-
-interface Image {
-  created_at: string;
-  file_name: string;
-  file_path: string;
-  file_size: number | null;
-  id: string;
-  mime_type: string | null;
-  storage_object_id: string | null;
-  updated_at: string;
-  user_id: string;
 }
 
 export const MemoManager = () => {
@@ -297,7 +287,7 @@ export const MemoManager = () => {
     [fetchTags],
   );
 
-  // タグ操作オブジェクト
+  // タグ操作オブジェクト memo-manager-uiへ渡す
   const tagOperations = {
     fetchData: { data: tags },
     addItem: addTag,
@@ -306,7 +296,7 @@ export const MemoManager = () => {
     useGetItem: useGetTag,
   };
 
-  // カテゴリ操作オブジェクト
+  // カテゴリ操作オブジェクト  memo-manager-uiへ渡す
   const categoryOperations = {
     fetchData: { data: categories },
     addItem: addCategory,
@@ -416,6 +406,7 @@ export const MemoManager = () => {
   );
 
   // フォーム用のカテゴリ・タグデータを準備
+  // categoriesとtagsをMemoFormで使用する形式に変換
   const formattedCategories = useMemo(() => {
     if (!categories) return null;
     return categories.map((cat) => ({

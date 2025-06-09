@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write src",
     "migrate": "dotenv -e .env.local -- npx prisma migrate dev",
     "generate": "dotenv -e .env.local -- npx prisma generate",
