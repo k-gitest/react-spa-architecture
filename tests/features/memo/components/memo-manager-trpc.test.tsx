@@ -1,9 +1,10 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { MemoManagerTrpc } from '@/features/memo/components/memo-manager-trpc';
 import { useMemos as useMemosMock } from '@/features/memo/hooks/use-memo-queries-trpc';
 import { useSessionStore as useSessionStoreMock } from '@/hooks/use-session-store';
 import userEvent from '@testing-library/user-event';
 import { vi, Mock } from 'vitest';
+import { renderWithQueryClient } from '@tests/test-utils';
 
 // セッションモック
 vi.mock('@/hooks/use-session-store', () => ({
@@ -92,7 +93,9 @@ describe('MemoManagerTrpc', () => {
       })
     );
 
-    render(<MemoManagerTrpc />);
+    // QueryClientProviderでラップ
+    renderWithQueryClient(<MemoManagerTrpc />);
+
     // タブの「メモ追加」をクリック
     await user.click(screen.getByRole('tab', { name: 'メモ追加' }));
 
@@ -139,6 +142,15 @@ describe('MemoManagerTrpc', () => {
           importance: 'low',
           category: '1',
           tags: ['recents'],
+          fileMetadata: [
+            {
+              alt_text: '',
+              description: '',
+            },
+          ],
+          files: [],
+          image_ids: [],
+          images: [],
         },
         'test-user-id'
       );

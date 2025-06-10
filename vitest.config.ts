@@ -12,6 +12,7 @@ export default defineConfig({
     include: ["tests/**/*.test.{js,ts,jsx,tsx}"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@tests": path.resolve(__dirname, "./tests"),
     },
   },
 });

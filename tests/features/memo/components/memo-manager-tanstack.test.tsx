@@ -1,9 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import { MemoManagerTanstack } from '@/features/memo/components/memo-manager-tanstack';
 import { useMemos as useMemosMock } from '@/features/memo/hooks/use-memo-queries-tanstack';
 import { useSessionStore as useSessionStoreMock } from '@/hooks/use-session-store';
 import userEvent from '@testing-library/user-event';
 import { vi, Mock } from 'vitest';
+import { renderWithQueryClient } from '@tests/test-utils';
 
 // セッションモック
 vi.mock('@/hooks/use-session-store', () => ({
@@ -81,7 +82,7 @@ describe('MemoManagerTanstack', () => {
   it('ローディングを描画', () => {
     (useMemosMock as unknown as Mock).mockReturnValue(createUseMemosMockReturn({ isMemosLoading: true }));
 
-    render(<MemoManagerTanstack />);
+    renderWithQueryClient(<MemoManagerTanstack />);
     expect(screen.getByText('Loading memos...')).toBeInTheDocument();
   });
 
@@ -93,7 +94,7 @@ describe('MemoManagerTanstack', () => {
       }),
     );
 
-    render(<MemoManagerTanstack />);
+    renderWithQueryClient(<MemoManagerTanstack />);
     expect(screen.getByText(/Error loading memos: Failed to load memos/i)).toBeInTheDocument();
   });
 
@@ -123,7 +124,7 @@ describe('MemoManagerTanstack', () => {
       }),
     );
 
-    render(<MemoManagerTanstack />);
+    renderWithQueryClient(<MemoManagerTanstack />);
     expect(screen.getByText('メモ1')).toBeInTheDocument();
     expect(screen.getByText('メモ2')).toBeInTheDocument();
   });
@@ -140,7 +141,7 @@ describe('MemoManagerTanstack', () => {
       }),
     );
 
-    render(<MemoManagerTanstack />);
+    renderWithQueryClient(<MemoManagerTanstack />);
     // タブの「メモ追加」をクリック
     await user.click(screen.getByRole('tab', { name: 'メモ追加' }));
 
@@ -206,7 +207,7 @@ describe('MemoManagerTanstack', () => {
       }),
     );
 
-    render(<MemoManagerTanstack />);
+    renderWithQueryClient(<MemoManagerTanstack />);
     const deleteButton = screen.getByTestId('delete-memo-1');
     fireEvent.click(deleteButton);
     expect(deleteMemoMock).toHaveBeenCalledWith('1');
@@ -215,7 +216,7 @@ describe('MemoManagerTanstack', () => {
   it('カテゴリ・タグ設定タブを表示', () => {
     (useMemosMock as unknown as Mock).mockReturnValue(createUseMemosMockReturn());
 
-    render(<MemoManagerTanstack />);
+    renderWithQueryClient(<MemoManagerTanstack />);
     fireEvent.click(screen.getByRole('tab', { name: 'カテゴリ設定' }));
     expect(screen.getByText(/カテゴリ/i)).toBeInTheDocument();
 

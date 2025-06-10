@@ -71,13 +71,13 @@ describe('MemoManagerUI', () => {
   };
 
   it('「メモはまだありません」と追加ボタンが表示される', () => {
-    render(<MemoManagerUI {...baseProps} />);
+    render(<MemoManagerUI {...baseProps} ><></></MemoManagerUI>);
     expect(screen.getByText('メモはまだありません')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'メモ追加' })).toBeInTheDocument();
   });
 
   it('メモ追加ボタンを押すとsetTabValueが呼ばれる', () => {
-    render(<MemoManagerUI {...baseProps} />);
+    render(<MemoManagerUI {...baseProps} ><></></MemoManagerUI>);
     fireEvent.click(screen.getByRole('button', { name: 'メモ追加' }));
     expect(mockSetTabValue).toHaveBeenCalledWith('addMemo');
   });
@@ -99,24 +99,40 @@ describe('MemoManagerUI', () => {
         },
       ],
     };
-    render(<MemoManagerUI {...props} />);
+    render(<MemoManagerUI {...props} ><></></MemoManagerUI>);
     expect(screen.getByText('タイトル1')).toBeInTheDocument();
   });
 
   it('タブ切り替えでフォームやマネージャーが表示される', () => {
     // メモ追加タブ
-    let { unmount } = render(<MemoManagerUI {...baseProps} tabValue="addMemo" />);
+    let { unmount } = render(
+      <MemoManagerUI
+        {...baseProps}
+        tabValue="addMemo"
+        // childrenにinputを渡す
+      >
+        <input placeholder="タイトルを入力してください" />
+      </MemoManagerUI>,
+    );
     expect(screen.getByPlaceholderText('タイトルを入力してください')).toBeInTheDocument();
 
     // カテゴリ設定タブ
     unmount();
-    ({ unmount } = render(<MemoManagerUI {...baseProps} tabValue="categorySetting" />));
+    ({ unmount } = render(
+      <MemoManagerUI {...baseProps} tabValue="categorySetting">
+        <input placeholder="タイトルを入力してください" />
+      </MemoManagerUI>,
+    ));
     expect(screen.getByRole('tab', { name: 'カテゴリ設定' })).toBeInTheDocument();
     expect(screen.getByText(/カテゴリ.*まだありません/)).toBeInTheDocument();
 
     // タグ設定タブ
     unmount();
-    render(<MemoManagerUI {...baseProps} tabValue="tagSetting" />);
+    render(
+      <MemoManagerUI {...baseProps} tabValue="tagSetting">
+        <input placeholder="タイトルを入力してください" />
+      </MemoManagerUI>,
+    );
     expect(screen.getAllByRole('tab', { name: 'タグ設定' }).length).toBeGreaterThan(0);
     expect(screen.getByText(/タグ.*まだありません/)).toBeInTheDocument();
   });

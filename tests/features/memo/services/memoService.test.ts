@@ -33,6 +33,7 @@ describe('memoService', () => {
         updated_at: new Date().toISOString(),
         category: [{ category: { id: 1, name: 'Category1' } }],
         tags: [{ tag: { id: 1, name: 'Tag1' } }],
+        images: [],
       },
     ];
 
@@ -51,6 +52,7 @@ describe('memoService', () => {
         updated_at: expect.any(String),
         category: 'Category1',
         tags: ['Tag1'],
+        images: [],
       },
     ]);
   });
@@ -69,7 +71,7 @@ describe('memoService', () => {
 
     await expect(addMemoService(input)).resolves.toBeUndefined();
 
-    expect(supabase.functions.invoke).toHaveBeenCalledWith('save-memo', {
+    expect(supabase.functions.invoke).toHaveBeenCalledWith('save-memo/drizzle', {
       body: {
         ...input,
         category: 1,
@@ -99,6 +101,8 @@ describe('memoService', () => {
       p_importance: input.importance,
       p_category_id: 1,
       p_tag_ids: [2],
+      p_image_ids: [],
+      p_image_metadatas: [],
     });
   });
 
@@ -108,6 +112,7 @@ describe('memoService', () => {
       content: 'memo',
       category: [{ category: { id: 1, name: 'Cat' } }],
       tags: [{ tag: { id: 1, name: 'Tag' } }],
+      images: [],
     };
 
     const mockSelect = vi.fn().mockReturnValue({
@@ -125,6 +130,7 @@ describe('memoService', () => {
       content: 'memo',
       category: '1',
       tags: ['1'],
+      images: [],
     });
   });
 
@@ -172,6 +178,8 @@ describe('memoService', () => {
       p_importance: updates.importance,
       p_category_id: 1,
       p_tag_ids: [2],
+      p_image_ids: [],
+      p_image_metadatas: [],
     });
   });
 

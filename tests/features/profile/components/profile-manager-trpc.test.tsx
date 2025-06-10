@@ -3,7 +3,7 @@ import { ProfileManager } from '@/features/profile/components/profile-manager-tr
 import { useProfile } from '@/features/profile/hooks/use-profile-queries-trpc';
 import { useSessionStore } from '@/hooks/use-session-store';
 import userEvent from '@testing-library/user-event';
-import { getExtensionIfAllowed, cn, convertFileToBase64 } from '@/lib/utils';
+import { getExtensionIfAllowed, convertFileToBase64 } from '@/lib/utils';
 
 vi.mock('@/hooks/use-session-store', () => ({
   useSessionStore: vi.fn(),

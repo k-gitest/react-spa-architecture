@@ -3,7 +3,7 @@ import { ProfileManager } from '@/features/profile/components/profile-manager-ta
 import { useProfile } from '@/features/profile/hooks/use-profile-queries-tanstack';
 import { useSessionStore } from '@/hooks/use-session-store';
 import userEvent from '@testing-library/user-event';
-import { getExtensionIfAllowed, cn } from '@/lib/utils';
+import { getExtensionIfAllowed } from '@/lib/utils';
 
 vi.mock('@/hooks/use-session-store', () => ({
   useSessionStore: vi.fn(),

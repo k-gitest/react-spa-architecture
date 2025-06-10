@@ -64,7 +64,7 @@ describe('ResponsiveDialog', () => {
   });
 
   it('モバイル環境で正しくDrawerをレンダリングする', () => {
-    render(<ResponsiveDialog {...defaultProps} isDesktop={false} />);
+    render(<ResponsiveDialog {...defaultProps} isDesktop={false} hasFooter={true} />);
     
     // DrawerTriggerの中のボタンが存在することを確認
     const triggerButton = screen.getByTestId('trigger-button');

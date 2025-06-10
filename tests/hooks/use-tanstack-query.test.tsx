@@ -1,6 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useApiQuery, useApiMutation } from '@/hooks/use-tanstack-query';
-import { queryClientWrapper } from '../setup';
+import { queryClientWrapper } from '@tests/test-utils';
 
 describe('useApiQuery', () => {
   it('クエリが成功したらonSuccessを呼び出す', async () => {
