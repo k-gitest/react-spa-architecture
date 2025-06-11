@@ -8,21 +8,6 @@ const TestComponent = ({ query }: { query: string }) => {
 };
 
 describe('useMediaQuery', () => {
-  beforeAll(() => {
-    // window.matchMedia を Vitest 形式でモック
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
-        matches: query === '(min-width: 768px)', // 条件を任意に調整
-        media: query,
-        onchange: null,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
-    });
-  });
-
   it('メディアクエリが一致するとtrueを返す', () => {
     render(<TestComponent query="(min-width: 768px)" />);
     expect(screen.getByText('Matched')).toBeInTheDocument();

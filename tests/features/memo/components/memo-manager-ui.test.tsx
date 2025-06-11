@@ -2,32 +2,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoManagerUI } from '@/features/memo/components/memo-manager-ui';
 
 describe('MemoManagerUI', () => {
-  beforeAll(() => {
-    // 必要なブラウザAPIのモック
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
-        matches: query === '(min-width: 768px)',
-        media: query,
-        onchange: null,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
-    });
-
-    HTMLElement.prototype.scrollIntoView = vi.fn();
-    HTMLElement.prototype.hasPointerCapture = vi.fn();
-    HTMLElement.prototype.setPointerCapture = vi.fn();
-    HTMLElement.prototype.releasePointerCapture = vi.fn();
-
-    global.ResizeObserver = class ResizeObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    };
-  });
-
   const mockSetTabValue = vi.fn();
   const mockHandleEditClick = vi.fn();
   const mockHandleDeleteClick = vi.fn();

@@ -53,30 +53,6 @@ const createUseMemosMockReturn = (overrides = {}) => ({
 describe('MemoManagerTanstack', () => {
   beforeAll(() => {
     (useSessionStoreMock as unknown as Mock).mockImplementation((selector) => selector(defaultSession));
-
-    // 必要なブラウザAPIのモック
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
-        matches: query === '(min-width: 768px)',
-        media: query,
-        onchange: null,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
-    });
-
-    HTMLElement.prototype.scrollIntoView = vi.fn();
-    HTMLElement.prototype.hasPointerCapture = vi.fn();
-    HTMLElement.prototype.setPointerCapture = vi.fn();
-    HTMLElement.prototype.releasePointerCapture = vi.fn();
-
-    global.ResizeObserver = class ResizeObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    };
   });
 
   it('ローディングを描画', () => {
@@ -164,7 +140,6 @@ describe('MemoManagerTanstack', () => {
     await user.click(screen.getByRole('button', { name: /カテゴリー追加/i }));
     const categoryInput = await screen.findByPlaceholderText('カテゴリーを入力してください');
     await user.type(categoryInput, '新カテゴリ');
-    // 「追加」→「送信」に修正
     await user.click(screen.getByRole('button', { name: /送信/i }));
 
     // タグ追加ダイアログを開いてタグ名を入力し追加
@@ -173,7 +148,7 @@ describe('MemoManagerTanstack', () => {
     await user.type(tagInput, '新タグ');
     await user.click(screen.getByRole('button', { name: /送信/i }));
 
-    // 送信
+    // メモ送信
     await user.click(screen.getByRole('button', { name: /送信/i }));
 
     expect(addMemoMock).toHaveBeenCalledWith(

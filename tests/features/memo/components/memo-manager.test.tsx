@@ -69,24 +69,6 @@ describe('MemoManager', () => {
       HTMLElement.prototype.scrollIntoView = function () {};
     }
 
-    // window.matchMedia を Vitest 形式でモック
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
-        matches: query === '(min-width: 768px)', // 条件を任意に調整
-        media: query,
-        onchange: null,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
-    });
-
-    global.ResizeObserver = class ResizeObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    };
   });
 
   it('メモリストを描画', async () => {

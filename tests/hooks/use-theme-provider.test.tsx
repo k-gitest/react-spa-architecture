@@ -28,7 +28,7 @@ const matchMediaMock = (matches: boolean) =>
     addListener: vi.fn(),
     removeListener: vi.fn(),
   }) as unknown as MediaQueryList;
-
+// setupのmatchMediaの内容を上書きする
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn(() => matchMediaMock(false)), // デフォルトは light に設定
@@ -98,12 +98,6 @@ describe('ThemeProvider', () => {
         </div>
       );
     };
-
-    // システム設定を light にしておく（render より前に設定）
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn(() => matchMediaMock(false)),
-    });
 
     let renderResult;
     await act(async () => {
