@@ -16,50 +16,19 @@ vi.mock('@/errors/error-handler', () => ({
 
 // FormWrapper / FormInput のモック
 vi.mock('@/components/form/form-parts', async () => {
-  const actual = await vi.importActual<typeof import('@/components/form/form-parts')>(
-    '@/components/form/form-parts'
-  );
-  return {
-    ...actual,
-    FormWrapper: ({ children, onSubmit, form }: any) => (
-      <FormProvider {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>{children}</form>
-      </FormProvider>
-    ),
-    FormInput: ({ label, name, placeholder }: any) => {
-      const { register } = useFormContext();
-      return (
-        <div>
-          <label htmlFor={name}>{label}</label>
-          <input
-            {...register(name)}
-            id={name}
-            name={name}
-            placeholder={placeholder}
-          />
-        </div>
-      );
-    },
-  };
+  return await import('@tests/mocks/form-parts');
 });
 
 // AccountFormはmock後にimport
 import { AccountForm } from '@/features/auth/components/auth-form';
 
 // モックの取得
-const {
-  signInWithPasswordAuthService,
-  signUpAuthService,
-  signInWithOAuthService,
-} = vi.mocked(
+const { signInWithPasswordAuthService, signUpAuthService, signInWithOAuthService } = vi.mocked(
   await import('@/features/auth/services/authService'),
-  { partial: true }
+  { partial: true },
 );
 
-const { errorHandler } = vi.mocked(
-  await import('@/errors/error-handler'),
-  { partial: true }
-);
+const { errorHandler } = vi.mocked(await import('@/errors/error-handler'), { partial: true });
 
 describe('AccountForm (authService) のテスト', () => {
   beforeEach(() => {
@@ -141,8 +110,9 @@ describe('AccountForm (authService) のテスト', () => {
     let resolvePromise: any;
     const dummyUser = {} as User;
     const dummySession = {} as Session;
-    const mockPromise: Promise<{ user: User; session: Session }> =
-      new Promise((res) => (resolvePromise = () => res({ user: dummyUser, session: dummySession })));
+    const mockPromise: Promise<{ user: User; session: Session }> = new Promise(
+      (res) => (resolvePromise = () => res({ user: dummyUser, session: dummySession })),
+    );
     signUpAuthService.mockReturnValue(mockPromise);
 
     render(<AccountForm type="signup" />);
@@ -168,8 +138,9 @@ describe('AccountForm (authService) のテスト', () => {
     // ダミーのUser/Sessionを用意
     const dummyUser = {} as User;
     const dummySession = {} as Session;
-    const mockPromise: Promise<{ user: User; session: Session }> =
-      new Promise((res) => (resolvePromise = () => res({ user: dummyUser, session: dummySession })));
+    const mockPromise: Promise<{ user: User; session: Session }> = new Promise(
+      (res) => (resolvePromise = () => res({ user: dummyUser, session: dummySession })),
+    );
     signInWithPasswordAuthService.mockReturnValue(mockPromise);
 
     render(<AccountForm type="login" />);

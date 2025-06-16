@@ -16,30 +16,6 @@ vi.mock('@/lib/trpc', () => ({
   syncZodErrors: vi.fn(),
 }));
 
-vi.mock('@/features/memo/components/memo-item-add-dialog', () => ({
-  MemoItemAddDialog: ({
-    buttonTitle,
-    onSubmit,
-    setOpen,
-  }: {
-    buttonTitle: string;
-    onSubmit: () => void;
-    setOpen: (open: boolean) => void;
-  }) => {
-    return (
-      <button
-        data-testid={`button-${buttonTitle.replace(/\s+/g, '-').toLowerCase()}`}
-        onClick={() => {
-          onSubmit();
-          setOpen(false);
-        }}
-      >
-                {buttonTitle}     {' '}
-      </button>
-    );
-  },
-}));
-
 // MemoItemAddDialogのモック
 vi.mock('@/features/memo/components/memo-item-add-dialog', () => ({
   MemoItemAddDialog: ({
@@ -59,159 +35,15 @@ vi.mock('@/features/memo/components/memo-item-add-dialog', () => ({
           setOpen(false);
         }}
       >
-                {buttonTitle}     {' '}
+        {buttonTitle}
       </button>
     );
   },
 }));
 
-// FormPartsのモックを改善
-vi.mock('@/components/form/form-parts', () => {
-  return {
-    FormWrapper: ({ children, onSubmit, form }: { children: ReactNode; onSubmit: (data: any) => void; form?: any }) => {
-      // カスタム送信ハンドラー
-      const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault(); // フォームの値を直接渡す
-        onSubmit(form.getValues());
-      };
-
-      return (
-        <Form {...form}>
-                   {' '}
-          <form data-testid="memo-form" onSubmit={handleSubmit}>
-                        {children}           {' '}
-            <button type="submit" data-testid="submit-button">
-              送信
-            </button>
-                     {' '}
-          </form>
-                 {' '}
-        </Form>
-      );
-    },
-    FormInput: ({ label, name, placeholder }: { label: string; name: string; placeholder?: string }) => {
-      return (
-        <div>
-                    <label htmlFor={name}>{label}</label>         {' '}
-          <input id={name} aria-label={label} name={name} placeholder={placeholder} data-testid={`input-${name}`} />   
-             {' '}
-        </div>
-      );
-    },
-    FormTextArea: ({ label, name, placeholder }: { label: string; name: string; placeholder?: string }) => {
-      return (
-        <div>
-                    <label htmlFor={name}>{label}</label>         {' '}
-          <textarea
-            id={name}
-            aria-label={label}
-            name={name}
-            placeholder={placeholder}
-            data-testid={`textarea-${name}`}
-          />
-                 {' '}
-        </div>
-      );
-    },
-    FormSelect: ({
-      label,
-      name,
-      options,
-      placeholder,
-    }: {
-      label: string;
-      name: string;
-      options: Array<{ value: string; label: string }>;
-      placeholder?: string;
-    }) => {
-      return (
-        <div aria-label={label} data-testid={`select-${name}`}>
-                    <label htmlFor={name}>{label}</label>         {' '}
-          <select id={name} name={name} role="combobox">
-                        {placeholder && <option value="">{placeholder}</option>}           {' '}
-            {options.map((option) => (
-              <option key={option.value} value={option.value}>
-                                {option.label}             {' '}
-              </option>
-            ))}
-                     {' '}
-          </select>
-                 {' '}
-        </div>
-      );
-    },
-    FormRadioGroup: ({
-      label,
-      name,
-      options,
-    }: {
-      label: string;
-      name: string;
-      options: Array<{ value: string; label: string }>;
-    }) => {
-      return (
-        <div aria-label={label} role="radiogroup" data-testid={`radio-group-${name}`}>
-                    <span>{label}</span>         {' '}
-          {options.map((option) => (
-            <div key={option.value}>
-                           {' '}
-              <input
-                type="radio"
-                id={`${name}-${option.value}`}
-                name={name}
-                value={option.value}
-                aria-label={option.label}
-                role="radio"
-                defaultChecked={option.value === 'high'}
-                aria-checked={option.value === 'high' ? 'true' : 'false'} // 明示的に設定
-                data-testid={`radio-${option.value}`}
-              />
-                            <label htmlFor={`${name}-${option.value}`}>{option.label}</label>           {' '}
-            </div>
-          ))}
-                 {' '}
-        </div>
-      );
-    },
-    FormCheckboxGroup: ({
-      label,
-      name,
-      options,
-    }: {
-      label: string;
-      name: string;
-      options: Array<{ value: string; label: string }>;
-    }) => {
-      const selectedTags = name === 'tags' && window.initialValues ? window.initialValues.tags : [];
-
-      return (
-        <div aria-label={label} data-testid={`checkbox-group-${name}`}>
-                    <span>{label}</span>         {' '}
-          {options.map((option) => {
-            const isChecked = selectedTags.includes(option.value);
-
-            return (
-              <div key={option.value}>
-                               {' '}
-                <input
-                  type="checkbox"
-                  id={`${name}-${option.value}`}
-                  name={name}
-                  value={option.value}
-                  aria-label={option.label}
-                  role="checkbox"
-                  defaultChecked={isChecked}
-                  data-testid={`checkbox-${option.value}`}
-                />
-                                <label htmlFor={`${name}-${option.value}`}>{option.label}</label>           {' '}
-              </div>
-            );
-          })}
-                 {' '}
-        </div>
-      );
-    },
-  };
+// FormPartsのモック
+vi.mock('@/components/form/form-parts', async () => {
+  return await import('@tests/mocks/form-parts');
 });
 
 // グローバルに型定義を追加
@@ -313,7 +145,7 @@ describe('MemoForm Component', () => {
     expect(contentTextarea.value).toBe(''); // 重要度のデフォルト値が "high" で、「大」と表示されていることを確認
 
     const highRadioButton = screen.getByRole('radio', { name: '大' });
-    expect(highRadioButton).toHaveAttribute('aria-checked', 'true');
+    expect(highRadioButton).toBeChecked();
   });
 
   it('初期値でレンダリングされる', async () => {
@@ -326,14 +158,18 @@ describe('MemoForm Component', () => {
       tags: ['home', 'documents'],
     };
 
-    renderMemoForm({ initialValues: window.initialValues }); // 値をテスト
+    renderMemoForm({ initialValues: window.initialValues }); // 値をテスト 
 
     const titleInput = screen.getByTestId('input-title') as HTMLInputElement;
+    expect(titleInput.value).toBe('テストタイトル');
+
     await user.clear(titleInput);
     await user.type(titleInput, 'タイトルを手入力');
     expect(titleInput.value).toBe('タイトルを手入力');
 
     const contentTextarea = screen.getByTestId('textarea-content') as HTMLTextAreaElement;
+    expect(contentTextarea.value).toBe('テスト内容');
+
     await user.clear(contentTextarea);
     await user.type(contentTextarea, '内容を手入力');
     expect(contentTextarea.value).toBe('内容を手入力');
