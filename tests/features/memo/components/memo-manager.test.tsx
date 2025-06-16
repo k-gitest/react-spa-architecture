@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoManager } from '@/features/memo/components/memo-manager';
 import {
   fetchMemosService,
-  addMemoRPC,  // addMemoService → addMemoRPC に変更
+  addMemoRPC,
   getMemoService,
   updateMemoService,
   deleteMemoService,
@@ -39,7 +39,7 @@ vi.mock('@/hooks/use-session-store', () => ({
 // サービス関数をモック化
 vi.mock('@/features/memo/services/memoService', () => ({
   fetchMemosService: vi.fn(),
-  addMemoRPC: vi.fn(),  // addMemoService → addMemoRPC に変更
+  addMemoRPC: vi.fn(),
   getMemoService: vi.fn(),
   updateMemoService: vi.fn(),
   deleteMemoService: vi.fn(),

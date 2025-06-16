@@ -21,72 +21,32 @@ vi.mock('@/features/account/hooks/use-account-queries-trpc', () => ({
   }),
 }));
 
-vi.mock('react-hook-form', () => ({
-  useForm: vi.fn().mockReturnValue({
-    register: vi.fn(),
-    handleSubmit: vi.fn((fn) => fn),
-    formState: { errors: {} },
-    reset: vi.fn(),
-    setValue: vi.fn(),
-    getValues: vi.fn(),
-    control: {},
-  }),
-}));
-
-// インターフェースの定義
-interface DialogProps {
-  children?: React.ReactNode;
-  buttonTitle?: string;
-  dialogTitle?: string;
-  dialogDescription?: string;
-  isDesktop?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  className?: string;
-}
-
-interface FormWrapperProps {
-  children?: React.ReactNode;
-  onSubmit: (data: any) => void;
-  form: any;
-}
-
-interface FormInputProps {
-  name: string;
-  label: string;
-  placeholder?: string;
-}
+vi.mock('react-hook-form', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useForm: vi.fn().mockReturnValue({
+      register: vi.fn(),
+      handleSubmit: vi.fn((fn) => fn),
+      formState: { errors: {} },
+      reset: vi.fn(),
+      setValue: vi.fn(),
+      getValues: vi.fn(() => ({ email: 'new@example.com', password: 'newpassword' })),
+      control: {},
+    }),
+    FormProvider: actual.FormProvider,
+  };
+});
 
 // ResponsiveDialogのモック
-vi.mock('@/components/responsive-dialog', () => ({
-  ResponsiveDialog: ({ children, buttonTitle, dialogTitle, onOpenChange }: DialogProps) => {
-    return (
-      <div data-testid={`dialog-${buttonTitle}`}>
-        <button onClick={() => onOpenChange && onOpenChange(true)} data-testid={`open-dialog-${buttonTitle}`}>
-          {buttonTitle}
-        </button>
-        <div data-testid={`dialog-content-${buttonTitle}`}>{children}</div>
-      </div>
-    );
-  },
-}));
+vi.mock('@/components/responsive-dialog', async () => {
+  return await import('@tests/mocks/responsive-dialog');
+});
 
 // FormWrapperとFormInputのモック
-vi.mock('@/components/form/form-parts', () => ({
-  FormWrapper: ({ children, onSubmit }: FormWrapperProps) => (
-    <form
-      data-testid="form-wrapper"
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit({ email: 'new@example.com', password: 'newpassword' });
-      }}
-    >
-      {children}
-    </form>
-  ),
-  FormInput: ({ name, label, placeholder }: FormInputProps) => (
-    <input data-testid={`input-${name}`} name={name} aria-label={label} placeholder={placeholder} />
-  ),
-}));
+vi.mock('@/components/form/form-parts', async () => {
+  return await import('@tests/mocks/form-parts');
+});
 
 // useSessionStoreモックの初期値を設定
 let defaultSession: {

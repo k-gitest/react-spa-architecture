@@ -9,32 +9,9 @@ const mockResetPassword = vi.fn();
 const mockDeleteAccount = vi.fn();
 
 // ダイアログのモック
-vi.mock('@/components/responsive-dialog', () => ({
-  ResponsiveDialog: ({
-    children,
-    buttonTitle,
-    dialogTitle,
-    dialogDescription,
-    ...rest
-  }: {
-    children: React.ReactNode;
-    buttonTitle: string;
-    dialogTitle: string;
-    dialogDescription: string;
-    [key: string]: any;
-  }) => (
-    <div data-testid={`dialog-${buttonTitle}`}>
-      <button data-testid={`open-dialog-${buttonTitle}`} {...rest}>
-        {buttonTitle}
-      </button>
-      <div data-testid={`dialog-content-${buttonTitle}`}>
-        <h2>{dialogTitle}</h2>
-        <p>{dialogDescription}</p>
-        {children}
-      </div>
-    </div>
-  ),
-}));
+vi.mock('@/components/responsive-dialog', async () => {
+  return await import('@tests/mocks/responsive-dialog');
+});
 
 // useMediaQuery のモック
 vi.mock('@/hooks/use-media-query', () => ({
@@ -51,39 +28,27 @@ vi.mock('@/features/account/hooks/use-account-queries-tanstack', () => ({
 }));
 
 // react-hook-form のモック
-vi.mock('react-hook-form', () => {
-  //rhfのuseFormプロパティ設定
-  const useFormMock = vi.fn().mockReturnValue({
-    register: vi.fn(),
-    handleSubmit: vi.fn((fn) => fn),
-    formState: { errors: {} },
-    reset: vi.fn(),
-    setValue: vi.fn(),
-    getValues: vi.fn(),
-    control: {},
-  });
-  const FormProviderMock = ({ children }: { children: React.ReactNode }) => <>{children}</>;
-  const ControllerMock = ({ field, children }: any) => (typeof children === 'function' ? children({ ...field }) : null);
-  return { useForm: useFormMock, FormProvider: FormProviderMock, Controller: ControllerMock };
+vi.mock('react-hook-form', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useForm: vi.fn().mockReturnValue({
+      register: vi.fn(),
+      handleSubmit: vi.fn((fn) => fn),
+      formState: { errors: {} },
+      reset: vi.fn(),
+      setValue: vi.fn(),
+      getValues: vi.fn(() => ({ email: 'new@example.com', password: 'newpassword' })),
+      control: {},
+    }),
+    FormProvider: actual.FormProvider,
+  };
 });
 
 // FormWrapperとFormInput のモック
-vi.mock('@/components/form/form-parts', () => ({
-  FormWrapper: ({ children, onSubmit }: any) => (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit({ email: 'new@example.com', password: 'newpassword' });
-      }}
-      data-testid="form-wrapper"
-    >
-      {children}
-    </form>
-  ),
-  FormInput: ({ label, name, placeholder }: any) => (
-    <input aria-label={label} name={name} placeholder={placeholder} data-testid={`input-${name}`} />
-  ),
-}));
+vi.mock('@/components/form/form-parts', async () => {
+  return await import('@tests/mocks/form-parts');
+});
 
 // useSessionStoreモックの初期値を設定
 let defaultSession: {

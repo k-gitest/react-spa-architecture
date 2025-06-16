@@ -8,22 +8,9 @@ vi.mock('@/features/auth/hooks/use-auth-queries-tanstack', () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock('@/components/form/form-parts', () => ({
-  FormWrapper: ({ children, onSubmit, form }: any) => (
-    <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>{children}</form>
-    </FormProvider>
-  ),
-  FormInput: ({ label, name, placeholder }: any) => {
-    const { register } = useFormContext();
-    return (
-      <div>
-        <label htmlFor={name}>{label}</label>
-        <input {...register(name)} id={name} name={name} placeholder={placeholder} />
-      </div>
-    );
-  },
-}));
+vi.mock('@/components/form/form-parts', async () => {
+    return await import('@tests/mocks/form-parts');
+});
 
 describe('AccountForm コンポーネントのテスト', () => {
   const signUp = vi.fn();

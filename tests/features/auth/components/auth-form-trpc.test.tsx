@@ -24,26 +24,7 @@ vi.mock('@/features/auth/hooks/use-auth-queries-trpc', () => ({
 
 // FormWrapper / FormInput のモック（FormContext 反映）
 vi.mock('@/components/form/form-parts', async () => {
-  const actual = await vi.importActual<typeof import('@/components/form/form-parts')>(
-    '@/components/form/form-parts'
-  );
-  return {
-    ...actual,
-    FormWrapper: ({ children, onSubmit, form }: any) => (
-      <FormProvider {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>{children}</form>
-      </FormProvider>
-    ),
-    FormInput: ({ label, name, placeholder }: any) => {
-      const { register } = useFormContext();
-      return (
-        <div>
-          <label htmlFor={name}>{label}</label>
-          <input {...register(name)} id={name} name={name} placeholder={placeholder} />
-        </div>
-      );
-    },
-  };
+  return await import('@tests/mocks/form-parts');
 });
 
 describe('AccountForm (trpc版) のテスト', () => {

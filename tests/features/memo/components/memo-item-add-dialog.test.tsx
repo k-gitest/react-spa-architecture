@@ -2,11 +2,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoItemAddDialog } from '@/features/memo/components/memo-item-add-dialog';
 
 // ResponsiveDialogとuseMediaQueryのモック
-vi.mock('@/components/responsive-dialog', () => ({
-  ResponsiveDialog: ({ children, ...props }: any) => (
-    <div data-testid="responsive-dialog" {...props}>{children}</div>
-  ),
-}));
+vi.mock('@/components/responsive-dialog', async () => {
+  return await import('@tests/mocks/responsive-dialog');
+});
+
 vi.mock('@/hooks/use-media-query', () => ({
   useMediaQuery: () => true,
 }));
@@ -26,7 +25,7 @@ describe('MemoItemAddDialog', () => {
 
   it('ダイアログのタイトル・説明・ボタン・インプットが表示される', () => {
     render(<MemoItemAddDialog {...defaultProps} />);
-    expect(screen.getByTestId('responsive-dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('dialog-カテゴリー追加')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('カテゴリー名を入力してください')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '送信' })).toBeInTheDocument();
   });
