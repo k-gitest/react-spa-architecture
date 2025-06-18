@@ -11,6 +11,7 @@ export const VariantToggle = () => {
       <Button 
         onClick={toggleVariant}
         className="flex items-center gap-2"
+        data-testid="variant-toggle"
       >
         <RotateCw className="h-4 w-4" />
         <span>{currentVariant.name}</span>

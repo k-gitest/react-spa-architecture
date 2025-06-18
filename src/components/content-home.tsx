@@ -10,16 +10,16 @@ export const ContentHome = () => {
       <div className="flex gap-2">
         {!session && (
           <>
-            <Button>
+            <Button data-testid="register-button-content-home">
               <Link to="/register">新規登録</Link>
             </Button>
-            <Button>
+            <Button data-testid="login-button-content-home">
               <Link to="/login">ログイン</Link>
             </Button>
           </>
         )}
         {session && (
-          <Button>
+          <Button data-testid="dashboard-button-content-home">
             <Link to="/dashboard">dashboard</Link>
           </Button>
         )}

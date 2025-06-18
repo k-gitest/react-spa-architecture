@@ -22,7 +22,7 @@ export function ModeToggle() {
   };
 
   return (
-    <Toggle aria-label="Toggle theme mode" onClick={toggleTheme}>
+    <Toggle aria-label="Toggle theme mode" onClick={toggleTheme} data-testid="theme-mode-toggle">
       {theme === 'dark' && <Laptop className="h-4 w-4" />}
       {theme === 'system' && <Sun className="h-4 w-4" />}
       {theme === 'light' && <Moon className="h-4 w-4" />}

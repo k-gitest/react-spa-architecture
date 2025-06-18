@@ -131,3 +131,10 @@ dist
 
 # prisma
 ./generated
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/e2e/pages/*.spec.ts-snapshots/
