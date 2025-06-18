@@ -463,3 +463,7 @@ const { isPending, data } = useApiMutation({
 | supabaseClient + trigger functions | 普通 | 低 | 高 |
 | supabaseClient + tanstack Query + edge functions + drizzle | 中 | 中 | 中
 | supabaseClient + tRPC + edge functions + prisma | 多 | 高 | 中 |
+
+- edge functionsではコールドスタートがあるためアクセスによってパフォーマンスが悪化する場合があります
+- tanstack Query、tRPC、ORMは多少のオーバーヘッドはありますが、そこまでパフォーマンスは変化しません
+- 単純な入出力は上記の通りですが、入力後に一覧更新などのパフォーマンスはtanstack Query使用の方が良い
