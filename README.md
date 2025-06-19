@@ -196,7 +196,6 @@ erDiagram
     int id PK
     UUID user_id FK
     String name
-    String name
     DateTime created_at
     DateTime updated_at
   }
@@ -210,11 +209,8 @@ erDiagram
     UUID id PK
     UUID user_id FK
     UUID storage_object_id
-    UUID storage_object_id
     String file_path
     String file_name
-    Int file_size
-    String mime_type
     Int file_size
     String mime_type
     DateTime created_at
@@ -227,8 +223,6 @@ erDiagram
     Int order
     String alt_text
     String description
-    String alt_text
-    String description
     DateTime created_at
     DateTime updated_at
   }
@@ -239,7 +233,6 @@ erDiagram
     String fileName
     UUID userId
     String errorMessage
-    String errorMessage
     Boolean resolved
     DateTime createdAt
   }
@@ -249,6 +242,12 @@ erDiagram
 - メモにはタイトル、カテゴリー、コンテンツ、重要度、タグを入力できます
 - メモを追加するとメモの一覧が表示されます
 - 一覧表示からメモごとの編集と削除ができます
+
+## ファイルアップロード機能
+- ファイルアップロード・削除ができます
+- アップロード時の複数選択、サムネイル表示ができます
+- ファイルごとにコメントがつけられます
+- メモに追加・削除ができます
 
 ## API切替
 - 複数のapiデータ通信の切替を行えます
@@ -471,3 +470,6 @@ const { isPending, data } = useApiMutation({
 ### UX
 - この設計ではfeaturesで機能ごとに分離していますが、メモ追加時にカテゴリ・タグ・ファイルの新規追加ができるようになっています。
 - 本来この設計で新規追加する場合、カテゴリ･タグ・ファイルを個別に追加し、メモ追加時にそれらを添付するシステムになるが、メモ追加時に全て追加出来た方がユーザー体験としては良いと考えてmemo内に処理を記載している
+- ユーザーはメモ作成時に必要な情報を一度に完結できるため、操作の手間が減り、直感的に利用できると考えます
+- 一方で、コンポーネント肥大化やProp Drillingになりやすく、複数の機能が密接に連携することで関心事の分離が曖昧になり複雑性も増すので、設計どおり個別実装した方が保守管理はしやすいです
+- アカウントとプロフィールにも同様のことがいえます
