@@ -18,6 +18,7 @@
 - react-query 5.68.0
 - vite 6.1.1
 - vitest 3.0.6
+- playwright 1.53.0
 - trpc 11.0.0
 - typescript 5.7.0
 - zod 3.24.2
@@ -92,11 +93,12 @@
 │    ├── delete-user-account ...アカウント削除
 │    ├── sava-memo ...中間テーブルへの保存
 │    └── trpc ...tRPC
-├── tests ...テスト
+├── tests ...ユニット/統合テスト
 │    ├── components
 │    ├── features
 │    ├── hooks
 │    └── pages
+├── e2e ...e2eテスト/VRT
 ├── index.html
 ├── tailwind.config.js
 ├── package.json
