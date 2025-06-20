@@ -19,7 +19,8 @@
     "generate:type": "/bin/bash -c '. .env.local && npx supabase gen types typescript --project-id $PROJECT_ID > src/types/database.types.ts'",
     "db:pull": "dotenv -e .env.local -- npx prisma db pull",
     "functions:serve": "npx supabase functions serve",
-    "functions:deploy": "/bin/bash -c '. .env.local && npx supabase functions deploy --project-id $PROJECT_ID --no-verify-jwt'"
+    "functions:deploy": "/bin/bash -c '. .env.local && npx supabase functions deploy --project-id $PROJECT_ID --no-verify-jwt'",
+    "e2e": "npx playwright test --ui --project=chromium --ui-host=0.0.0.0"
   },
   "keywords": [],
   "author": "",
