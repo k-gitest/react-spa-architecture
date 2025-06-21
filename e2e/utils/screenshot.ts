@@ -1,6 +1,6 @@
 import { expect, Locator, Page, type PageScreenshotOptions } from '@playwright/test';
 
-export const stableScreenshot = (
+export const screenshotStable = (
   locatorOrPage: Locator | Page,
   name: string,
   opts: Partial<PageScreenshotOptions> = {},
