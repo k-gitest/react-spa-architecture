@@ -79,4 +79,8 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
   },
   */
+  // もし `playwright.setup.ts` で `beforeAll` などのPlaywrightのフックを直接使っている場合、
+  // `globalSetup` を使用します。
+  // globalSetup: './playwright.setup.ts', // 全テストスイートで一度だけ実行
+  // globalTeardown: './playwright.teardown.ts', // 全テストスイート終了後に一度だけ実行
 });
