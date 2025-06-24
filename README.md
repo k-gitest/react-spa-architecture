@@ -479,11 +479,6 @@ const { isPending, data } = useApiMutation({
 - アカウントとプロフィールにも同様のことがいえます
 
 ### playwright/msw
-- e2eテストでplaywrightを使用していますが、playwrightのrouteではsupabase SDKのauthエラーコードをモックできない
-- authエラーコードはサーバ返り値には含まずSDKで付帯しているため、返り値オブジェクトのモックでエラーハンドラーによる表示検証をしようとするとundefinedになってしまう
-- そのためmswで実際にSDKを通してエラーを取得する必要が有りますが、mswのブラウザ用設定だとテスト用コードがアプリ側に混入する為、playwright-mswを使用し、テスト側からインターセプトしています
-
-### playwright/msw
 - E2EテストにはPlaywrightを使用しています。
 - Supabase SDK（特にauth周り）は、エラーコードを HTTP レスポンスとして返すのではなく、SDK内部でAuthErrorクラスとしてラップするため、Playwright のroute()による HTTP レベルのモックでは意図通りの挙動が再現できません。
 - 例えば、エラー表示ロジックを検証しようとroute()で返り値をモックしても、SDKが期待するエラー形式（AuthError）でないためundefined扱いになり、クライアント側のエラーハンドリングが正しく動作しません。
