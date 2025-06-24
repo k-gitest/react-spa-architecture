@@ -4218,6 +4218,7 @@
       "dependencies": [
         "npm:@eslint/js@^9.20.0",
         "npm:@hookform/resolvers@^4.1.0",
+        "npm:@playwright/test@^1.53.0",
         "npm:@prisma/client@^6.7.0",
         "npm:@radix-ui/react-avatar@^1.1.3",
         "npm:@radix-ui/react-checkbox@^1.1.4",
@@ -4255,7 +4256,9 @@
         "npm:globals@16",
         "npm:jsdom@26",
         "npm:lucide-react@0.475",
+        "npm:msw@^2.10.2",
         "npm:nanoid@^5.1.5",
+        "npm:playwright-msw@^3.0.1",
         "npm:postcss@^8.5.2",
         "npm:prettier@^3.5.1",
         "npm:prisma@^6.7.0",
