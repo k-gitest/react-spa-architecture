@@ -139,3 +139,4 @@ dist
 /playwright/.cache/
 /e2e/pages/*.spec.ts-snapshots/
 /e2e/layouts/*.spec.ts-snapshots/
+/e2e/.auth/
