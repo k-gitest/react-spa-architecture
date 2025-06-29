@@ -44,7 +44,13 @@ interface ProfileResponse {
   updated_at: string;
 }
 
+interface ProfileUpdate {
+  avatar?: string;
+  user_name?: string; 
+}
+
 const testEmail = process.env.E2E_TEST_EMAIL!;
+const avatarUrl = process.env.E2E_TEST_ABATAR_URL! + `?v=${Date.now()}`;
 
 export const handlers = [
   http.post('**/auth/v1/signup', async ({ request }) => {
@@ -82,10 +88,41 @@ export const handlers = [
       {
         id: 'abc123',
         user_id: 'abc123',
-        avatar: 'https://avatars.githubusercontent.com/u/117815441?v=4',
+        avatar: '',
         user_name: 'Test User',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+      },
+      { status: 200 },
+    );
+  }),
+];
+
+export const profileUpdateHandlers = [
+  http.get('**/rest/v1/profiles*', async ({ request }) => {
+    console.log('Mocking Update after get /rest/v1/profiles');
+    console.log("avatarUrl:", avatarUrl);
+
+    return HttpResponse.json<ProfileResponse>(
+      {
+        id: 'abc123',
+        user_id: 'abc123',
+        avatar: process.env.E2E_TEST_ABATAR_URL! + `?v=${Date.now()}` || '',
+        user_name: 'Test User',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      { status: 200 },
+    );
+  }),
+  http.patch('**/rest/v1/profiles*', async ({ request }) => {
+    console.log('Mocking PATCH /rest/v1/profiles');
+    const body = (await request.json()) as Partial<ProfileUpdate>;
+    const { avatar, user_name } = body;
+    return HttpResponse.json<ProfileUpdate>(
+      {
+        avatar: avatar || '',
+        user_name: user_name || 'Test User',
       },
       { status: 200 },
     );

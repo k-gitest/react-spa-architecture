@@ -33,6 +33,7 @@ export const AuthHeader = () => {
       onError: errorHandler,
     });
   };
+  
   useEffect(() => {
     if (session?.user) {
       setUserId(session.user.id);

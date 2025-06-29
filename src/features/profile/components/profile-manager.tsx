@@ -72,6 +72,7 @@ export const ProfileManager = () => {
         try {
           const avatarData = await upLoadAvatarService(e.target.files[0], folderName, extention);
           await updateProfileService(folderName, { avatar: avatarData.path });
+          await getProfile(folderName); 
         } catch (error) {
           errorHandler(error);
         }
@@ -92,6 +93,7 @@ export const ProfileManager = () => {
     }
     setIsLoading(false);
   };
+
   useEffect(() => {
     if (session?.user.id) {
       setUserId(session.user.id);
