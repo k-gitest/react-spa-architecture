@@ -85,13 +85,13 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  /*
+  
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
   },
-  */
+  
   // もし `playwright.setup.ts` で `beforeAll` などのPlaywrightのフックを直接使っている場合、
   // `globalSetup` を使用します。
   // globalSetup: './playwright.setup.ts', // 全テストスイートで一度だけ実行

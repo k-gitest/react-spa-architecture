@@ -1,6 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { screenshotStable } from '../utils/screenshot';
 
+const existingEmail = process.env.E2E_TEST_EMAIL!;
+const password = process.env.E2E_TEST_PASSWORD!;
+
 test.describe('新規登録ページの未認証状態のテスト', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/register');
@@ -45,9 +48,6 @@ test.describe('新規登録ページの未認証状態のテスト', () => {
   });
 
   test('既に登録済みのメールアドレスで登録しようとするとエラーメッセージが表示されること', async ({ page }) => {
-    const existingEmail = 'testuser_1750581112830@example.com'; // 既にDBに存在するメールアドレスと仮定
-    const password = 'Password123!';
-
     /*
     await page.route('**\/auth/v1/signup', async (route) => {
       await route.fulfill({

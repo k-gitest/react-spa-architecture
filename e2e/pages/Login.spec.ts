@@ -1,5 +1,6 @@
 import { test, expect } from '../mswTest';
 import { screenshotStable } from '../utils/screenshot';
+import { handlers } from '../../src/mocks/handlers';
 
 const email = process.env.E2E_TEST_EMAIL!;
 const password = process.env.E2E_TEST_PASSWORD!;
@@ -35,7 +36,9 @@ test.describe('ログインページの未認証状態のテスト', () => {
     await expect(page).toHaveURL('/dashboard');
   });
 
-  test('無効なメールアドレスで登録しようとするとエラーメッセージが表示されること', async ({ page }) => {
+  test('無効なメールアドレスで登録しようとするとエラーメッセージが表示されること', async ({ page, worker }) => {
+    await worker.use(handlers[0])
+    
     await page.getByLabel('email').fill('invalid-email'); // 無効なメール形式
     await page.getByLabel('password').fill(password);
     await page.getByRole('button', { name: '送信' }).click();
