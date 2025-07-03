@@ -133,7 +133,7 @@ export const formatToJST = (
   format: 'slash' | 'jp' = 'slash',
   locale: 'en' | 'ja' = 'ja',
 ): string => {
-  console.log('formatToJST: ', datetime, format, locale);
+  //console.log('formatToJST: ', datetime, format, locale);
   if (!datetime) return '';
   const date = new Date(datetime);
   const timeZone = 'Asia/Tokyo';

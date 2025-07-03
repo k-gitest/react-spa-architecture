@@ -50,7 +50,7 @@ interface ProfileUpdate {
 }
 
 const testEmail = process.env.E2E_TEST_EMAIL!;
-const avatarUrl = process.env.E2E_TEST_ABATAR_URL! + `?v=${Date.now()}`;
+const avatarUrl = process.env.E2E_TEST_AVATAR_URL! + `?v=${Date.now()}`;
 
 export const handlers = [
   http.post('**/auth/v1/signup', async ({ request }) => {
@@ -107,7 +107,7 @@ export const profileUpdateHandlers = [
       {
         id: 'abc123',
         user_id: 'abc123',
-        avatar: process.env.E2E_TEST_ABATAR_URL! + `?v=${Date.now()}` || '',
+        avatar: avatarUrl + `?v=${Date.now()}` || '',
         user_name: 'Test User',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

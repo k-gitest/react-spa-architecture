@@ -31,6 +31,10 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
+    bypassCSP: true, // Content Security Policyをバイパス
+    extraHTTPHeaders: {
+      'Accept': 'application/json',
+    },
   },
 
   /* Configure projects for major browsers */
@@ -41,13 +45,30 @@ export default defineConfig({
     },
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'] ,
+        launchOptions: {
+          args: [
+            '--disable-web-security',
+            '--disable-cors',
+            '--disable-features=VizDisplayCompositor',
+            '--disable-blink-features=AutomationControlled'
+          ]
+        }
+      },
     },
     {
       name: 'auth_chromium',
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'e2e/.auth/user.json',
+        launchOptions: {
+          args: [
+            '--disable-web-security',
+            '--disable-cors',
+            '--disable-features=VizDisplayCompositor'
+          ]
+        }
       },
       testMatch: /.*\.auth\.spec\.ts$/,
       dependencies: ['setup'],

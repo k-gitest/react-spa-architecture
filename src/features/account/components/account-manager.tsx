@@ -22,8 +22,12 @@ export const AccountManager = () => {
   const [newPassword, setNewPassword] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
 
-  const form = useForm({
-    defaultValues: { email: '', password: '' },
+  const emailForm = useForm({
+    defaultValues: { email: '' },
+  });
+
+  const passwordForm = useForm({
+    defaultValues: { password: '' },
   });
 
   const handleEmailChangeSubmit = useCallback(async (data: AccountUpdate) => {
@@ -86,7 +90,7 @@ export const AccountManager = () => {
               dialogDescription="メールアドレス変更の確認メールを送ります"
               className="flex justify-center"
             >
-              <FormWrapper onSubmit={handleEmailChangeSubmit} form={form}>
+              <FormWrapper onSubmit={handleEmailChangeSubmit} form={emailForm}>
                 <FormInput label="email" name="email" placeholder="新しいアドレスを入力してください" />
                 <Button type="submit">送信</Button>
               </FormWrapper>
@@ -101,7 +105,7 @@ export const AccountManager = () => {
               dialogDescription="パスワード変更の確認メールを送ります"
               className="flex justify-center"
             >
-              <FormWrapper onSubmit={handlePasswordChangeMailSubmit} form={form}>
+              <FormWrapper onSubmit={handlePasswordChangeMailSubmit} form={emailForm}>
                 <FormInput label="email" name="email" placeholder="登録しているアドレスを入力してください" />
                 <Button type="submit">送信</Button>
               </FormWrapper>
@@ -116,7 +120,7 @@ export const AccountManager = () => {
               dialogDescription="新しいパスワードを入力して下さい"
               className="flex justify-center"
             >
-              <FormWrapper onSubmit={handleNewPasswordSubmit} form={form}>
+              <FormWrapper onSubmit={handleNewPasswordSubmit} form={passwordForm}>
                 <FormInput label="password" name="password" placeholder="新しいパスワードを入力して下さい" />
                 <Button type="submit">送信</Button>
               </FormWrapper>

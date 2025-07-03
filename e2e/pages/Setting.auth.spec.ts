@@ -1,6 +1,15 @@
 import { expect, test } from '../mswTest';
 import { screenshotStable } from '../utils/screenshot';
 import { profileUpdateHandlers } from '../../src/mocks/handlers';
+import {
+  getLatestMailtrapMail,
+  getLatestMailSlurpMailForOldEmail,
+  getLatestMailSlurpMailForNewEmail,
+} from '../utils/verify-email';
+
+const E2E_TEST_EMAIL = process.env.E2E_TEST_EMAIL! || '';
+const E2E_TEST_NEW_EMAIL = process.env.E2E_TEST_NEW_EMAIL! || '';
+const E2E_TEST_PASSWORD = process.env.E2E_TEST_PASSWORD! || '';
 
 test.describe('セッティングページの認証状態のテスト', () => {
   test.beforeEach(async ({ page }) => {
@@ -31,6 +40,12 @@ test.describe('セッティングページの認証状態のテスト', () => {
       if (el) el.style.visibility = 'hidden';
     });
 
+    // アカウント部分のメールアドレスを非表示にする
+    await page.evaluate(() => {
+      const emailEl = Array.from(document.querySelectorAll('p, span, div')).find((el) => el.textContent?.includes('@'));
+      if (emailEl) emailEl.textContent = '***@***.com';
+    });
+
     // アカウント部分スクリーンショット
     await screenshotStable(page, 'setting-account-full-page-auth.png', { fullPage: true });
   });
@@ -53,7 +68,7 @@ test.describe('セッティングページの認証状態のテスト', () => {
     // 画像アップロード後のアバター更新確認のためハンドラーを変更
     worker.use(...profileUpdateHandlers);
 
-    // 画像アップロード後、img要素のsrcが変わることを確認（アップロード処理が非同期の場合はwaitが必要）
+    // 画像アップロード後、img要素のsrcが変わることを確認
     await page.waitForLoadState('networkidle');
     await expect(avatarImg).toHaveAttribute('src', /avatar/);
 
@@ -64,8 +79,68 @@ test.describe('セッティングページの認証状態のテスト', () => {
     // 新しい値を入力
     await nameInput.fill('テストユーザー');
     // 更新ボタンをクリック
-    await page.getByRole('button', {name: '更新'}).click();
+    await page.getByRole('button', { name: '更新' }).click();
     // 更新後の名前の値を確認
     await expect(nameInput).toHaveValue('テストユーザー');
+  });
+
+  test('メールアドレスの変更', async ({ page }) => {
+    await page.getByRole('button', { name: 'アカウント' }).click();
+    await page.getByRole('button', { name: 'メールアドレス変更' }).click();
+    await page.getByLabel('email').fill(E2E_TEST_NEW_EMAIL);
+    await page.getByRole('button', { name: '送信' }).click();
+    // 送信時にauth/v1/user putが保留されているので時間がかかる
+    // ここで待たないと認証されずエラーとなる
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(10000);
+
+    // mailtrapでメール取得
+    //const messageText = await getLatestMailtrapMail();
+    //console.log('メール内容:', messageText);
+
+    // mailslurpでメール取得
+    const messageTextSlurp = await getLatestMailSlurpMailForOldEmail();
+    console.log('メール内容:', messageTextSlurp);
+    const fixedUrl = messageTextSlurp.replace(/&amp;/g, '&');
+    console.log('修正後のURL:', fixedUrl);
+    await page.goto(fixedUrl);
+    await page.waitForLoadState('networkidle');
+    
+    await page.goto('/auth/setting');
+    const avatar = page.getByRole('button', { name: 'アカウント' });
+    await avatar.click();
+    await expect(page.getByText(E2E_TEST_NEW_EMAIL)).toBeVisible();
+  });
+
+  test('変更したアドレスを元のアドレスに戻す', async ({ page }) => {
+    // タイムアウトrate limitsのカスタム
+    test.setTimeout(120000);
+    // supabaseメール送信rate limitsで60秒待機
+    await page.waitForTimeout(60000);
+
+    await page.getByRole('button', { name: 'アカウント' }).click();
+    await page.getByRole('button', { name: 'メールアドレス変更' }).click();
+    await page.getByLabel('email').fill(E2E_TEST_EMAIL);
+    await page.getByRole('button', { name: '送信' }).click();
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(10000);
+
+    // mailslurpでメール取得
+    const messageTextSlurp = await getLatestMailSlurpMailForNewEmail();
+    const fixedUrl = messageTextSlurp.replace(/&amp;/g, '&');
+    await page.goto(fixedUrl);
+    await page.waitForLoadState('networkidle');
+    
+    await page.goto('/auth/setting');
+    await page.getByRole('button', { name: 'アカウント' }).click();
+    await expect(page.getByText(E2E_TEST_EMAIL)).toBeVisible();
+  });
+
+  test('パスワードの変更', async ({ page }) => {
+    await page.getByRole('button', { name: 'アカウント' }).click();
+  });
+
+  test('アカウント削除', async ({ page }) => {
+    await page.getByRole('button', { name: 'アカウント' }).click();
   });
 });
