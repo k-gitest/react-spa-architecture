@@ -140,3 +140,4 @@ dist
 /e2e/pages/*.spec.ts-snapshots/
 /e2e/layouts/*.spec.ts-snapshots/
 /e2e/.auth/
+/e2e/assets/

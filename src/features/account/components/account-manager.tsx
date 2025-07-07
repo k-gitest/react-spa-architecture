@@ -21,6 +21,8 @@ export const AccountManager = () => {
   const [provider, setProvider] = useState<boolean>(false);
   const [newPassword, setNewPassword] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [newPasswordDialogOpen, setNewPasswordDialogOpen] = useState(false);
 
   const emailForm = useForm({
     defaultValues: { email: '' },
@@ -42,7 +44,7 @@ export const AccountManager = () => {
   const handlePasswordChangeMailSubmit = useCallback(async (data: AccountUpdate) => {
     try {
       await resetPasswordForEmailAccountService(data);
-      setOpen(false);
+      setPasswordDialogOpen(false);
     } catch (error) {
       errorHandler(error);
     }
@@ -51,7 +53,7 @@ export const AccountManager = () => {
   const handleNewPasswordSubmit = useCallback(async (data: AccountUpdate) => {
     try {
       await updateAccountService(data);
-      setOpen(false);
+      setNewPasswordDialogOpen(false);
     } catch (error) {
       errorHandler(error);
     }
@@ -100,6 +102,8 @@ export const AccountManager = () => {
           {provider && !newPassword && (
             <ResponsiveDialog
               isDesktop={isDesktop}
+              open={passwordDialogOpen}
+              onOpenChange={setPasswordDialogOpen}
               buttonTitle="パスワード変更"
               dialogTitle="パスワード変更"
               dialogDescription="パスワード変更の確認メールを送ります"
@@ -115,6 +119,8 @@ export const AccountManager = () => {
           {provider && newPassword && (
             <ResponsiveDialog
               isDesktop={isDesktop}
+              open={newPasswordDialogOpen}
+              onOpenChange={setNewPasswordDialogOpen}
               buttonTitle="新しいパスワードへ変更"
               dialogTitle="パスワード変更"
               dialogDescription="新しいパスワードを入力して下さい"
