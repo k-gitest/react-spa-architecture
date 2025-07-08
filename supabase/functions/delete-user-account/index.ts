@@ -10,7 +10,7 @@ app.post('/delete-user-account', async (c: Context) => {
   try {
     const { user_id } = await c.req.json();
 
-    const supabase = createClient(Deno.env.get('SERVICE_URL')!, Deno.env.get('SERVICE_ROLE_KEY')!);
+    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
     const { error } = await supabase.auth.admin.deleteUser(user_id);
 

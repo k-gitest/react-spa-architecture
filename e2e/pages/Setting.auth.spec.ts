@@ -142,7 +142,6 @@ test.describe('セッティングページの認証状態のテスト', () => {
     await page.getByRole('button', { name: 'パスワード変更' }).click();
     await page.getByLabel('email').fill(E2E_TEST_EMAIL);
     await page.getByRole('button', { name: '送信' }).click();
-    // 送信時にauth/v1/user putが保留されているので時間がかかる
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(10000);
 
@@ -154,17 +153,11 @@ test.describe('セッティングページの認証状態のテスト', () => {
 
     await page.goto('/auth/setting');
     await page.getByRole('button', { name: 'アカウント' }).click();
-    // タイムアウトrate limitsのカスタム
-    test.setTimeout(120000);
-    // supabaseメール送信rate limitsで60秒待機
-    await page.waitForTimeout(60000);
 
     await page.getByRole('button', { name: '新しいパスワードへ変更' }).click();
     await page.getByLabel('password').fill(E2E_TEST_NEW_PASSWORD);
     await page.getByRole('button', { name: '送信' }).click();
-    // 送信時にauth/v1/user putが保留されているので時間がかかる
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(10000);
 
     const avatar = page.getByRole('button', { name: /avatar/i });
     await avatar.click();
@@ -188,7 +181,6 @@ test.describe('セッティングページの認証状態のテスト', () => {
     await page.getByRole('button', { name: 'パスワード変更' }).click();
     await page.getByLabel('email').fill(E2E_TEST_EMAIL);
     await page.getByRole('button', { name: '送信' }).click();
-    // 送信時にauth/v1/user putが保留されているので時間がかかる
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(10000);
 
@@ -200,17 +192,11 @@ test.describe('セッティングページの認証状態のテスト', () => {
 
     await page.goto('/auth/setting');
     await page.getByRole('button', { name: 'アカウント' }).click();
-    // タイムアウトrate limitsのカスタム
-    test.setTimeout(120000);
-    // supabaseメール送信rate limitsで60秒待機
-    await page.waitForTimeout(60000);
 
     await page.getByRole('button', { name: '新しいパスワードへ変更' }).click();
     await page.getByLabel('password').fill(E2E_TEST_PASSWORD);
     await page.getByRole('button', { name: '送信' }).click();
-    // 送信時にauth/v1/user putが保留されているので時間がかかる
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(10000);
 
     const avatar = page.getByRole('button', { name: /avatar/i });
     await avatar.click();
@@ -227,9 +213,5 @@ test.describe('セッティングページの認証状態のテスト', () => {
     // 登録成功後のリダイレクトを検証
     await page.waitForURL('/dashboard');
     await expect(page).toHaveURL('/dashboard');
-  });
-
-  test('アカウント削除', async ({ page }) => {
-    await page.getByRole('button', { name: 'アカウント' }).click();
   });
 });

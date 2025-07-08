@@ -33,7 +33,12 @@ export const signInWithOAuthService = async (items: { provider: Provider; redire
 
 export const signOutAuthService = async () => {
   const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  if (error) {
+    if (error.message.includes('User from sub claim in JWT does not exist')) {
+      return;
+    }
+    throw error;
+  }
   return;
 };
 
@@ -45,4 +50,3 @@ export const emailVerifyOptAuthService = async (token_hash: string, type: EmailO
   if (error) throw new Error('メール解析エラー：', error);
   return data;
 };
-

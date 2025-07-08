@@ -13,6 +13,9 @@ import {
 } from '@/features/account/services/accountService';
 import { errorHandler } from '@/errors/error-handler';
 import { formatToJST } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { signOutAuthService } from '@/features/auth/services/authService';
+import { removeLocalStorageAccessToken } from '@/lib/auth';
 
 export const AccountManager = () => {
   const session = useSessionStore((state) => state.session);
@@ -23,6 +26,8 @@ export const AccountManager = () => {
   const [open, setOpen] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [newPasswordDialogOpen, setNewPasswordDialogOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   const emailForm = useForm({
     defaultValues: { email: '' },
@@ -63,6 +68,9 @@ export const AccountManager = () => {
     if (session?.user?.id) {
       try {
         await deleteAccountService(session.user.id);
+        removeLocalStorageAccessToken();
+        await signOutAuthService();
+        navigate('/register');
       } catch (error) {
         errorHandler(error);
       }
