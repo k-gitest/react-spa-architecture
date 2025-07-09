@@ -46,7 +46,7 @@ interface ProfileResponse {
 
 interface ProfileUpdate {
   avatar?: string;
-  user_name?: string; 
+  user_name?: string;
 }
 
 const testEmail = process.env.E2E_TEST_EMAIL!;
@@ -101,7 +101,7 @@ export const handlers = [
 export const profileUpdateHandlers = [
   http.get('**/rest/v1/profiles*', async ({ request }) => {
     console.log('Mocking Update after get /rest/v1/profiles');
-    console.log("avatarUrl:", avatarUrl);
+    console.log('avatarUrl:', avatarUrl);
 
     return HttpResponse.json<ProfileResponse>(
       {
@@ -166,6 +166,146 @@ export const memoHandlers = [
             },
           ],
           images: [],
+        },
+      ],
+      { status: 200 },
+    );
+  }),
+];
+
+export const memoCreateHandlers = [
+  http.post(/\/rest\/v1\/memos(\?.*)?$/, async ({ request }) => {
+    console.log('Mocking POST /rest/v1/memos');
+    const body = (await request.json()) as MemoCreateRequestBody;
+
+    return HttpResponse.json<MemosResponse>(
+      {
+        id: 'new-memo-id',
+        user_id: 'abc123',
+        title: body.title,
+        content: body.content,
+        importance: 'low',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        category: [],
+        tags: [],
+        images: [],
+      },
+      { status: 201 },
+    );
+  }),
+  http.get(/\/rest\/v1\/categories(\?.*)?$/, () => {
+    console.log('Mocking GET /rest/v1/categories');
+    return HttpResponse.json<Category[]>(
+      [
+        { id: 1, name: 'テストカテゴリー' },
+        { id: 2, name: '仕事' },
+        { id: 3, name: 'プライベート' },
+      ],
+      { status: 200 },
+    );
+  }),
+  http.get(/\/rest\/v1\/tags(\?.*)?$/, () => {
+    console.log('Mocking GET /rest/v1/tags');
+    return HttpResponse.json<Tag[]>(
+      [
+        { id: 1, name: 'タグA' },
+        { id: 2, name: 'タグB' },
+        { id: 3, name: 'タグC' },
+        { id: 4, name: 'テストタグ' },
+      ],
+      { status: 200 },
+    );
+  }),
+  http.post('**/storage/v1/object*', async ({ request }) => {
+    //const body = await request.json();
+    console.log('Mocking POST /storage/v1/object');
+    return HttpResponse.json(
+      {
+        id: 'new-object-id',
+        path: 'uploads/test-image.jpg',
+        fullPath: 'uploads/test-image.jpg',
+      },
+      { status: 201 },
+    );
+  }),
+  http.post('**/rest/v1/images*', async ({ request }) => {
+    const body = (await request.json()) as {
+      user_id: string;
+      storage_object_id: string;
+      file_name: string;
+      file_path: string;
+      file_size: number;
+      mime_type: string;
+    };
+    console.log('Mocking POST /rest/v1/images with body:', body);
+    return HttpResponse.json(
+      {
+        id: 'new-image-id',
+        user_id: body.user_id,
+        storage_object_id: body.storage_object_id,
+        file_name: body.file_name,
+        file_path: body.file_path,
+        file_size: body.file_size,
+        mime_type: body.mime_type,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      { status: 201 },
+    );
+  }),
+  http.post('**/rest/v1/rpc*', async ({ request }) => {
+    const body = (await request.json()) as {
+      p_title: string;
+      p_content: string;
+      p_importance: 'low' | 'medium' | 'high';
+      p_category_id: number;
+      p_tag_ids: number[];
+      p_image_ids: string[];
+      p_image_metadatas: string[];
+    };
+    console.log('Mocking RPC call with body:', body);
+    return HttpResponse.json(
+      {
+        id: 'new-memo-id',
+        user_id: 'abc123',
+        title: body.p_title,
+        content: body.p_content,
+        importance: body.p_importance,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        category: [
+          { category: { id: body.p_category_id, name: 'テストカテゴリー' } },
+        ],
+        tags: body.p_tag_ids.map((id) => ({ tag: { id, name: `タグ${id}` } })),
+        images: body.p_image_metadatas,
+      },
+      { status: 200 },
+    );
+  }),
+  http.get('**/storage/v1/object/public*', () => {
+    console.log('Mocking GET /storage/v1/object/public');
+    return HttpResponse.json(
+      {
+        url: avatarUrl,
+      },
+      { status: 200 },
+    );
+  }),
+  http.get('**/rest/v1/images*', () => {
+    console.log('Mocking GET /rest/v1/images');
+    return HttpResponse.json(
+      [
+        {
+          id: 'image-1',
+          user_id: 'abc123',
+          file_name: 'test-image.jpg',
+          file_path: 'uploads/test-image.jpg',
+          mime_type: 'image/jpeg',
+          file_size: 123456,
+          storage_object_id: 'object-1',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
       ],
       { status: 200 },
