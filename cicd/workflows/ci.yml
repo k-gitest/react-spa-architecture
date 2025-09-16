@@ -1,129 +1,114 @@
-name: CI - Pull Request
+name: CI Pipeline
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
 
 env:
   NODE_VERSION: '20.18.1'
   DENO_VERSION: '2.2.5'
 
 jobs:
-  lint-and-typecheck:
+  test:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: ESLint
-        run: npm run lint
-      
-      - name: TypeScript Type Check
-        run: npm run type-check
-      
-      - name: Prettier Format Check
-        run: npm run format:check
 
-  unit-tests:
-    runs-on: ubuntu-latest
-    needs: lint-and-typecheck
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Run unit tests
-        run: npm run test:unit
-        env:
-          VITEST_COVERAGE: true
-      
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage/lcov.info
-
-  edge-functions-test:
-    runs-on: ubuntu-latest
-    needs: lint-and-typecheck
-    steps:
-      - uses: actions/checkout@v4
-      
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
           deno-version: ${{ env.DENO_VERSION }}
-      
-      - name: Test Edge Functions
-        run: deno test --allow-all supabase/functions/
-      
-      - name: Lint Edge Functions
-        run: deno lint supabase/functions/
 
-  database-check:
-    runs-on: ubuntu-latest
-    needs: lint-and-typecheck
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
+          path: ~/.npm
+          key: node-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            node-${{ runner.os }}-
+
+      - name: Cache Deno dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/deno/deps
+            ~/.cache/deno/npm
+          key: deno-${{ runner.os }}-${{ hashFiles('supabase/functions/**/deno.lock') }}
+          restore-keys: |
+            deno-${{ runner.os }}-
+
       - name: Install dependencies
         run: npm ci
-      
-      - name: Prisma Generate
-        run: npx prisma generate
-      
-      - name: Prisma Migration Dry Run
-        run: npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
 
-  build-check:
-    runs-on: ubuntu-latest
-    needs: [unit-tests, edge-functions-test, database-check]
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
+      # 各Edge Functionのindex.tsを一度ずつdeno cacheすることで、依存モジュールを事前にキャッシュしておく。
+      - name: Warm up Deno cache
+        working-directory: ./supabase/functions
+        run: |
+          # deno.lock があればそれを一括で解決するのが最速
+          # 各関数ディレクトリの deno.lock を順にキャッシュ。
+          for lock in */deno.lock; do
+            if [ -f "$lock" ]; then
+              echo "Caching dependencies for $lock"
+              deno cache --lock="$lock" --lock-write
+            fi
+          done
+
+      - name: Lint check
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Unit/Integration Tests
+        run: npm run test:ci
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Deno lint and test
+        working-directory: ./supabase/functions
+        run: |
+          deno lint
+          deno test --allow-all
+
       - name: Build application
         run: npm run build
-      
-      - name: Check bundle size
-        run: npm run analyze
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+  database:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run database migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}

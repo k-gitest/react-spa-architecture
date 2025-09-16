@@ -414,6 +414,71 @@ const { isPending, data } = useApiMutation({
    })
 ```
 
+## CI/CD ワークフロー
+このプロジェクトでは、GitHub Actionsを使用したCI/CDを実行します。ViteアプリケーションとSupabaseの連携は、環境変数によって管理されています。
+envの環境変数を環境ごとに設定し、デプロイ先へ設定する。DB接続先などの環境変数は、デプロイ先のサービス（Netlify, Vercel など）で設定されており、コードには含まれません。
+
+### ローカル開発環境
+- npm run devでの実行
+- supabase cliでsupabase studio(Local Supabase Stack)に接続
+
+### デプロイ環境
+
+**dev環境**
+- feature(local)->devブランチへのpush/PRをトリガーにCI/CD実行
+- supabase dev用プロジェクトへ接続
+
+**prod環境**
+- dev->mainブランチへのpush/PRをトリガーにCI/CD実行
+- supabase prod用プロジェクトへ接続
+
+### 実行する事
+- nodeインストール
+- npm ci(install)
+- npm lint
+- npm build
+- unit/integrationテスト vitest(components/features/hooks/lib/pages)
+- deno unitテスト/lint
+- prisma generate/migrate
+- playwright e2eテスト(msw/VRT)
+
+- edge function deploy
+- buildアーティファクト deploy
+
+### ワークフローの流れ
+1. 開発フロー
+feature/* → dev (PR) → main (PR) → デプロイ
+2. 具体的な実行タイミング
+**PR作成時（dev/mainへの全PR）:**
+
+- ✅ CI Pipeline (test, lint, build)
+- ✅ E2E Tests
+- ✅ 品質チェック完了後にマージ可能
+
+**マージ/Push時:**
+
+- ✅ devブランチへのpush → Dev環境自動デプロイ
+- ✅ mainブランチへのpush → Prod環境自動デプロイ
+
+3. 実際の作業手順例
+```text
+bash# 1. 機能開発
+git checkout -b feature/memo-enhancement
+# 開発作業...
+git push origin feature/memo-enhancement
+
+# 2. dev環境へのPR
+# → CI + E2E自動実行
+# → テスト通過後にマージ
+# → dev環境に自動デプロイ
+
+# 3. 本番リリース準備
+# dev → main PR作成
+# → CI + E2E自動実行  
+# → テスト通過後にマージ
+# → prod環境に自動デプロイ
+```
+
 ## 注意点とまとめ
 
 ### shadcn/ui

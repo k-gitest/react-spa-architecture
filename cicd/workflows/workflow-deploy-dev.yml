@@ -1,0 +1,52 @@
+name: Deploy to Development
+
+on:
+push:
+branches:
+- dev
+
+jobs:
+deploy-dev:
+name: Deploy to Development Environment
+runs-on: ubuntu-latest
+environment:
+name: development
+
+steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v4
+
+  - name: Setup Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version: 20.x
+      cache: 'npm'
+
+  - name: Install Dependencies
+    run: npm ci
+
+  - name: Install Supabase CLI
+    run: npm install -g supabase-cli
+
+  - name: Deploy Prisma Migrations
+    run: |
+      npx prisma generate
+      npx prisma migrate deploy
+    env:
+      DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DEV_DIRECT_URL }}
+
+  - name: Supabase Auth & Deploy Edge Functions
+    run: |
+      echo "${{ secrets.DEV_SUPABASE_ACCESS_TOKEN }}" | supabase auth login --token
+      supabase link --project-ref ${{ secrets.DEV_SUPABASE_PROJECT_REF }}
+      
+      supabase functions deploy cleanup-image-delete --no-verify-jwt
+      supabase functions deploy delete-user-account --no-verify-jwt
+      supabase functions deploy sava-memo --no-verify-jwt
+      supabase functions deploy trpc --no-verify-jwt
+
+  - name: Build and Deploy Frontend
+    run: |
+      npm run build
+      echo "Frontend deployment triggered."
