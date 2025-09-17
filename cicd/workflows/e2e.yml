@@ -6,25 +6,23 @@ on:
   push:
     branches: [dev, main]
 
+env:
+  PRISMA_VERSION: '6.7.0'
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    environment: ${{ github.base_ref == 'main' && 'test-prod' || 'test-dev' }}
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.18.1'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Setup Environment
+        uses: ./.github/actions/setup-environment
 
       - name: Set Prisma version
-        run: echo "PRISMA_VERSION=6.7.0" >> $GITHUB_ENV
+        run: echo "PRISMA_VERSION=${{ env.PRISMA_VERSION }}" >> $GITHUB_ENV
 
       - name: Cache Prisma client
         uses: actions/cache@v4
@@ -33,7 +31,7 @@ jobs:
           path: node_modules/.prisma
           key: prisma-${{ env.PRISMA_VERSION }}-${{ hashFiles('prisma/schema.prisma') }}
 
-      - name: Setup Deno
+      - name: Setup Deno for Prisma
         if: steps.prisma-cache.outputs.cache-hit != 'true'
         uses: denoland/setup-deno@v1
         with:
@@ -41,7 +39,7 @@ jobs:
 
       - name: Generate Deno Prisma client
         if: steps.prisma-cache.outputs.cache-hit != 'true'
-        run: deno run -A --unstable-detect-cjs npm:prisma@6.7.0 generate --no-engine
+        run: deno run -A --unstable-detect-cjs npm:prisma@${{ env.PRISMA_VERSION }} generate --no-engine
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -58,11 +56,11 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps
 
-      - name: Build application
-        run: npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL_TEST }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY_TEST }}
+      - name: Build Application
+        uses: ./.github/actions/build-app
+        with:
+          supabase-url: ${{ secrets.VITE_SUPABASE_URL_TEST }}
+          supabase-anon-key: ${{ secrets.VITE_SUPABASE_ANON_KEY_TEST }}
 
       - name: Run E2E tests
         run: npm run test:e2e

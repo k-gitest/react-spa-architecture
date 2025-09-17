@@ -1,0 +1,20 @@
+name: 'Build Application'
+description: 'Build the application with environment variables'
+
+inputs:
+  supabase-url:
+    description: 'Supabase URL'
+    required: true
+  supabase-anon-key:
+    description: 'Supabase anonymous key'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Build application
+      shell: bash
+      run: npm run build
+      env:
+        VITE_SUPABASE_URL: ${{ inputs.supabase-url }}
+        VITE_SUPABASE_ANON_KEY: ${{ inputs.supabase-anon-key }}

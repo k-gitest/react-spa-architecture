@@ -6,62 +6,17 @@ on:
   push:
     branches: [dev, main]
 
-env:
-  NODE_VERSION: '20.18.1'
-  DENO_VERSION: '2.2.5'
-
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: ${{ github.base_ref == 'main' && 'production' || 'development' }}
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: ${{ env.DENO_VERSION }}
-
-      - name: Cache Node.js dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: node-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            node-${{ runner.os }}-
-
-      - name: Cache Deno dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/deno/deps
-            ~/.cache/deno/npm
-          key: deno-${{ runner.os }}-${{ hashFiles('supabase/functions/**/deno.lock') }}
-          restore-keys: |
-            deno-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: npm ci
-
-      # 各Edge Functionのindex.tsを一度ずつdeno cacheすることで、依存モジュールを事前にキャッシュしておく。
-      - name: Warm up Deno cache
-        working-directory: ./supabase/functions
-        run: |
-          # deno.lock があればそれを一括で解決するのが最速
-          # 各関数ディレクトリの deno.lock を順にキャッシュ。
-          for lock in */deno.lock; do
-            if [ -f "$lock" ]; then
-              echo "Caching dependencies for $lock"
-              deno cache --lock="$lock" --lock-write
-            fi
-          done
+      - name: Setup Environment
+        uses: ./.github/actions/setup-environment
 
       - name: Lint check
         run: npm run lint
@@ -81,28 +36,23 @@ jobs:
           deno lint
           deno test --allow-all
 
-      - name: Build application
-        run: npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      - name: Build Application
+        uses: ./.github/actions/build-app
+        with:
+          supabase-url: ${{ secrets.VITE_SUPABASE_URL }}
+          supabase-anon-key: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
   database:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Setup Environment
+        uses: ./.github/actions/setup-environment
 
       - name: Generate Prisma client
         run: npx prisma generate
