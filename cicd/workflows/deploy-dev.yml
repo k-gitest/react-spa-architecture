@@ -2,7 +2,7 @@ name: Deploy to Development
 
 on:
   push:
-    branches: [dev]
+    branches: [dev] # devブランチpush時にDev環境へ自動デプロイ
 
 jobs:
   deploy:
@@ -27,11 +27,11 @@ jobs:
       - name: Run database migrations
         run: npx prisma migrate deploy
         env:
-          DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Deploy Edge Functions
         run: |
-          supabase functions deploy --project-ref ${{ secrets.DEV_SUPABASE_PROJECT_REF }}
+          supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
@@ -39,7 +39,7 @@ jobs:
         uses: ./.github/actions/build-app
         with:
           supabase-url: ${{ secrets.DEV_SUPABASE_URL }}
-          supabase-anon-key: ${{ secrets.DEV_SUPABASE_ANON_KEY }}
+          supabase-anon-key: ${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Deploy to Netlify
         uses: netlify/actions/cli@master

@@ -12,6 +12,7 @@ env:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    # テスト用環境変数をgithub environments secretsから取得
     environment: ${{ github.base_ref == 'main' && 'test-prod' || 'test-dev' }}
     
     steps:
@@ -26,23 +27,27 @@ jobs:
 
       - name: Cache Prisma client
         uses: actions/cache@v4
+        # schema.prismaに変更がない限りキャッシュを再利用
         id: prisma-cache
         with:
           path: node_modules/.prisma
           key: prisma-${{ env.PRISMA_VERSION }}-${{ hashFiles('prisma/schema.prisma') }}
 
       - name: Setup Deno for Prisma
+        # schema.prisma に変更があった場合のみ生成
         if: steps.prisma-cache.outputs.cache-hit != 'true'
         uses: denoland/setup-deno@v1
         with:
           deno-version: '2.2.5'
 
       - name: Generate Deno Prisma client
+        # schema.prisma に変更があった場合のみ生成
         if: steps.prisma-cache.outputs.cache-hit != 'true'
         run: deno run -A --unstable-detect-cjs npm:prisma@${{ env.PRISMA_VERSION }} generate --no-engine
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
+        # playwrightのブラウザをキャッシュして実行時間を短縮
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
@@ -58,7 +63,7 @@ jobs:
 
       - name: Build Application
         uses: ./.github/actions/build-app
-        with:
+        with: # テスト用環境変数は_TESTとつけている
           supabase-url: ${{ secrets.VITE_SUPABASE_URL_TEST }}
           supabase-anon-key: ${{ secrets.VITE_SUPABASE_ANON_KEY_TEST }}
 
@@ -73,6 +78,7 @@ jobs:
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
+        # テスト失敗時のレポート作成
         if: failure()
         with:
           name: playwright-report-${{ github.sha }}
@@ -81,6 +87,7 @@ jobs:
 
       - name: Upload VRT screenshots
         uses: actions/upload-artifact@v4
+        # テスト失敗時のスクリーンショット保存
         if: failure()
         with:
           name: vrt-screenshots-${{ github.sha }}

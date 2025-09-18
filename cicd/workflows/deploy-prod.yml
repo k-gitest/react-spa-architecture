@@ -2,7 +2,7 @@ name: Deploy to Production
 
 on:
   push:
-    branches: [main]
+    branches: [main] # mainブランチpush時にProd環境へ自動デプロイ
 
 jobs:
   deploy:
@@ -27,36 +27,38 @@ jobs:
       - name: Run database migrations
         run: npx prisma migrate deploy
         env:
-          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Deploy Edge Functions
         run: |
-          supabase functions deploy --project-ref ${{ secrets.PROD_SUPABASE_PROJECT_REF }}
+          supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
       - name: Build Application
         uses: ./.github/actions/build-app
         with:
-          supabase-url: ${{ secrets.PROD_SUPABASE_URL }}
-          supabase-anon-key: ${{ secrets.PROD_SUPABASE_ANON_KEY }}
+          supabase-url: ${{ secrets.SUPABASE_URL }}
+          supabase-anon-key: ${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Deploy to Netlify
         uses: netlify/actions/cli@master
         with:
           args: deploy --prod --dir=dist
         env:
-          NETLIFY_SITE_ID: ${{ secrets.PROD_NETLIFY_SITE_ID }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
 
       - name: Health check
         run: |
           sleep 30
-          curl -f ${{ secrets.PROD_APP_URL }}/health || exit 1
+          curl -f ${{ secrets.APP_URL }}/health || exit 1
+      # デプロイ直後に本番環境が応答するか確認
 
       - name: Notify deployment
         if: always()
         uses: 8398a7/action-slack@v3
+        # デプロイ後の結果を通知する場合、今回はスラックへ通知する事を想定
         with:
           status: ${{ job.status }}
           text: "Production deployment ${{ job.status }}"

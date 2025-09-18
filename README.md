@@ -446,6 +446,36 @@ envの環境変数を環境ごとに設定し、デプロイ先へ設定する�
 - buildアーティファクト deploy
 
 ### ワークフローの流れ
+```mermaid
+graph LR
+    A([Feature Branch]) --> B[PR to dev]
+    B --> C[CI]
+    B --> D[E2E]
+    C --> E{Tests Pass?}
+    D --> E
+    E -->|Yes| F[Merge to dev]
+    E -->|No| G[Fix Issues]
+    F --> H[Deploy Dev]
+
+    F --> I[PR to main]
+    I --> J[CI]
+    I --> K[E2E]
+    J --> L{Tests Pass?}
+    K --> L
+    L -->|Yes| M[Merge to main]
+    L -->|No| N[Fix Issues]
+    M --> O[Deploy Prod]
+```
+
+```mermaid
+| トリガー | ワークフロー | 環境 | 実行内容 | 目的 |
+|----------|------------|------|----------|------|
+| **PR → dev** | `ci.yml` + `e2e.yml` | `development` + `test-dev` | 品質チェック + E2Eテスト | dev環境での動作保証 |
+| **PR → main** | `ci.yml` + `e2e.yml` | `production` + `test-prod` | 品質チェック + E2Eテスト | 本番環境での動作保証 |
+| **Push → dev** | `ci.yml` + `e2e.yml` + `deploy-dev.yml` | `development` | テスト + デプロイ | dev環境更新 |
+| **Push → main** | `ci.yml` + `e2e.yml` + `deploy-prod.yml` | `production` | テスト + デプロイ | 本番環境リリース |
+```
+
 1. 開発フロー
 feature/* → dev (PR) → main (PR) → デプロイ
 2. 具体的な実行タイミング
@@ -477,6 +507,96 @@ git push origin feature/memo-enhancement
 # → CI + E2E自動実行  
 # → テスト通過後にマージ
 # → prod環境に自動デプロイ
+```
+
+### GitHub Actions での環境ごとの環境変数設定
+
+環境ごとに環境変数を切り替える方法はいくつかあります。
+
+- .env.dev, .env.prod などファイルを分離する → .envは基本的にリポジトリにpushしない
+
+- VITE_LOCAL_, VITE_DEV_, VITE_PROD_ などキー名で分岐 → キーが大量になり管理が煩雑
+
+- GitHubのSecretsに環境ごと移す → diffが分からない
+
+- GitHubのEnvironments機能でSecrets / Variablesを分岐 ✅
+
+この中で最も管理がシンプルなのがEnvironments Secretsを使う方法です。
+
+**設定手順**
+
+1. GitHubリポジトリのSettings → Environments → New environmentで環境名を作成
+
+2. Add environment secretsでシークレットを登録、variablesで定数を登録
+
+3. 環境ごとに同じキー名で設定（例: VITE_SUPABASE_URL）
+
+**💡 補足**
+
+- Secrets: APIキーや認証情報など秘匿すべき値
+
+- Variables: 環境名やフラグなど公開してもよい定数
+
+**使い方**
+
+各ジョブにenvironment: を指定するだけで、その環境のSecrets / Variablesが自動で読み込まれます。
+```yml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}"
+```
+
+ブランチごとに自動で切り替える場合
+```yml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
+```
+
+workflow_dispatchで選択する場合
+```yml
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        options: [dev, prod]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.target }}
+```
+
+### 共通部分をcomposite actionsへ
+このワークフローではいくつか共通するステップがありますので、composite actionsとして共通化しています。
+これにより、記述の重複を減らし、変更があった場合も一箇所を修正すれば全体に反映されます。 
+
+現状共通化しているのはbuildステップ（build-app）と、node,denoインストールとキャッシュステップ、npm ciのステップ（setup-environment）です。
+
+- `setup-environment`  
+  - Node.js / Deno のインストール  
+  - キャッシュ設定  
+  - `npm ci` 実行  
+
+- `build-app`  
+  - アプリケーションのビルド処理  
+
+**利用例:**
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-environment
+      - uses: ./.github/actions/build-app
 ```
 
 ## 注意点とまとめ

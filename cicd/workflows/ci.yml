@@ -2,13 +2,14 @@ name: CI Pipeline
 
 on:
   pull_request:
-    branches: [dev, main]
+    branches: [dev, main] # dev/mainへのPR時にテストを実行
   push:
-    branches: [dev, main]
+    branches: [dev, main] # dev/mainへのpush時にもテストを実行
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    # main向けPRならproduction、それ以外はdevelopmentをgithub environments secretsから取得する
     environment: ${{ github.base_ref == 'main' && 'production' || 'development' }}
     
     steps:
@@ -26,7 +27,7 @@ jobs:
 
       - name: Unit/Integration Tests
         run: npm run test:ci
-        env:
+        env: # 環境ごとにEnvironmentsで切替ているので変数名をdev, prodで統一している
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
