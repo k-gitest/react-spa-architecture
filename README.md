@@ -467,14 +467,12 @@ graph LR
     M --> O[Deploy Prod]
 ```
 
-```mermaid
 | トリガー | ワークフロー | 環境 | 実行内容 | 目的 |
 |----------|------------|------|----------|------|
 | **PR → dev** | `ci.yml` + `e2e.yml` | `development` + `test-dev` | 品質チェック + E2Eテスト | dev環境での動作保証 |
 | **PR → main** | `ci.yml` + `e2e.yml` | `production` + `test-prod` | 品質チェック + E2Eテスト | 本番環境での動作保証 |
 | **Push → dev** | `ci.yml` + `e2e.yml` + `deploy-dev.yml` | `development` | テスト + デプロイ | dev環境更新 |
 | **Push → main** | `ci.yml` + `e2e.yml` + `deploy-prod.yml` | `production` | テスト + デプロイ | 本番環境リリース |
-```
 
 1. 開発フロー
 feature/* → dev (PR) → main (PR) → デプロイ
