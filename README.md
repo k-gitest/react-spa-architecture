@@ -101,6 +101,9 @@
 │    ├── hooks
 │    └── pages
 ├── e2e ...e2eテスト/VRT
+├── cicd ...github actions
+│    ├── actions
+│    └── workflows
 ├── index.html
 ├── tailwind.config.js
 ├── package.json
@@ -595,6 +598,28 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-environment
       - uses: ./.github/actions/build-app
+```
+
+### AWS S3デプロイでOIDC認証する場合
+フロントエンドアプリケーションのデプロイ先がAWS S3の場合、AWSへ認証する必要が有ります。
+その際アクセスキーをシークレットに保存ではなくOIDCで認証する場合、IAM roleをシークレットに保存し、role-to-assume似設定する必要があります。
+cloudfrontを使用している場合、CDNキャッシュをクリアする必要が有ります。
+
+**デプロイ設定手順**
+1. Terraform出力から以下の値を取得:
+   - AWS_ROLE_ARN: `terraform output -json github_actions_role_arns`
+2. GitHub Secrets設定:
+   - AWS_ROLE_ARN: 上記で取得した値
+   - S3_BUCKET_NAME: プロジェクト名-環境名-frontend
+   - CLOUDFRONT_DISTRIBUTION_ID: 別途CloudFront作成後に設定
+
+```yml
+- name: Configure AWS credentials
+  uses: aws-actions/configure-aws-credentials@v4
+  with:
+    role-to-assume: ${{ secrets.AWS_ROLE_ARN }}  # ← ここで使用
+    role-session-name: deploy-to-dev
+    aws-region: ap-northeast-1
 ```
 
 ## 注意点とまとめ
