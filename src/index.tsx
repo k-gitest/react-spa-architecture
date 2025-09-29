@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
+import GlobalErrorBoundary from '@/errors/error-boundary';
 
 // mswをブラウザで使用する場合
 // 開発環境でのみMSWを有効にする関数
@@ -29,7 +30,9 @@ enableMocking().then(() => {
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    <GlobalErrorBoundary>
+      <App />
+    </GlobalErrorBoundary>
   </React.StrictMode>,
 );
 
