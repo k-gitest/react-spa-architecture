@@ -7,6 +7,10 @@ import { useSessionObserver } from '@/hooks/use-session-observer';
 import { HelmetProvider } from 'react-helmet-async';
 import { setupZodI18n } from '@/errors/zod-error-map';
 
+// index.tsxでローディングfallbackする場合、Routerを遅延ロードで非同期読み込みとする
+// lazyで遅延コンポーネント読み込みをする場合、冒頭でのRouter importは削除する
+// const Router = lazy(() => import('@/routes/router').then(m => ({ default: m.Router })));
+
 interface AppProps {
   children?: ReactNode;
 }
@@ -17,7 +21,7 @@ export default function App({ children }: AppProps) {
   useSessionObserver();
 
   /* エラーバウンダリーチェック
-  if (true) {
+  if (isInitialized) {
     throw new Error('Test Error: This error should be caught by ErrorBoundary.');
   }
   */

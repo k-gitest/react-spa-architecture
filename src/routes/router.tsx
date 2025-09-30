@@ -13,14 +13,14 @@ import Dashboard from '@/pages/Dashboard';
 import NotFound from '@/pages/Not-Found';
 import { AuthGuard } from '@/routes/auth-guard';
 import { GuestGuard } from '@/routes/guest-guard';
-import { PageErrorBoundary } from '@/errors/error-boundary';
+import { PageAsyncBoundary } from '@/components/async-boundary';
 
 const LayoutWrapper = () => {
   return (
     <Layout>
-      <PageErrorBoundary>
+      <PageAsyncBoundary>
         <Outlet />
-      </PageErrorBoundary>
+      </PageAsyncBoundary>
     </Layout>
   );
 };
@@ -28,9 +28,9 @@ const LayoutWrapper = () => {
 const AuthLayoutWrapper = () => {
   return (
     <AuthLayout>
-      <PageErrorBoundary>
+      <PageAsyncBoundary>
         <Outlet />
-      </PageErrorBoundary>
+      </PageAsyncBoundary>
     </AuthLayout>
   );
 };

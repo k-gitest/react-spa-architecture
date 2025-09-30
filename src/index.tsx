@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
-import GlobalErrorBoundary from '@/errors/error-boundary';
+import { GlobalAsyncBoundary } from '@/components/async-boundary';
 
 // mswをブラウザで使用する場合
 // 開発環境でのみMSWを有効にする関数
@@ -30,9 +30,9 @@ enableMocking().then(() => {
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <GlobalErrorBoundary>
+    <GlobalAsyncBoundary>
       <App />
-    </GlobalErrorBoundary>
+    </GlobalAsyncBoundary>
   </React.StrictMode>,
 );
 
