@@ -622,6 +622,44 @@ cloudfrontを使用している場合、CDNキャッシュをクリアする必�
     aws-region: ap-northeast-1
 ```
 
+## error-boundaryの設置場所
+このアプリケーションでは、階層的なエラーバウンダリーを採用し、エラーの影響範囲を最小限に抑えながら、ユーザーに適切なフィードバックを提供しています。
+
+### 構造階層
+```text
+GlobalErrorBoundary (index.tsx)
+  └─ App
+      └─ RouterProvider
+          ├─ LayoutWrapper
+          │   ├─ Layout (Header + Footer)
+          │   └─ PageContentErrorBoundary
+          │       └─ Outlet (各ページコンポーネント)
+          │
+          └─ AuthLayoutWrapper
+              ├─ AuthLayout (認証済みユーザー用レイアウト)
+              └─ PageContentErrorBoundary
+                  └─ Outlet (認証が必要なページ)
+```
+### エラーバウンダリーの種類
+**GlobalErrorBoundary（グローバルレベル）**
+- アプリケーション全体の致命的なエラーをキャッチ
+- 白画面（White Screen of Death）の防止
+- アプリケーションが完全にクラッシュした場合のフォールバックUI表示
+
+**PageContentErrorBoundary（ページレベル）**
+- 各ページコンポーネント内のエラーをキャッチ
+- Header/Footerは表示を維持（ナビゲーション可能な状態を保つ）
+- ページ単位でのエラーハンドリング
+
+**ComponentErrorBoundary（コンポーネントレベル）**
+- 特定のUIコンポーネント内のエラーをキャッチ
+- エラーが発生しても、ページ全体や他のコンポーネントは正常動作
+- 非致命的なエラーの局所化
+
+### エラーログ
+すべてのエラーバウンダリーは、キャッチしたエラーをコンソールに出力しますが、
+本番環境では、外部エラー監視サービス（Sentry等）への送信を実装することを推奨します。
+
 ## 注意点とまとめ
 
 ### shadcn/ui

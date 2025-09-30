@@ -16,6 +16,12 @@ setupZodI18n();
 export default function App({ children }: AppProps) {
   useSessionObserver();
 
+  /* エラーバウンダリーチェック
+  if (true) {
+    throw new Error('Test Error: This error should be caught by ErrorBoundary.');
+  }
+  */
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
