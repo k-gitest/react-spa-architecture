@@ -660,6 +660,19 @@ GlobalErrorBoundary (index.tsx)
 すべてのエラーバウンダリーは、キャッチしたエラーをコンソールに出力しますが、
 本番環境では、外部エラー監視サービス（Sentry等）への送信を実装することを推奨します。
 
+## error boundaryとsuspenceの統合
+error boundaryをindex.tsxと各プレゼンテーション層に設置しており、初期読み込み時とページ読み込み時でのsuspenceと統合する事で同じパターンの設計として統一できます。
+
+統一する場合は、components/async-boundary.tsxを作成し、error boundaryをラップする形でコンポーネントを作成します。
+設置場所はerror boundaryと同様の設計になります。
+
+- 一体管理: ErrorBoundary と Suspense を1つのコンポーネントで管理
+- シンプルな使用: ラッパー1つでエラーとローディング両方に対応
+- 一貫性: エラーバウンダリーと同じ設計思想
+- DRY原則: ネストを最小限に
+
+suspenceを使用する場合は、lazyでコンポーネントの非同期による遅延読み込みを使用してローディングなどUI表示を行なう事になります。
+
 ## 注意点とまとめ
 
 ### shadcn/ui
