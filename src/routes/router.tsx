@@ -35,6 +35,13 @@ const AuthLayoutWrapper = () => {
   );
 };
 
+/* pages内コンポーネントを非同期のlazyとする場合
+import { LazyPages } from './lazy-pages';
+// 使い方
+<Route path="/" element={<LazyPages.Home />} />
+<Route path="/about" element={<LazyPages.About />} />
+*/
+
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>

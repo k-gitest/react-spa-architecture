@@ -673,6 +673,9 @@ error boundaryをindex.tsxと各プレゼンテーション層に設置してお
 
 suspenceを使用する場合は、lazyでコンポーネントの非同期による遅延読み込みを使用してローディングなどUI表示を行なう事になります。
 
+**pages内コンポーネントのlazy**
+pages内のプレゼンテーション層をlazyで非同期読み込みとする場合、pages/で個別に設定するのではなく、先のerror-boundaryとsuspenceと同様にroutes/router.tsxで行います。これによって設定を一元化でき保守管理しやすくなります。
+
 ## 注意点とまとめ
 
 ### shadcn/ui
