@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
+import { errorHandler } from "@/errors/error-handler";
 
 interface Props {
   children?: ReactNode;
@@ -34,6 +35,9 @@ class ErrorBoundary extends Component<Props, State> {
       errorInfo,
       componentStack: errorInfo.componentStack
     });
+
+    // エラーハンドラーにapiエラー内容を渡す->トースト表示などを実行
+    errorHandler(error)
 
     // カスタムエラーハンドラーがあれば実行
     this.props.onError?.(error, errorInfo);
