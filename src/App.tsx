@@ -6,6 +6,7 @@ import { queryClient, QueryClientProvider } from '@/lib/queryClient';
 import { useSessionObserver } from '@/hooks/use-session-observer';
 import { HelmetProvider } from 'react-helmet-async';
 import { setupZodI18n } from '@/errors/zod-error-map';
+// import { useSessionMonitor } from '@/hooks/use-session-monitor';
 
 // index.tsxでローディングfallbackする場合、Routerを遅延ロードで非同期読み込みとする
 // lazyで遅延コンポーネント読み込みをする場合、冒頭でのRouter importは削除する
@@ -19,6 +20,8 @@ setupZodI18n();
 
 export default function App({ children }: AppProps) {
   useSessionObserver();
+  // 認証チェックをtanstackで行う場合
+  // useSessionMonitor();
 
   /* エラーバウンダリーチェック
   if (isInitialized) {
