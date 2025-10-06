@@ -719,6 +719,36 @@ errorHandler(error) ← 既存の共通エラーハンドラー
 toast({ title: "..." }) ← エラー通知表示
 ```
 
+## 認証チェックにtanstackを使用する場合
+認証チェックは基本的にsupabaseクライアントを使用しておこないますが、tanstack queryを使用する事で責務分離が分かり易くなります。
+
+### tanstack queryを使用した場合の担当責務
+
+| 機能 | 担当 |
+|------|------|
+| セッション取得/キャッシュ | TanStack Query |
+| グローバル状態反映（UI依存部分） | Zustand |
+| 認証イベント購読 | Supabase (`onAuthStateChange`) |
+| Query/Zustand間の同期 | useEffect |
+
+### 認証チェック実装の比較
+
+| 観点 | **useSessionObserver**（従来） | **useSessionMonitor**（TanStack Query版） |
+|------|-------------------------------|------------------------------------------|
+| **データ取得** | Supabaseから直接取得、useStateで保持 | useQuery経由で取得、キャッシュに保持 |
+| **状態管理** | Zustandのみ | TanStack Query（主） + Zustand（同期用） |
+| **再マウント時** | 再フェッチが発生する可能性あり | キャッシュから即座に復元（`staleTime: Infinity`） |
+| **ローディング管理** | 手動で`useState`を管理 | `isLoading`が自動提供 |
+| **エラーハンドリング** | 手動でtry/catchが必要 | `error`や`onError`で自動処理可能 |
+| **責務分離** | 1つのhookで取得・状態管理・購読を担当 | Query（取得・キャッシュ）/ Zustand（UI状態）で分離 |
+| **保守性** | シンプルで小規模向き | 中〜大規模で拡張性が高い |
+| **React Query親和性** | なし（独立管理） | 高い（他のQueryとの連携が容易） |
+
+### 選択基準
+
+- **従来版（useSessionObserver）**: 小規模プロジェクト、シンプルさ重視
+- **TanStack Query版（useSessionMonitor）**: 中〜大規模、既にTanStack Queryを使用、責務分離重視
+
 ## 注意点とまとめ
 
 ### shadcn/ui
