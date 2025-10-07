@@ -12,8 +12,18 @@ export const useSessionMonitor = () => {
   const { data: session, isLoading } = useQuery({
     queryKey: ['auth', 'session'],
     queryFn: async () => {
+      // supabaseクライアントから取得する場合は以下を有効化する
       const { data: { session } } = await supabase.auth.getSession();
       return session;
+      // edgeでredisから取得する場合は以下を有効化する
+      /* 
+      const { data, error } = await supabase.functions.invoke('verify-session', {
+        method: 'GET',
+      });
+
+      if (error) throw error;
+      return data.session;
+      */
     },
     staleTime: Infinity, // セッションは手動更新のみ
     gcTime: Infinity,
