@@ -749,6 +749,15 @@ toast({ title: "..." }) ← エラー通知表示
 - **従来版（useSessionObserver）**: 小規模プロジェクト、シンプルさ重視
 - **TanStack Query版（useSessionMonitor）**: 中〜大規模、既にTanStack Queryを使用、責務分離重視
 
+## セッション保存にRedisを使用する場合
+```typescript
+// Redisキャッシュチェック
+    const redis = new Redis({
+      url: Deno.env.get('UPSTASH_REDIS_REST_URL')!,
+      token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN')!,
+    });
+```
+
 ## 注意点とまとめ
 
 ### shadcn/ui
