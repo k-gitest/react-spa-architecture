@@ -28,6 +28,7 @@
 - shadcn/ui
 - tailwindcss 3.4.13
 - react-helmet-async 2.0.5
+- upstash redis 1.34.3
 - prisma 6.5.0
 - drizzle-orm 0.32.2
 - supabase 2.19.7
@@ -750,13 +751,26 @@ toast({ title: "..." }) ← エラー通知表示
 - **TanStack Query版（useSessionMonitor）**: 中〜大規模、既にTanStack Queryを使用、責務分離重視
 
 ## セッション保存にRedisを使用する場合
-```typescript
-// Redisキャッシュチェック
-    const redis = new Redis({
-      url: Deno.env.get('UPSTASH_REDIS_REST_URL')!,
-      token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN')!,
-    });
-```
+**🚀 メリット**
+
+- Supabaseへの不要なAuthアクセスを大幅削減
+- Redis経由でセッションフェッチが高速化
+- TanStack QueryとTTL同期で安定したキャッシュ挙動
+- SSRや他クライアントからの認証確認にも再利用可能（verify-sessionを共通APIとして利用）
+- Rate Limitingによるセキュリティ向上
+- セッション無効化（Blacklist）機能による強制ログアウト対応
+
+### Upstash Redisを選択する理由
+このプロジェクト（SPA + Supabase Edge Functions）では Upstash Redis が最適
+
+- ✅ Edge Functionsから直接アクセス可能（HTTP REST API）
+- ✅ サーバーレス環境にマッチ
+- ✅ 低トラフィック時のコストが最小
+- ✅ インフラ管理不要
+- ✅ グローバルエッジで低レイテンシー
+
+**将来の拡張性**
+将来的にトラフィックが増加した場合は、バックエンドをVPC環境に移行し、ElastiCacheへの切り替えを検討すれば良い。標準Redisコマンドを使用していれば移行は容易。
 
 ## 注意点とまとめ
 
