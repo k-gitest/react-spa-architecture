@@ -6,11 +6,21 @@ import { corsHeaders } from '../_shared/cors.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+const cacheTTL = parseInt(Deno.env.get('SESSION_CACHE_TTL') || '3600', 10);
+
+const errorResponse = (message: string, status: number = 400) => {
+  return new Response(
+    JSON.stringify({ error: message, session: null }),
+    { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+};
 
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { status: 200, headers: corsHeaders });
   }
+
+  const startTime = Date.now();
 
   try {
     // Redis初期化
@@ -33,27 +43,18 @@ serve(async (req: Request) => {
     const { success } = await ratelimit.limit(ip);
 
     if (!success) {
-      return new Response(
-        JSON.stringify({ error: 'Rate limit exceeded' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return errorResponse('Rate limit exceeded', 429);
     }
 
     // 認証チェック
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization header required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return errorResponse('Authorization header required', 401);
     }
 
     const token = authHeader.replace('Bearer ', '');
     if (!token) {
-      return new Response(
-        JSON.stringify({ error: 'Token not found' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return errorResponse('Token not found', 401);
     }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -67,10 +68,7 @@ serve(async (req: Request) => {
     const { data, error } = await supabase.auth.getUser(token);
     if (error || !data.user) {
       console.log(`未認証ユーザー: ${error}`);
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized', session: null }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return errorResponse('Unauthorized', 401);
     }
 
     console.log(`認証ユーザー: ${data.user.id}`);
@@ -80,8 +78,28 @@ serve(async (req: Request) => {
     const cachedSession = await redis.get(cacheKey);
 
     if (cachedSession) {
+      const session = typeof cachedSession === 'string' 
+        ? JSON.parse(cachedSession) 
+        : cachedSession;
+      
+      // 有効期限チェック
+      const expiresAt = new Date(session.expires_at).getTime();
+      if (expiresAt < Date.now()) {
+        await redis.del(cacheKey);
+        return errorResponse('Session expired', 401);
+      }
+
+      const duration = Date.now() - startTime;
+      console.log(JSON.stringify({
+        type: 'session_fetch',
+        userId: data.user.id,
+        cached: true,
+        duration,
+        timestamp: new Date().toISOString(),
+      }));
+
       return new Response(
-        JSON.stringify({ session: cachedSession, cached: true }),
+        JSON.stringify({ session, cached: true }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -90,14 +108,20 @@ serve(async (req: Request) => {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
     if (sessionError || !sessionData.session) {
-      return new Response(
-        JSON.stringify({ error: 'Session not found', session: null }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return errorResponse('Session not found', 401);
     }
 
     // Redisにキャッシュ（TTL: 1時間）
-    await redis.setex(cacheKey, 3600, JSON.stringify(sessionData.session));
+    await redis.setex(cacheKey, cacheTTL, JSON.stringify(sessionData.session));
+
+    const duration = Date.now() - startTime;
+    console.log(JSON.stringify({
+      type: 'session_fetch',
+      userId: data.user.id,
+      cached: false,
+      duration,
+      timestamp: new Date().toISOString(),
+    }));
 
     return new Response(
       JSON.stringify({ session: sessionData.session, cached: false }),
@@ -105,12 +129,9 @@ serve(async (req: Request) => {
     );
   } catch (error) {
     console.error('Session error:', error);
-    const errorMessage = error instanceof Error 
-                         ? error.message 
-                         : 'An unknown error occurred';
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    return errorResponse(
+      error instanceof Error ? error.message : 'An unknown error occurred',
+      500
     );
   }
 });
