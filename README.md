@@ -772,6 +772,15 @@ toast({ title: "..." }) ← エラー通知表示
 **将来の拡張性**
 将来的にトラフィックが増加した場合は、バックエンドをVPC環境に移行し、ElastiCacheへの切り替えを検討すれば良い。標準Redisコマンドを使用していれば移行は容易。
 
+**環境変数の設定**
+upstash Redisを使用する場合、環境変数に追加の設定が必要になります。
+
+```text
+UPSTASH_REDIS_REST_URL=example_url
+UPSTASH_REDIS_REST_TOKEN=example_token
+```
+
+
 ## 注意点とまとめ
 
 ### shadcn/ui
