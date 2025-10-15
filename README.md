@@ -779,7 +779,90 @@ upstash Redisを使用する場合、環境変数に追加の設定が必要に�
 UPSTASH_REDIS_REST_URL=example_url
 UPSTASH_REDIS_REST_TOKEN=example_token
 ```
+### セッション管理の取得方法
 
+アプリでは、環境に応じてセッション取得元を切り替えられるように設計されています。
+
+| 環境 | 取得方法 | 利用先 | キャッシュ戦略 |
+|------|-----------|--------|--------------|
+| 通常運用（開発/ローカル） | `supabase.auth.getSession()` | Supabaseクライアントから直接取得 | TanStack Query（5分） |
+| パフォーマンス最適化（本番） | `supabase.functions.invoke('verify-session')` | Edge Function + Redisキャッシュ経由 | Redis（1時間）+ TanStack Query（手動もしくは5分） |
+
+Edge Function経由の場合、Redisにセッション情報がキャッシュされているため、Supabase Auth APIへのリクエスト回数を削減し、レスポンス速度を大幅に改善します（約10-30ms）。
+
+### フォールバック設計
+
+Edge Function（Redis経由）の取得が失敗した場合でも、クライアントは自動的に `supabase.auth.getSession()` へフォールバックします。
+
+**フォールバックが発動するケース：**
+- Redis（Upstash）の障害・メンテナンス
+- Edge Functionのデプロイ中・障害
+- ネットワークエラー
+- Rate Limit超過
+
+これにより、Redis や Edge Function の障害時でもセッション取得が継続可能で、サービスの可用性が保たれます。
+
+### キャッシュ戦略の詳細
+```
+┌─────────────────────────────────────────┐
+│ 1. TanStack Query (5分キャッシュ)        │
+│    - クライアント側メモリキャッシュ        │
+│    - 再マウント時も有効                   │
+└────────────┬────────────────────────────┘
+             ↓ (キャッシュミス)
+┌────────────┴────────────────────────────┐
+│ 2. Edge Function                        │
+│    ↓                                    │
+│ 3. Redis (1時間キャッシュ)               │
+│    - サーバー側グローバルキャッシュ        │
+│    - 全ユーザー・デバイス間で共有          │
+└────────────┬────────────────────────────┘
+             ↓ (キャッシュミス)
+┌────────────┴────────────────────────────┐
+│ 4. Supabase Auth API                    │
+│    - 最新のセッション情報を取得            │
+└─────────────────────────────────────────┘
+```
+
+### セッション削除時の挙動
+
+ユーザーがログアウトした際の処理フロー：
+
+1. **クライアント側**: `supabase.auth.signOut()` でSupabase側のセッションを削除
+2. **Edge Function**: `session-delete` を呼び出し、Redisキャッシュも削除
+3. **TanStack Query**: クライアント側のキャッシュをクリア
+```typescript
+// onAuthStateChange内での処理
+if (event === 'SIGNED_OUT') {
+  try {
+    await supabase.functions.invoke('session-delete', {
+      method: 'DELETE',
+    });
+  } catch (error) {
+    console.error('Failed to delete session cache:', error);
+    // TTLで自動削除されるため、失敗しても問題なし
+  }
+}
+```
+
+**重要:** `session-delete` が失敗しても問題ありません。RedisのTTL（1時間）により自動的にキャッシュは削除されます。
+
+### Rate Limiting
+
+Edge Functionには、不正アクセスやDDoS攻撃を防ぐためのRate Limitingが実装されています。
+
+| 状態 | 制限 | 説明 |
+|------|------|------|
+| **認証済み** | 20リクエスト/10秒 | JWT形式の有効なトークンを持つユーザー |
+| **未認証** | 10リクエスト/10秒 | トークンなし、または不正な形式のトークン |
+
+Rate Limitに達した場合、以下のレスポンスヘッダーが返されます：
+
+- `X-RateLimit-Limit`: 制限値
+- `X-RateLimit-Remaining`: 残りリクエスト数
+- `X-RateLimit-Reset`: 制限リセット時刻（UNIX timestamp）
+
+Rate Limit超過時は自動的にフォールバック（`supabase.auth.getSession()`）に切り替わります。
 
 ## 注意点とまとめ
 
