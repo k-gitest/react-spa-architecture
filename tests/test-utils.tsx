@@ -15,7 +15,13 @@ import { render, RenderOptions, RenderResult } from '@testing-library/react';
  * 必要なProviderをまとめて適用したい場合に使用します。
  */
 export const queryClientWrapper = () => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 1,
+      },
+    },
+  });
   return ({ children }: { children: ReactNode }) => (
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
