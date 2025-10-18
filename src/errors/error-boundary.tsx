@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { errorHandler } from "@/errors/error-handler";
+import * as Sentry from "@sentry/react";
 
 interface Props {
   children?: ReactNode;
@@ -46,6 +47,12 @@ class ErrorBoundary extends Component<Props, State> {
     if (process.env.NODE_ENV === 'production') {
       // TODO: エラー監視サービス（Sentry等）への送信
       // sendErrorToMonitoringService(error, errorInfo, level);
+      Sentry.captureException(error, {
+        extra: {
+          componentStack: errorInfo.componentStack,
+          level,
+        },
+      });
     }
   }
 
