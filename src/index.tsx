@@ -30,6 +30,16 @@ enableMocking().then(() => {
 */
 
 // Sentryの初期化
+// リリース・バージョン名の設定
+const appName = import.meta.env.VITE_APP_NAME;
+const appVersion = import.meta.env.VITE_APP_VERSION;
+const isProd = import.meta.env.MODE === "production";
+const gitSha = import.meta.env.VITE_GIT_SHA;
+
+const release = isProd
+  ? `${appName}@${appVersion}-${gitSha || "unknown"}`
+  : `${appName}@${appVersion}-local`;
+
 if (import.meta.env.MODE === "production") {
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
@@ -37,6 +47,8 @@ if (import.meta.env.MODE === "production") {
     // For example, automatic IP address collection on events
     sendDefaultPii: true,
     environment: import.meta.env.MODE,
+    release,
+    tracesSampleRate: 0.1,
   });
 }
 
