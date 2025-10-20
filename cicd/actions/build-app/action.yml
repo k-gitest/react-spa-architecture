@@ -8,6 +8,12 @@ inputs:
   supabase-anon-key:
     description: 'Supabase anonymous key'
     required: true
+  git-sha:
+    description: 'Git commit SHA'
+    required: true
+  sentry-dsn:
+    description: 'Sentry DSN'
+    required: false
 
 runs:
   using: 'composite'
@@ -18,3 +24,5 @@ runs:
       env:
         VITE_SUPABASE_URL: ${{ inputs.supabase-url }}
         VITE_SUPABASE_ANON_KEY: ${{ inputs.supabase-anon-key }}
+        VITE_GIT_SHA: ${{ inputs.git-sha }}
+        VITE_SENTRY_DSN: ${{ inputs.sentry-dsn }}
