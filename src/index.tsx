@@ -4,6 +4,7 @@ import App from './App';
 import './index.css';
 import { GlobalAsyncBoundary } from '@/components/async-boundary';
 import * as Sentry from "@sentry/react";
+import { SENTRY_DSN, SENTRY_RELEASE } from "@/lib/constants";
 
 // mswをブラウザで使用する場合
 // 開発環境でのみMSWを有効にする関数
@@ -30,24 +31,12 @@ enableMocking().then(() => {
 */
 
 // Sentryの初期化
-// リリース・バージョン名の設定
-const appName = import.meta.env.VITE_APP_NAME;
-const appVersion = import.meta.env.VITE_APP_VERSION;
-const isProd = import.meta.env.MODE === "production";
-const gitSha = import.meta.env.VITE_GIT_SHA;
-
-const release = isProd
-  ? `${appName}@${appVersion}-${gitSha || "unknown"}`
-  : `${appName}@${appVersion}-local`;
-
-if (import.meta.env.MODE === "production") {
+if (import.meta.env.MODE === "production" && SENTRY_DSN) {
   Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
-    // Setting this option to true will send default PII data to Sentry.
-    // For example, automatic IP address collection on events
+    dsn: SENTRY_DSN,
     sendDefaultPii: true,
     environment: import.meta.env.MODE,
-    release,
+    release: SENTRY_RELEASE,
     tracesSampleRate: 0.1,
   });
 }

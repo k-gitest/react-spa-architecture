@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
-      // package.jsonからアプリ名とバージョンを取得
+      // package.jsonからアプリ名とバージョンを取得し環境変数に注入
       'import.meta.env.VITE_APP_NAME': JSON.stringify(pkg.name),
       'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkg.version),
     },
