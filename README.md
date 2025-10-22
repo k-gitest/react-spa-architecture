@@ -353,6 +353,76 @@ hooks/useLocalFileManagerで選択したファイルの管理を行います。
 - TRPCはエラーフォーマッターで整形してから返しています。
 - TRPCのZodエラーに関してはUI側で取得しRHFのformState.errorsに渡して表示しています。
 
+## Sentry によるエラー監視
+
+本番環境でのエラートラッキングとデバッグ効率化のため、Sentryを統合しています。
+
+### 設定内容
+
+**環境変数**
+```bash
+VITE_SENTRY_DSN=your-sentry-dsn
+```
+
+**初期化（main.tsx）**
+```typescript
+import * as Sentry from "@sentry/react";
+import { SENTRY_DSN, SENTRY_RELEASE, IS_PRODUCTION } from "@/lib/constants";
+
+if (IS_PRODUCTION && SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    release: SENTRY_RELEASE,
+    environment: import.meta.env.MODE,
+    sendDefaultPii: true,
+    tracesSampleRate: 0.1,
+  });
+}
+```
+
+### リリースバージョン管理
+
+Sentryには以下の形式でリリース情報が送信されます：
+
+- **本番環境**: `アプリ名@バージョン-GitSHA`（例: `my-app@1.0.0-abc1234`）
+- **開発環境**: `アプリ名@バージョン-local`（例: `my-app@1.0.0-local`）
+
+リリース情報は`lib/constants.ts`で自動生成されます：
+```typescript
+export const SENTRY_RELEASE: string = import.meta.env.MODE === 'production'
+  ? `${APP_NAME}@${APP_VERSION}-${GIT_SHA || 'unknown'}`
+  : `${APP_NAME}@${APP_VERSION}-local`;
+```
+
+### CI/CDでの設定
+
+GitHub Actionsでビルド時にGit SHAを環境変数として注入：
+```yaml
+- name: Build Application
+  uses: ./.github/actions/build-app
+  with:
+    supabase-url: ${{ secrets.VITE_SUPABASE_URL }}
+    supabase-anon-key: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+    git-sha: ${{ github.sha }}
+    sentry-dsn: ${{ secrets.VITE_SENTRY_DSN }}
+```
+
+### エラーバウンダリーとの連携
+
+既存のエラーバウンダリー（`GlobalErrorBoundary`、`PageContentErrorBoundary`）でキャッチされたエラーは、自動的にSentryに送信されます。
+
+### メリット
+
+- ✅ **リリース単位でのエラー追跡**: Git SHAによりエラーが発生したコミットを特定可能
+- ✅ **環境別の監視**: 本番/開発環境でエラーを分離して管理
+- ✅ **パフォーマンス監視**: `tracesSampleRate`によるパフォーマンス計測（10%サンプリング）
+- ✅ **デバッグ効率化**: スタックトレース、ブレッドクラム、ユーザー情報の自動収集
+
+### 注意事項
+
+- Sentry DSNは本番環境のみ設定することを推奨（開発環境のノイズ削減）
+- `sendDefaultPii: true`により自動的にIPアドレスなどが収集されるため、プライバシーポリシーに記載が必要
+
 ## Fetch API クライアント
 APIとの通信を行うためのカスタムクライアントです。
 
