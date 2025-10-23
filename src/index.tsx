@@ -4,7 +4,7 @@ import App from './App';
 import './index.css';
 import { GlobalAsyncBoundary } from '@/components/async-boundary';
 import * as Sentry from "@sentry/react";
-import { SENTRY_DSN, SENTRY_RELEASE } from "@/lib/constants";
+import { SENTRY_DSN, SENTRY_RELEASE, IS_PRODUCTION } from "@/lib/constants";
 
 // mswをブラウザで使用する場合
 // 開発環境でのみMSWを有効にする関数
@@ -31,7 +31,7 @@ enableMocking().then(() => {
 */
 
 // Sentryの初期化
-if (import.meta.env.MODE === "production" && SENTRY_DSN) {
+if (IS_PRODUCTION && SENTRY_DSN) {
   Sentry.init({
     dsn: SENTRY_DSN,
     sendDefaultPii: true,
@@ -39,6 +39,9 @@ if (import.meta.env.MODE === "production" && SENTRY_DSN) {
     release: SENTRY_RELEASE,
     tracesSampleRate: 0.1,
   });
+
+  // グローバルに公開（setSentryUserで使用するため）
+  window.Sentry = Sentry;
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

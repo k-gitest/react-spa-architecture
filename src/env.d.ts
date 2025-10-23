@@ -25,3 +25,8 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+// window.Sentryの型定義
+interface Window {
+  Sentry?: typeof import("@sentry/react");
+}

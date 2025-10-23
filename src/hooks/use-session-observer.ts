@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { Session } from '@supabase/supabase-js';
+import { setSentryUserFromSession } from '@/lib/constants';
 
 export const useSessionObserver = () => {
   const [loading, setLoading] = useState(true);
@@ -15,6 +16,8 @@ export const useSessionObserver = () => {
       setGlobalSession(session);
       setLoading(false);
       setInitialized(true);
+      // sentryにユーザー情報を送信
+      setSentryUserFromSession(session);
     });
 
     const { data } = supabase.auth.onAuthStateChange((_, session) => {
@@ -22,6 +25,8 @@ export const useSessionObserver = () => {
       setGlobalSession(session);
       setLoading(false);
       setInitialized(true);
+      // sentryにユーザー情報を送信
+      setSentryUserFromSession(session);
     });
 
     return () => data.subscription.unsubscribe();

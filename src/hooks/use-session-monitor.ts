@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useSessionStore } from '@/hooks/use-session-store';
 import { useEffect } from 'react';
+import { setSentryUserFromSession } from '@/lib/constants';
 
 export const useSessionMonitor = () => {
   const setGlobalSession = useSessionStore((state) => state.setSession);
@@ -63,6 +64,8 @@ export const useSessionMonitor = () => {
   useEffect(() => {
     if (session !== undefined) {
       setGlobalSession(session);
+      // sentryへ送信 初回ロード時またはキャッシュからの復元時
+      setSentryUserFromSession(session);
     }
   }, [session, setGlobalSession]);
 
@@ -72,6 +75,8 @@ export const useSessionMonitor = () => {
       // キャッシュを更新
       queryClient.setQueryData(['auth', 'session'], newSession);
       setGlobalSession(newSession);
+      // sentryへ送信 ログイン/ログアウト/リフレッシュ時
+      setSentryUserFromSession(newSession);
 
       /* redis使用時に有効化
       // ログアウト時はEdge Function経由でRedisキャッシュも削除
